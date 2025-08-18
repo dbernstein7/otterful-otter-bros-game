@@ -2796,6 +2796,13 @@
                             <button onclick="scanAllOtterfulOtters()" style="background: linear-gradient(135deg, #9C27B0, #7B1FA2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔍 Scan All 2222</button>
                             <button onclick="disconnectWalletFromProfile()" style="background: linear-gradient(135deg, #F44336, #D32F2F); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">❌ Disconnect</button>
                         </div>
+                        <div style="margin-top: 10px;">
+                            <button onclick="scanTokenRange(0, 499)" style="background: linear-gradient(135deg, #795548, #5D4037); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold; transition: all 0.3s ease;">🔍 Scan 0-499</button>
+                            <button onclick="scanTokenRange(500, 999)" style="background: linear-gradient(135deg, #795548, #5D4037); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold; transition: all 0.3s ease; margin-left: 5px;">🔍 Scan 500-999</button>
+                            <button onclick="scanTokenRange(1000, 1499)" style="background: linear-gradient(135deg, #795548, #5D4037); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold; transition: all 0.3s ease; margin-left: 5px;">🔍 Scan 1000-1499</button>
+                            <button onclick="scanTokenRange(1500, 1999)" style="background: linear-gradient(135deg, #795548, #5D4037); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold; transition: all 0.3s ease; margin-left: 5px;">🔍 Scan 1500-1999</button>
+                            <button onclick="scanTokenRange(2000, 2221)" style="background: linear-gradient(135deg, #795548, #5D4037); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold; transition: all 0.3s ease; margin-left: 5px;">🔍 Scan 2000-2221</button>
+                        </div>
                     </div>
                     <div id="walletDisconnectedStatus">
                         <div style="font-size: 24px; margin-bottom: 10px;">🔌</div>
@@ -3440,59 +3447,76 @@
             async getOwnedTokenIds() {
                 const tokenIds = [];
                 
-                console.log('🔍 Starting to scan for owned tokens...');
+                console.log('🔍 Starting batch scan for owned tokens...');
                 console.log('📋 Contract address:', this.contractAddress);
                 console.log('👤 User address:', this.account);
                 
-                // Get all token IDs owned by this address
-                // Scan all 2222 Otterful Otters
-                let errorCount = 0;
-                let consecutiveErrors = 0;
+                // Scan in batches of 500 tokens
+                const BATCH_SIZE = 500;
                 const TOTAL_OTTERS = 2222; // Total supply of Otterful Otters
-                console.log(`🔍 Scanning all ${TOTAL_OTTERS} Otterful Otters for owned tokens...`);
+                const TOTAL_BATCHES = Math.ceil(TOTAL_OTTERS / BATCH_SIZE);
                 
-                for (let i = 0; i < TOTAL_OTTERS; i++) {
-                    try {
-                        // Add delay every 50 calls to prevent RPC overload
-                        if (i % 50 === 0 && i > 0) {
-                            console.log(`⏳ Pausing for 1 second to prevent RPC overload...`);
-                            await new Promise(resolve => setTimeout(resolve, 1000));
-                        }
-                        
-                        const owner = await this.getTokenOwner(i);
-                        if (owner && owner.toLowerCase() === this.account.toLowerCase()) {
-                            console.log(`✅ Found owned token: ${i}`);
-                            tokenIds.push(i);
-                            consecutiveErrors = 0; // Reset consecutive errors
-                        }
-                        
-                        // Show progress every 100 tokens
-                        if (i % 100 === 0) {
-                            console.log(`📊 Scan progress: ${i}/${TOTAL_OTTERS} (${Math.round(i/TOTAL_OTTERS*100)}%)`);
-                        }
-                    } catch (error) {
-                        console.log(`❌ Error checking token ${i}:`, error.message);
-                        errorCount++;
-                        consecutiveErrors++;
-                        
-                        // If we get too many consecutive errors, pause longer
-                        if (consecutiveErrors >= 5) {
-                            console.log(`⚠️ ${consecutiveErrors} consecutive errors, pausing for 3 seconds...`);
-                            await new Promise(resolve => setTimeout(resolve, 3000));
-                            consecutiveErrors = 0;
-                        }
-                        
-                        // Stop after 20 total errors to avoid infinite loops
-                        if (errorCount > 20) {
-                            console.log('⚠️ Too many errors, stopping scan');
-                            break;
+                console.log(`🔍 Scanning ${TOTAL_OTTERS} Otterful Otters in ${TOTAL_BATCHES} batches of ${BATCH_SIZE}...`);
+                
+                for (let batch = 0; batch < TOTAL_BATCHES; batch++) {
+                    const startToken = batch * BATCH_SIZE;
+                    const endToken = Math.min((batch + 1) * BATCH_SIZE, TOTAL_OTTERS);
+                    
+                    console.log(`📦 Starting batch ${batch + 1}/${TOTAL_BATCHES}: tokens ${startToken}-${endToken - 1}`);
+                    
+                    let batchErrorCount = 0;
+                    let batchConsecutiveErrors = 0;
+                    
+                    for (let i = startToken; i < endToken; i++) {
+                        try {
+                            // Add delay every 25 calls within a batch
+                            if ((i - startToken) % 25 === 0 && (i - startToken) > 0) {
+                                console.log(`⏳ Batch ${batch + 1}: Pausing for 500ms...`);
+                                await new Promise(resolve => setTimeout(resolve, 500));
+                            }
+                            
+                            const owner = await this.getTokenOwner(i);
+                            if (owner && owner.toLowerCase() === this.account.toLowerCase()) {
+                                console.log(`✅ Found owned token: ${i}`);
+                                tokenIds.push(i);
+                                batchConsecutiveErrors = 0; // Reset consecutive errors
+                            }
+                            
+                            // Show progress every 50 tokens within batch
+                            if ((i - startToken) % 50 === 0) {
+                                const batchProgress = Math.round(((i - startToken) / (endToken - startToken)) * 100);
+                                console.log(`📊 Batch ${batch + 1} progress: ${batchProgress}% (token ${i})`);
+                            }
+                            
+                        } catch (error) {
+                            console.log(`❌ Error checking token ${i}:`, error.message);
+                            batchErrorCount++;
+                            batchConsecutiveErrors++;
+                            
+                            // If we get too many consecutive errors in this batch, pause longer
+                            if (batchConsecutiveErrors >= 3) {
+                                console.log(`⚠️ ${batchConsecutiveErrors} consecutive errors in batch ${batch + 1}, pausing for 2 seconds...`);
+                                await new Promise(resolve => setTimeout(resolve, 2000));
+                                batchConsecutiveErrors = 0;
+                            }
+                            
+                            // Stop this batch if too many errors
+                            if (batchErrorCount > 10) {
+                                console.log(`⚠️ Too many errors in batch ${batch + 1}, stopping batch`);
+                                break;
+                            }
                         }
                     }
                     
-                    // Reset error count if we found a token
-                    if (tokenIds.length > errorCount) {
-                        errorCount = 0;
+                    // Pause between batches to prevent RPC overload
+                    if (batch < TOTAL_BATCHES - 1) {
+                        console.log(`⏳ Completed batch ${batch + 1}/${TOTAL_BATCHES}, pausing for 3 seconds before next batch...`);
+                        await new Promise(resolve => setTimeout(resolve, 3000));
                     }
+                    
+                    // Reset error counts for next batch
+                    batchErrorCount = 0;
+                    batchConsecutiveErrors = 0;
                 }
                 
                 console.log('📊 Total owned tokens found:', tokenIds);
@@ -17168,6 +17192,61 @@
             
             console.log('⚠️ No owned tokens found in first', maxTokens, 'tokens');
             alert(`No owned tokens found in first ${maxTokens} tokens. Your NFTs might be in higher token IDs.`);
+        }
+
+        // Function to scan specific range
+        async function scanTokenRange(startToken, endToken) {
+            console.log(`🔍 Scanning token range ${startToken}-${endToken}...`);
+            
+            if (!otterWallet || !otterWallet.isConnected) {
+                console.log('⚠️ Wallet not connected');
+                alert('Please connect your wallet first!');
+                return;
+            }
+            
+            const tokenIds = [];
+            let errorCount = 0;
+            
+            for (let i = startToken; i <= endToken; i++) {
+                try {
+                    // Add delay every 25 calls
+                    if ((i - startToken) % 25 === 0 && (i - startToken) > 0) {
+                        console.log(`⏳ Pausing for 500ms...`);
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                    }
+                    
+                    const owner = await otterWallet.getTokenOwner(i);
+                    if (owner && owner.toLowerCase() === otterWallet.account.toLowerCase()) {
+                        console.log(`✅ Found owned token: ${i}`);
+                        tokenIds.push(i);
+                    }
+                    
+                    // Show progress every 50 tokens
+                    if ((i - startToken) % 50 === 0) {
+                        const progress = Math.round(((i - startToken) / (endToken - startToken)) * 100);
+                        console.log(`📊 Progress: ${progress}% (token ${i})`);
+                    }
+                    
+                } catch (error) {
+                    console.log(`❌ Error checking token ${i}:`, error.message);
+                    errorCount++;
+                    
+                    if (errorCount > 5) {
+                        console.log('⚠️ Too many errors, stopping scan');
+                        break;
+                    }
+                }
+            }
+            
+            console.log(`📊 Found ${tokenIds.length} tokens in range ${startToken}-${endToken}:`, tokenIds);
+            
+            if (tokenIds.length > 0) {
+                alert(`Found ${tokenIds.length} NFTs in range ${startToken}-${endToken}!\n\nToken IDs: ${tokenIds.join(', ')}`);
+            } else {
+                alert(`No NFTs found in range ${startToken}-${endToken}`);
+            }
+            
+            return tokenIds;
         }
         
         function refreshWalletData() {
