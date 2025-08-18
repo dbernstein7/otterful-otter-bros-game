@@ -3455,6 +3455,17 @@
                     const tokenURI = await this.getTokenURI(tokenId);
                     console.log(`🔗 Token ${tokenId} URI:`, tokenURI);
                     
+                    if (!tokenURI) {
+                        console.log(`⚠️ No URI found for token ${tokenId}, creating basic NFT`);
+                        return {
+                            name: `Otter #${tokenId}`,
+                            description: 'Base Otterful Otter',
+                            attributes: [
+                                { trait_type: 'Type', value: 'Base Otter' }
+                            ]
+                        };
+                    }
+                    
                     if (tokenURI && tokenURI.startsWith('http')) {
                         console.log(`🌐 Fetching metadata from: ${tokenURI}`);
                         
@@ -3465,7 +3476,6 @@
                         try {
                             const response = await fetch(tokenURI);
                             console.log(`📄 Response status:`, response.status);
-                            console.log(`📄 Response headers:`, response.headers);
                             
                             if (response.ok) {
                                 metadata = await response.json();
@@ -3473,8 +3483,6 @@
                                 return metadata;
                             } else {
                                 console.warn(`⚠️ HTTP error ${response.status} for token ${tokenId}`);
-                                const errorText = await response.text();
-                                console.warn(`📄 Error response:`, errorText);
                             }
                         } catch (error) {
                             console.warn(`⚠️ Direct fetch failed for token ${tokenId}:`, error);
@@ -3515,7 +3523,7 @@
                         }
                         
                     } else if (tokenURI && tokenURI.startsWith('ipfs://')) {
-                        // Handle IPFS URIs
+                        console.log(`🌐 Converting IPFS URI: ${tokenURI}`);
                         const ipfsGateway = 'https://ipfs.io/ipfs/';
                         const ipfsHash = tokenURI.replace('ipfs://', '');
                         const httpURI = ipfsGateway + ipfsHash;
@@ -3531,10 +3539,25 @@
                         console.warn(`⚠️ Invalid URI format for token ${tokenId}:`, tokenURI);
                     }
                     
-                    return null;
+                    // If all else fails, create a basic NFT
+                    console.log(`📄 Creating basic NFT for token ${tokenId}`);
+                    return {
+                        name: `Otter #${tokenId}`,
+                        description: 'Base Otterful Otter',
+                        attributes: [
+                            { trait_type: 'Type', value: 'Base Otter' }
+                        ]
+                    };
                 } catch (error) {
                     console.warn(`⚠️ Error getting metadata for token ${tokenId}:`, error);
-                    return null;
+                    // Return basic NFT on error
+                    return {
+                        name: `Otter #${tokenId}`,
+                        description: 'Base Otterful Otter',
+                        attributes: [
+                            { trait_type: 'Type', value: 'Base Otter' }
+                        ]
+                    };
                 }
             }
             
@@ -3582,6 +3605,15 @@
                         str += String.fromCharCode(charCode);
                     }
                     console.log('🔍 Decoded string:', str);
+                    
+                    // Clean up the URI - remove any extra characters
+                    if (str) {
+                        str = str.trim();
+                        // Remove any trailing null characters or invalid chars
+                        str = str.replace(/\0/g, '');
+                        console.log('🔍 Cleaned URI:', str);
+                    }
+                    
                     return str;
                 } catch (error) {
                     console.warn('⚠️ Error decoding string:', error);
