@@ -19758,8 +19758,56 @@
         `;
         document.head.appendChild(style);
 
-
-
+        function testMetadataFetching() {
+            console.log('🌐 Testing metadata fetching for your wallet...');
+            console.log('👤 Your wallet address:', '0x16E315e37cDEda413D22a6899FFF67A4B001D91B');
+            
+            if (!otterWallet || !otterWallet.isConnected) {
+                console.log('⚠️ Wallet not connected');
+                return;
+            }
+            
+            // Test your specific wallet
+            const testAddress = '0x16E315e37cDEda413D22a6899FFF67A4B001D91B';
+            const contractAddress = '0x4e5913922b7ddf916c8d27d1016827f799687e66';
+            
+            console.log('🔍 Testing balance for your address...');
+            const data = '0x70a08231' + testAddress.slice(2).padStart(64, '0');
+            
+            window.ethereum.request({
+                method: 'eth_call',
+                params: [{
+                    to: contractAddress,
+                    data: data
+                }, 'latest']
+            }).then(result => {
+                const balance = parseInt(result, 16);
+                console.log('💰 Your balance:', balance);
+                
+                if (balance > 0) {
+                    console.log('🎉 Found NFTs! Now checking token 0...');
+                    // Check token 0 specifically
+                    const ownerData = '0x6352211e' + '0'.padStart(64, '0');
+                    return window.ethereum.request({
+                        method: 'eth_call',
+                        params: [{
+                            to: contractAddress,
+                            data: ownerData
+                        }, 'latest']
+                    });
+                } else {
+                    console.log('⚠️ No NFTs found');
+                }
+            }).then(result => {
+                if (result) {
+                    const owner = '0x' + result.slice(26);
+                    console.log('👤 Token 0 owner:', owner);
+                    console.log('✅ Matches your wallet:', owner.toLowerCase() === testAddress.toLowerCase());
+                }
+            }).catch(error => {
+                console.error('❌ Error testing metadata:', error);
+            });
+        }
 
     </script>
 </body>
