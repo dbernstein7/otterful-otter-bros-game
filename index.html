@@ -3152,14 +3152,17 @@
             }
 
             async connect() {
+                console.log('🚀 connect() called');
                 const connectWalletBtn = document.getElementById('connectWalletBtn');
                 
                 if (!window.ethereum) {
+                    console.log('❌ No ethereum provider found');
                     this.showMessage('Please install MetaMask or another Web3 wallet!', 'error');
                     return;
                 }
 
                 try {
+                    console.log('🔗 Requesting accounts...');
                     if (connectWalletBtn) {
                         connectWalletBtn.innerHTML = '<span style="position: relative; z-index: 2;">🔄 Connecting...</span>';
                         connectWalletBtn.disabled = true;
@@ -3169,18 +3172,27 @@
                         method: 'eth_requestAccounts'
                     });
 
+                    console.log('👤 Accounts received:', accounts);
                     this.account = accounts[0];
                     this.provider = window.ethereum;
                     this.isConnected = true;
+                    
+                    console.log('✅ Wallet connected successfully');
+                    console.log('👤 Account:', this.account);
+                    console.log('🔗 Provider:', this.provider);
+                    console.log('🔗 isConnected:', this.isConnected);
 
+                    console.log('🔄 Switching to ApeChain...');
                     await this.switchToApeChain();
 
+                    console.log('🔄 Updating UI...');
                     this.updateUI();
+                    console.log('🔄 Loading NFTs...');
                     this.loadNFTs();
                     this.showMessage('Successfully connected to ApeChain!', 'success');
 
                 } catch (error) {
-                    console.error('Connection failed:', error);
+                    console.error('❌ Connection failed:', error);
                     this.showMessage(`Connection failed: ${error.message}`, 'error');
                 } finally {
                     if (connectWalletBtn) {
@@ -3222,9 +3234,18 @@
             }
 
             async loadNFTs() {
-                if (!this.isConnected || !this.provider) return;
+                console.log('🚀 loadNFTs() called');
+                console.log('🔗 isConnected:', this.isConnected);
+                console.log('🔗 provider:', this.provider);
+                console.log('👤 account:', this.account);
+                
+                if (!this.isConnected || !this.provider) {
+                    console.log('❌ Not connected or no provider, returning');
+                    return;
+                }
 
                 try {
+                    console.log('🔗 Requesting chain ID...');
                     const chainId = await window.ethereum.request({
                         method: 'eth_chainId'
                     });
