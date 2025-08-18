@@ -3439,15 +3439,23 @@
                 // Get all token IDs owned by this address
                 // Scan all 2222 Otterful Otters
                 let errorCount = 0;
+                let consecutiveErrors = 0;
                 const TOTAL_OTTERS = 2222; // Total supply of Otterful Otters
                 console.log(`🔍 Scanning all ${TOTAL_OTTERS} Otterful Otters for owned tokens...`);
                 
                 for (let i = 0; i < TOTAL_OTTERS; i++) {
                     try {
+                        // Add delay every 50 calls to prevent RPC overload
+                        if (i % 50 === 0 && i > 0) {
+                            console.log(`⏳ Pausing for 1 second to prevent RPC overload...`);
+                            await new Promise(resolve => setTimeout(resolve, 1000));
+                        }
+                        
                         const owner = await this.getTokenOwner(i);
                         if (owner && owner.toLowerCase() === this.account.toLowerCase()) {
                             console.log(`✅ Found owned token: ${i}`);
                             tokenIds.push(i);
+                            consecutiveErrors = 0; // Reset consecutive errors
                         }
                         
                         // Show progress every 100 tokens
@@ -3457,8 +3465,17 @@
                     } catch (error) {
                         console.log(`❌ Error checking token ${i}:`, error.message);
                         errorCount++;
-                        // Stop after 10 consecutive errors to avoid infinite loop
-                        if (errorCount > 10) {
+                        consecutiveErrors++;
+                        
+                        // If we get too many consecutive errors, pause longer
+                        if (consecutiveErrors >= 5) {
+                            console.log(`⚠️ ${consecutiveErrors} consecutive errors, pausing for 3 seconds...`);
+                            await new Promise(resolve => setTimeout(resolve, 3000));
+                            consecutiveErrors = 0;
+                        }
+                        
+                        // Stop after 20 total errors to avoid infinite loops
+                        if (errorCount > 20) {
                             console.log('⚠️ Too many errors, stopping scan');
                             break;
                         }
@@ -3495,12 +3512,18 @@
                         return owner;
                     } else {
                         console.log(`⚠️ Invalid result for token ${tokenId}:`, result);
-                        throw new Error('Invalid result from contract');
+                        return null; // Return null instead of throwing
                     }
                 } catch (error) {
-                    console.error(`❌ Error getting owner for token ${tokenId}:`, error);
-                    // Return null instead of throwing to continue scanning
-                    return null;
+                    // Check if it's an RPC error and handle gracefully
+                    if (error.code === -32603 || error.message.includes('Internal JSON-RPC error')) {
+                        console.log(`⚠️ RPC error for token ${tokenId}, will retry later`);
+                        // Don't log the full error to avoid spam
+                        return null;
+                    } else {
+                        console.error(`❌ Error getting owner for token ${tokenId}:`, error.message);
+                        return null;
+                    }
                 }
             }
             
@@ -17012,17 +17035,23 @@
                 return;
             }
             
+            // Show user that scan is starting
+            alert('🦦 Starting full scan of all 2222 Otterful Otters...\n\nThis may take 2-3 minutes due to RPC rate limiting.\n\nWatch the console for progress updates!');
+            
             // This will trigger a full scan of all 2222 tokens
             otterWallet.loadNFTs().then(() => {
                 console.log('✅ Full scan completed');
                 console.log(`📊 Found ${otterWallet.userNFTs.length} NFTs`);
                 try {
                     updateWalletProfile();
+                    alert(`✅ Scan completed!\n\nFound ${otterWallet.userNFTs.length} NFTs in your wallet.`);
                 } catch (error) {
                     console.error('❌ Error updating profile after scan:', error);
+                    alert('⚠️ Scan completed but failed to update profile display.');
                 }
             }).catch(error => {
                 console.error('❌ Full scan failed:', error);
+                alert('❌ Scan failed. Check console for details and try again.');
             });
         }
 
