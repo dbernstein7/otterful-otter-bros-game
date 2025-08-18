@@ -3180,7 +3180,7 @@
                 if (!window.ethereum) {
                     console.log('❌ No ethereum provider found');
                     this.showMessage('Please install MetaMask or another Web3 wallet!', 'error');
-                    return;
+                    throw new Error('No ethereum provider found');
                 }
 
                 try {
@@ -3210,12 +3210,13 @@
                     console.log('🔄 Updating UI...');
                     this.updateUI();
                     console.log('🔄 Loading NFTs...');
-                    this.loadNFTs();
+                    await this.loadNFTs();
                     this.showMessage('Successfully connected to ApeChain!', 'success');
 
                 } catch (error) {
                     console.error('❌ Connection failed:', error);
                     this.showMessage(`Connection failed: ${error.message}`, 'error');
+                    throw error; // Re-throw the error so callers can catch it
                 } finally {
                     if (connectWalletBtn) {
                         connectWalletBtn.disabled = false;
@@ -16872,17 +16873,24 @@
         }
         
         function connectWalletFromProfile() {
+            console.log('🔗 Connecting wallet from profile...');
             if (otterWallet) {
                 otterWallet.connect().then(() => {
+                    console.log('✅ Wallet connected from profile');
                     updateWalletProfile();
                 }).catch(error => {
-                    console.error('Failed to connect wallet from profile:', error);
+                    console.error('❌ Failed to connect wallet from profile:', error);
                 });
+            } else {
+                console.error('❌ OtterWallet not initialized');
             }
         }
         
         function refreshWalletData() {
             console.log('🔄 Refreshing wallet data...');
+            console.log('🔍 otterWallet exists:', !!otterWallet);
+            console.log('🔍 otterWallet.isConnected:', otterWallet?.isConnected);
+            
             if (otterWallet && otterWallet.isConnected) {
                 console.log('👤 Current wallet address:', otterWallet.account);
                 console.log('🔗 Current network:', window.ethereum.chainId);
@@ -16896,6 +16904,11 @@
                 });
             } else {
                 console.log('⚠️ Wallet not connected, cannot refresh');
+                if (!otterWallet) {
+                    console.error('❌ OtterWallet not initialized');
+                } else if (!otterWallet.isConnected) {
+                    console.log('💡 Try connecting your wallet first');
+                }
             }
         }
         
