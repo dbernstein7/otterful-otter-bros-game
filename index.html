@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; connect-src 'self' https: wss:; img-src 'self' data: https: blob:; style-src 'self' 'unsafe-inline' https:; font-src 'self' data: https:;">
     <title>Ollie the Otter - 2D Platformer</title>
     <style>
             @keyframes levelUpPulse {
@@ -3396,18 +3395,23 @@
                 
                 // Get all token IDs owned by this address
                 // This is a simplified approach - in production you'd want to use events or a more efficient method
-                for (let i = 0; i < 1000; i++) { // Check first 1000 token IDs
+                let errorCount = 0;
+                for (let i = 0; i < 100; i++) { // Check first 100 token IDs (reduced from 1000)
                     try {
                         const owner = await this.getTokenOwner(i);
                         console.log(`🔍 Token ${i} owner:`, owner);
-                        if (owner.toLowerCase() === this.account.toLowerCase()) {
+                        if (owner && owner.toLowerCase() === this.account.toLowerCase()) {
                             console.log(`✅ Found owned token: ${i}`);
                             tokenIds.push(i);
                         }
                     } catch (error) {
                         console.log(`❌ Error checking token ${i}:`, error.message);
-                        // Continue scanning even if some tokens fail
-                        if (i > 10) break; // Stop after 10 errors to avoid infinite loop
+                        errorCount++;
+                        // Stop after 5 consecutive errors to avoid infinite loop
+                        if (errorCount > 5) {
+                            console.log('⚠️ Too many errors, stopping scan');
+                            break;
+                        }
                     }
                 }
                 
@@ -3440,7 +3444,8 @@
                     }
                 } catch (error) {
                     console.error(`❌ Error getting owner for token ${tokenId}:`, error);
-                    throw error;
+                    // Return null instead of throwing to continue scanning
+                    return null;
                 }
             }
             
@@ -16859,6 +16864,11 @@
                 return;
             }
             
+            console.log('🔗 Testing basic wallet connection...');
+            console.log('👤 Account:', otterWallet.account);
+            console.log('🔗 Provider:', otterWallet.provider);
+            console.log('📋 Contract:', otterWallet.contractAddress);
+            
             // Test basic contract calls
             otterWallet.getTokenBalance().then(balance => {
                 console.log('✅ Balance test passed:', balance);
@@ -16875,6 +16885,8 @@
                 console.log('🎉 All contract tests passed!');
             }).catch(error => {
                 console.error('❌ Contract test failed:', error);
+                console.log('🔍 Error details:', error.message);
+                console.log('🔍 Error code:', error.code);
             });
         }
         
