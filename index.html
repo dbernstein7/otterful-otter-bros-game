@@ -2786,6 +2786,12 @@
                         <div style="font-size: 24px; margin-bottom: 10px;">✅</div>
                         <div style="font-size: 18px; font-weight: bold; color: #4CAF50; margin-bottom: 5px;">Connected to ApeChain</div>
                         <div id="walletAddressDisplay" style="font-size: 14px; color: #00FFFF; font-family: monospace; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; margin: 10px 0;">0x0000...0000</div>
+                        <div style="margin-top: 15px;">
+                            <button onclick="refreshWalletData()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease;">🔄 Refresh Data</button>
+                            <button onclick="refreshMetadata()" style="background: linear-gradient(135deg, #2196F3, #1976D2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🌐 Refresh Metadata</button>
+                            <button onclick="checkNFTs()" style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔍 Check NFTs</button>
+                            <button onclick="disconnectWalletFromProfile()" style="background: linear-gradient(135deg, #F44336, #D32F2F); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">❌ Disconnect</button>
+                        </div>
                     </div>
                     <div id="walletDisconnectedStatus">
                         <div style="font-size: 24px; margin-bottom: 10px;">🔌</div>
@@ -16885,6 +16891,59 @@
                 console.error('❌ OtterWallet not initialized');
             }
         }
+
+        function disconnectWalletFromProfile() {
+            console.log('🔌 Disconnecting wallet from profile...');
+            if (otterWallet) {
+                otterWallet.disconnect();
+                updateWalletProfile();
+                console.log('✅ Wallet disconnected from profile');
+            } else {
+                console.error('❌ OtterWallet not initialized');
+            }
+        }
+
+        function refreshMetadata() {
+            console.log('🌐 Refreshing metadata...');
+            if (otterWallet && otterWallet.isConnected) {
+                console.log('👤 Current wallet address:', otterWallet.account);
+                console.log('📊 Current NFTs:', otterWallet.userNFTs.length);
+                
+                // Force reload NFTs with fresh metadata
+                otterWallet.loadUserNFTsWithMetadata(otterWallet.userNFTs.length).then(() => {
+                    updateWalletProfile();
+                    console.log('✅ Metadata refreshed');
+                    console.log('📊 Updated NFTs:', otterWallet.userNFTs.length);
+                }).catch(error => {
+                    console.error('❌ Failed to refresh metadata:', error);
+                });
+            } else {
+                console.log('⚠️ Wallet not connected, cannot refresh metadata');
+            }
+        }
+
+        function checkNFTs() {
+            console.log('🔍 Checking NFTs...');
+            if (otterWallet && otterWallet.isConnected) {
+                console.log('👤 Current wallet address:', otterWallet.account);
+                console.log('📊 Current NFTs:', otterWallet.userNFTs.length);
+                
+                // Show detailed NFT information
+                console.log('🦦 NFT Details:');
+                otterWallet.userNFTs.forEach((nft, index) => {
+                    console.log(`  ${index + 1}. Token #${nft.tokenId}: ${nft.name}`);
+                    console.log(`     Traits: ${nft.traits.join(', ')}`);
+                    console.log(`     Rarity: ${nft.rarity}`);
+                    console.log(`     Multiplier: ${nft.multiplier}x`);
+                });
+                
+                // Update the profile display
+                updateWalletProfile();
+                console.log('✅ NFT check completed');
+            } else {
+                console.log('⚠️ Wallet not connected, cannot check NFTs');
+            }
+        }
         
         function refreshWalletData() {
             console.log('🔄 Refreshing wallet data...');
@@ -16949,6 +17008,32 @@
                 console.error('❌ Contract test failed:', error);
                 console.log('🔍 Error details:', error.message);
                 console.log('🔍 Error code:', error.code);
+            });
+        }
+
+        function testMetadataFetching() {
+            console.log('🌐 Testing metadata fetching...');
+            if (!otterWallet || !otterWallet.isConnected) {
+                console.log('⚠️ Wallet not connected');
+                return;
+            }
+            
+            // Test metadata fetching for a specific token
+            const testTokenId = 1; // Test with token ID 1
+            console.log(`🧪 Testing metadata for token #${testTokenId}...`);
+            
+            otterWallet.getTokenMetadata(testTokenId).then(metadata => {
+                console.log('✅ Metadata test result:', metadata);
+                if (metadata && metadata.attributes) {
+                    console.log('🎨 Attributes found:', metadata.attributes.length);
+                    metadata.attributes.forEach(attr => {
+                        console.log(`  - ${attr.trait_type}: ${attr.value}`);
+                    });
+                } else {
+                    console.log('⚠️ No attributes found in metadata');
+                }
+            }).catch(error => {
+                console.error('❌ Metadata test failed:', error);
             });
         }
         
