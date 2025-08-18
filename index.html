@@ -2789,6 +2789,7 @@
                         <div style="margin-top: 15px;">
                             <button onclick="testProfileButton()" style="background: linear-gradient(135deg, #FF5722, #E64A19); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease;">🧪 Test Button</button>
                             <button onclick="checkProfileAccess()" style="background: linear-gradient(135deg, #607D8B, #455A64); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔍 Check Profile</button>
+                            <button onclick="testLocalMetadata()" style="background: linear-gradient(135deg, #00BCD4, #0097A7); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">📁 Test Local Metadata</button>
                             <button onclick="testNFTLoading()" style="background: linear-gradient(135deg, #E91E63, #C2185B); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🧪 Test NFT Loading</button>
                             <button onclick="refreshWalletData()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔄 Refresh Data</button>
                             <button onclick="refreshMetadata()" style="background: linear-gradient(135deg, #2196F3, #1976D2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🌐 Refresh Metadata</button>
@@ -3361,10 +3362,10 @@
                         return;
                     }
                     
-                    // Load metadata for each token
+                    // Load metadata for each token using LOCAL files
                     for (const tokenId of tokenIds) {
                         try {
-                            const metadata = await this.getTokenMetadata(tokenId);
+                            const metadata = await this.getLocalTokenMetadata(tokenId);
                             console.log(`📄 Token ${tokenId} metadata:`, metadata);
                             
                             if (metadata && metadata.attributes) {
@@ -3382,6 +3383,14 @@
                                 
                                 console.log(`🎨 Extracted traits for token ${tokenId}:`, traits);
                                 
+                                // Convert IPFS image URL to local path
+                                let localImage = null;
+                                if (metadata.image && metadata.image.startsWith('ipfs://')) {
+                                    // Extract the filename from IPFS URL and use local path
+                                    const filename = metadata.image.split('/').pop();
+                                    localImage = `./images/${filename}`;
+                                }
+                                
                                 this.userNFTs.push({
                                     tokenId: tokenId,
                                     name: metadata.name || `Otter #${tokenId}`,
@@ -3389,7 +3398,7 @@
                                     multiplier: this.calculateMultiplier(traits),
                                     perks: this.calculatePerks(traits),
                                     rarity: this.calculateRarity(traits),
-                                    image: metadata.image,
+                                    image: localImage,
                                     description: metadata.description
                                 });
                             } else if (metadata) {
@@ -3559,6 +3568,43 @@
                 }
             }
             
+            async getLocalTokenMetadata(tokenId) {
+                try {
+                    console.log(`📁 Loading local metadata for token ${tokenId}...`);
+                    
+                    // Try to fetch the local metadata file
+                    const metadataUrl = `./metadata/${tokenId}.json`;
+                    console.log(`📄 Fetching from: ${metadataUrl}`);
+                    
+                    const response = await fetch(metadataUrl);
+                    if (response.ok) {
+                        const metadata = await response.json();
+                        console.log(`✅ Local metadata loaded for token ${tokenId}:`, metadata);
+                        return metadata;
+                    } else {
+                        console.log(`⚠️ Local metadata file not found for token ${tokenId}`);
+                        // Fallback to basic NFT
+                        return {
+                            name: `Otter #${tokenId}`,
+                            description: 'Base Otterful Otter',
+                            attributes: [
+                                { trait_type: 'Base', value: 'Normal' }
+                            ]
+                        };
+                    }
+                } catch (error) {
+                    console.warn(`⚠️ Error loading local metadata for token ${tokenId}:`, error);
+                    // Fallback to basic NFT
+                    return {
+                        name: `Otter #${tokenId}`,
+                        description: 'Base Otterful Otter',
+                        attributes: [
+                            { trait_type: 'Base', value: 'Normal' }
+                        ]
+                    };
+                }
+            }
+
             async getTokenMetadata(tokenId) {
                 try {
                     // First get the token URI
@@ -17192,6 +17238,36 @@
             
             console.log('⚠️ No owned tokens found in first', maxTokens, 'tokens');
             alert(`No owned tokens found in first ${maxTokens} tokens. Your NFTs might be in higher token IDs.`);
+        }
+
+        // Function to test local metadata system
+        async function testLocalMetadata() {
+            console.log('🧪 Testing local metadata system...');
+            
+            if (!otterWallet || !otterWallet.isConnected) {
+                console.log('⚠️ Wallet not connected');
+                alert('Please connect your wallet first!');
+                return;
+            }
+            
+            // Test loading a few local metadata files
+            const testTokens = [1499, 1000, 500, 1];
+            
+            for (const tokenId of testTokens) {
+                try {
+                    console.log(`🧪 Testing local metadata for token ${tokenId}...`);
+                    const metadata = await otterWallet.getLocalTokenMetadata(tokenId);
+                    console.log(`✅ Token ${tokenId} metadata:`, metadata);
+                    
+                    if (metadata && metadata.attributes) {
+                        console.log(`🎨 Token ${tokenId} traits:`, metadata.attributes);
+                    }
+                } catch (error) {
+                    console.error(`❌ Error testing token ${tokenId}:`, error);
+                }
+            }
+            
+            alert('Local metadata test completed! Check console for results.');
         }
 
         // Function to scan specific range
