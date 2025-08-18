@@ -16846,9 +16846,13 @@
         function refreshWalletData() {
             console.log('🔄 Refreshing wallet data...');
             if (otterWallet && otterWallet.isConnected) {
+                console.log('👤 Current wallet address:', otterWallet.account);
+                console.log('🔗 Current network:', window.ethereum.chainId);
+                
                 otterWallet.loadNFTs().then(() => {
                     updateWalletProfile();
                     console.log('✅ Wallet data refreshed');
+                    console.log('📊 Total NFTs loaded:', otterWallet.userNFTs.length);
                 }).catch(error => {
                     console.error('❌ Failed to refresh wallet data:', error);
                 });
@@ -16869,20 +16873,27 @@
             console.log('🔗 Provider:', otterWallet.provider);
             console.log('📋 Contract:', otterWallet.contractAddress);
             
-            // Test basic contract calls
-            otterWallet.getTokenBalance().then(balance => {
+            // Test network first
+            window.ethereum.request({method: 'eth_chainId'}).then(chainId => {
+                console.log('🌐 Current chain ID:', chainId);
+                console.log('🎯 Expected chain ID:', otterWallet.apeChainId);
+                console.log('✅ Network match:', chainId === otterWallet.apeChainId);
+                
+                // Test basic contract calls
+                return otterWallet.getTokenBalance();
+            }).then(balance => {
                 console.log('✅ Balance test passed:', balance);
                 
-                // Test getting owner of token 0
-                return otterWallet.getTokenOwner(0);
-            }).then(owner => {
-                console.log('✅ Owner test passed:', owner);
-                
-                // Test getting token URI for token 0
-                return otterWallet.getTokenURI(0);
-            }).then(uri => {
-                console.log('✅ URI test passed:', uri);
-                console.log('🎉 All contract tests passed!');
+                if (balance > 0) {
+                    console.log('🎉 You have NFTs! Loading them...');
+                    return otterWallet.loadUserNFTsWithMetadata(balance);
+                } else {
+                    console.log('⚠️ No NFTs found in wallet');
+                    return Promise.resolve();
+                }
+            }).then(() => {
+                console.log('✅ NFT loading test completed');
+                console.log('📊 User NFTs:', otterWallet.userNFTs);
             }).catch(error => {
                 console.error('❌ Contract test failed:', error);
                 console.log('🔍 Error details:', error.message);
