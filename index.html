@@ -3034,51 +3034,73 @@
                 this.fishCoins = 0;
                 this.stakingStartTimes = {};
                 
-                // Trait-based multipliers and bonuses - Otterful Otters Edition
+                // Updated trait multipliers based on your actual NFT attributes
                 this.traitMultipliers = {
-                    // Plumber Hat Collection - Based on rarity/floor prices
-                    'Plumber-v5': 3.0,    // Rarest - 55 APE floor (only 3 exist!)
-                    'Plumber-v3': 2.5,    // High value - 25 APE floor (20 exist)
-                    'Plumber-v4': 2.2,    // Mid-rare - 9 exist
-                    'Plumber-v2': 2.0,    // Common - 8 exist  
-                    'Plumber': 1.8,       // Base version - 7 exist
+                    // Hat traits (most valuable)
+                    'Hat-Stealth-v2': 2.5,
+                    'Hat-Plumber-v5': 3.0,
+                    'Hat-Plumber-v3': 2.5,
+                    'Hat-Plumber-v4': 2.2,
+                    'Hat-Plumber-v2': 2.0,
+                    'Hat-Plumber': 1.8,
+                    'Hat-Pirate': 2.0,
+                    'Hat-Crown': 1.8,
+                    'Hat-Wizard': 1.5,
+                    'Hat-Baseball': 1.2,
+                    'Hat-Beanie': 1.1,
                     
-                    // Overalls Collection - High-Value Items
-                    'Overalls V2': 2.2,
-                    'Overalls V3': 2.8, // Still highest for overalls
+                    // Shirt/Overalls traits
+                    'Shirt-Overalls-Orange': 1.6,
+                    'Shirt-Overalls-Blue': 1.5,
+                    'Shirt-Overalls-V2': 2.2,
+                    'Shirt-Overalls-V3': 2.8,
                     
-                    // Original traits (keeping for compatibility)
-                    'Pirate Hat': 2.0,
-                    'Crown': 1.8,
-                    'Wizard Hat': 1.5,
-                    'Baseball Cap': 1.2,
-                    'Beanie': 1.1,
-                    'Golden Fur': 1.5,
-                    'Rainbow Fur': 1.3,
-                    'Laser Eyes': 1.4,
-                    'Diamond Teeth': 1.3,
-                    'Sunglasses': 1.2
+                    // Fur color traits
+                    'Fur-Golden': 1.5,
+                    'Fur-Rainbow': 1.3,
+                    'Fur-Green': 1.2,
+                    'Fur-Blue': 1.1,
+                    
+                    // Eye traits
+                    'Eyes-Laser': 1.4,
+                    'Eyes-Yellow-Scanner': 1.3,
+                    'Eyes-Diamond': 1.3,
+                    'Eyes-Sunglasses': 1.2,
+                    
+                    // Base traits
+                    'Base-Stealth': 1.4,
+                    'Base-Normal': 1.0
                 };
 
                 this.gamePerks = {
-                    // Plumber Hat Perks - Each version has unique abilities
-                    'Plumber-v5': { type: 'master', value: 1.0, description: 'Ultra Rare! All plumber abilities + 3x build speed' },
-                    'Plumber-v3': { type: 'damage', value: 2.0, description: 'Pipe burst! Double damage output' },
-                    'Plumber-v4': { type: 'speed', value: 1.8, description: 'Pipe rush! +80% movement speed' },
-                    'Plumber-v2': { type: 'luck', value: 1.6, description: 'Pipe finder! +60% rare item discovery' },
-                    'Plumber': { type: 'points', value: 1.5, description: 'Coin collector! +50% score multiplier' },
+                    // Hat perks
+                    'Hat-Stealth-v2': { type: 'stealth', value: 1.0, description: 'Invisible to enemies for 3 seconds' },
+                    'Hat-Plumber-v5': { type: 'master', value: 1.0, description: 'Ultra Rare! All plumber abilities + 3x build speed' },
+                    'Hat-Plumber-v3': { type: 'damage', value: 2.0, description: 'Pipe burst! Double damage output' },
+                    'Hat-Plumber-v4': { type: 'speed', value: 1.8, description: 'Pipe rush! +80% movement speed' },
+                    'Hat-Plumber-v2': { type: 'luck', value: 1.6, description: 'Pipe finder! +60% rare item discovery' },
+                    'Hat-Plumber': { type: 'points', value: 1.5, description: 'Coin collector! +50% score multiplier' },
+                    'Hat-Pirate': { type: 'speed', value: 1.5, description: '50% faster movement' },
+                    'Hat-Crown': { type: 'points', value: 2.0, description: 'Double points scoring' },
+                    'Hat-Wizard': { type: 'magic', value: 1.0, description: 'Unlock magic abilities' },
                     
-                    // Overalls Perks - Worker otter bonuses
-                    'Overalls V2': { type: 'construction', value: 1.0, description: 'Build platforms! Create temporary bridges' },
-                    'Overalls V3': { type: 'master', value: 1.0, description: 'Master builder! All construction abilities + double build speed' },
+                    // Shirt perks
+                    'Shirt-Overalls-Orange': { type: 'construction', value: 1.0, description: 'Build temporary platforms' },
+                    'Shirt-Overalls-V2': { type: 'construction', value: 1.0, description: 'Build platforms! Create temporary bridges' },
+                    'Shirt-Overalls-V3': { type: 'master', value: 1.0, description: 'Master builder! All construction abilities + double build speed' },
                     
-                    // Original perks
-                    'Pirate Hat': { type: 'speed', value: 1.5, description: '50% faster movement' },
-                    'Crown': { type: 'points', value: 2.0, description: 'Double points scoring' },
-                    'Wizard Hat': { type: 'magic', value: 1.0, description: 'Unlock magic abilities' },
-                    'Golden Fur': { type: 'luck', value: 1.3, description: '30% better item drops' },
-                    'Laser Eyes': { type: 'damage', value: 1.4, description: '40% more damage' },
-                    'Diamond Teeth': { type: 'defense', value: 0.8, description: '20% damage reduction' }
+                    // Eye perks
+                    'Eyes-Laser': { type: 'damage', value: 1.4, description: '40% more damage' },
+                    'Eyes-Yellow-Scanner': { type: 'detection', value: 1.0, description: 'See hidden items and enemies' },
+                    'Eyes-Diamond': { type: 'defense', value: 0.8, description: '20% damage reduction' },
+                    'Eyes-Sunglasses': { type: 'cool', value: 1.0, description: 'Immunity to flash effects' },
+                    
+                    // Fur perks
+                    'Fur-Golden': { type: 'luck', value: 1.3, description: '30% better item drops' },
+                    'Fur-Rainbow': { type: 'rainbow', value: 1.0, description: 'Random ability every 30 seconds' },
+                    
+                    // Base perks
+                    'Base-Stealth': { type: 'stealth', value: 0.7, description: 'Slightly harder for enemies to detect' }
                 };
                 
                 this.init();
@@ -3321,8 +3343,18 @@
                             console.log(`📄 Token ${tokenId} metadata:`, metadata);
                             
                             if (metadata && metadata.attributes) {
-                                // Extract traits from metadata attributes
-                                const traits = metadata.attributes.map(attr => attr.trait_type + (attr.value ? ': ' + attr.value : '')).filter(trait => trait);
+                                // Extract traits from metadata attributes - FIXED FORMAT
+                                const traits = metadata.attributes.map(attr => {
+                                    // Create proper trait format: "TraitType-Value" or just "Value" for single values
+                                    if (attr.trait_type && attr.value) {
+                                        return `${attr.trait_type}-${attr.value}`;
+                                    } else if (attr.value) {
+                                        return attr.value;
+                                    } else {
+                                        return attr.trait_type;
+                                    }
+                                }).filter(trait => trait);
+                                
                                 console.log(`🎨 Extracted traits for token ${tokenId}:`, traits);
                                 
                                 this.userNFTs.push({
@@ -3634,24 +3666,16 @@
             loadSampleNFTs(balance) {
                 console.log('🔄 Loading sample NFTs as fallback...');
                 
-                // Enhanced sample traits with actual Otterful Otters plumber hats
+                // Sample traits based on your actual NFT format
                 const sampleTraitCombos = [
-                    ['Plumber-v5', 'Overalls V3'],          // Ultimate ultra-rare combo!
-                    ['Plumber-v3', 'Golden Fur'],           // High-value damage dealer
-                    ['Plumber-v4', 'Laser Eyes'],           // Speed demon combo
-                    ['Plumber-v2', 'Diamond Teeth'],        // Lucky defender
-                    ['Plumber', 'Overalls V2'],             // Basic worker combo
-                    ['Plumber-v5'],                         // Solo ultra-rare (only 3 exist!)
-                    ['Plumber-v3', 'Crown'],                // Royal plumber
-                    ['Plumber-v4', 'Rainbow Fur'],          // Speedy rainbow
-                    ['Plumber-v2', 'Sunglasses'],          // Cool lucky otter
-                    ['Plumber', 'Baseball Cap'],            // Casual plumber
-                    ['Overalls V3', 'Golden Fur'],          // Master builder
-                    ['Overalls V2', 'Wizard Hat'],          // Magic worker
-                    ['Pirate Hat', 'Diamond Teeth'],        // Original combo
-                    ['Crown', 'Rainbow Fur'],               // Rainbow royalty
-                    ['Laser Eyes', 'Sunglasses'],          // Cool warrior
-                    ['Golden Fur']                           // Solo rare
+                    ['Hat-Stealth-v2', 'Fur-Green', 'Shirt-Overalls-Orange', 'Eyes-Yellow-Scanner', 'Base-Stealth'],
+                    ['Hat-Plumber-v5', 'Fur-Golden', 'Shirt-Overalls-V3'],
+                    ['Hat-Plumber-v3', 'Fur-Rainbow', 'Eyes-Laser'],
+                    ['Hat-Pirate', 'Fur-Golden', 'Eyes-Diamond'],
+                    ['Hat-Crown', 'Fur-Rainbow', 'Shirt-Overalls-V2'],
+                    ['Hat-Wizard', 'Eyes-Yellow-Scanner', 'Base-Stealth'],
+                    ['Fur-Green', 'Eyes-Sunglasses', 'Shirt-Overalls-Orange'],
+                    ['Base-Normal']
                 ];
 
                 for (let i = 0; i < Math.min(balance, 16); i++) {
@@ -3669,27 +3693,24 @@
 
             calculateRarity(traits) {
                 // Check for legendary traits
-                if (traits.some(trait => {
-                    const traitName = trait.includes(':') ? trait.split(':')[0].trim() : trait;
-                    const traitValue = trait.includes(':') ? trait.split(':')[1].trim() : null;
-                    return traitName === 'Plumber-v5' || traitValue === 'Plumber-v5' || 
-                           traitName === 'Overalls V3' || traitValue === 'Overalls V3';
-                })) return 'legendary';
+                if (traits.some(trait => 
+                    trait.includes('Hat-Plumber-v5') || 
+                    trait.includes('Hat-Stealth-v2') ||
+                    trait.includes('Shirt-Overalls-V3')
+                )) return 'legendary';
                 
                 // Check for epic traits
-                if (traits.some(trait => {
-                    const traitName = trait.includes(':') ? trait.split(':')[0].trim() : trait;
-                    const traitValue = trait.includes(':') ? trait.split(':')[1].trim() : null;
-                    return traitName === 'Plumber-v3' || traitValue === 'Plumber-v3';
-                })) return 'epic';
+                if (traits.some(trait => 
+                    trait.includes('Hat-Plumber-v3') || 
+                    trait.includes('Fur-Golden')
+                )) return 'epic';
                 
                 // Check for rare traits
-                if (traits.some(trait => {
-                    const traitName = trait.includes(':') ? trait.split(':')[0].trim() : trait;
-                    const traitValue = trait.includes(':') ? trait.split(':')[1].trim() : null;
-                    return ['Plumber-v4', 'Plumber-v2', 'Overalls V2', 'Plumber', 'Crown', 'Golden Fur', 'Laser Eyes'].includes(traitName) ||
-                           ['Plumber-v4', 'Plumber-v2', 'Overalls V2', 'Plumber', 'Crown', 'Golden Fur', 'Laser Eyes'].includes(traitValue);
-                })) return 'rare';
+                if (traits.some(trait => 
+                    trait.includes('Hat-') || 
+                    trait.includes('Eyes-Laser') ||
+                    trait.includes('Base-Stealth')
+                )) return 'rare';
                 
                 return 'common';
             }
@@ -3697,35 +3718,18 @@
             calculateMultiplier(traits) {
                 let multiplier = 1.0;
                 traits.forEach(trait => {
-                    // Handle both simple trait names and "trait_type: value" format
-                    const traitName = trait.includes(':') ? trait.split(':')[0].trim() : trait;
-                    const traitValue = trait.includes(':') ? trait.split(':')[1].trim() : null;
-                    
-                    // Check if we have a multiplier for this trait
-                    if (this.traitMultipliers[traitName]) {
-                        multiplier *= this.traitMultipliers[traitName];
-                    } else if (traitValue && this.traitMultipliers[traitValue]) {
-                        // Check if the value itself has a multiplier
-                        multiplier *= this.traitMultipliers[traitValue];
-                    } else if (traitName === 'Base Otter') {
-                        // Base otter gets 1.0x multiplier
-                        multiplier *= 1.0;
+                    if (this.traitMultipliers[trait]) {
+                        multiplier *= this.traitMultipliers[trait];
                     }
                 });
-                return Math.round(multiplier * 100) / 100; // Round to 2 decimals
+                return Math.round(multiplier * 100) / 100;
             }
 
             calculatePerks(traits) {
                 const perks = [];
                 traits.forEach(trait => {
-                    // Handle both simple trait names and "trait_type: value" format
-                    const traitName = trait.includes(':') ? trait.split(':')[0].trim() : trait;
-                    const traitValue = trait.includes(':') ? trait.split(':')[1].trim() : null;
-                    
-                    if (this.gamePerks[traitName]) {
-                        perks.push(this.gamePerks[traitName]);
-                    } else if (traitValue && this.gamePerks[traitValue]) {
-                        perks.push(this.gamePerks[traitValue]);
+                    if (this.gamePerks[trait]) {
+                        perks.push(this.gamePerks[trait]);
                     }
                 });
                 return perks;
@@ -3845,16 +3849,8 @@
                 const activeTraits = new Set();
                 [...this.userNFTs, ...this.stakedNFTs].forEach(nft => {
                     nft.traits.forEach(trait => {
-                        // Handle both simple trait names and "trait_type: value" format
-                        const traitName = trait.includes(':') ? trait.split(':')[0].trim() : trait;
-                        const traitValue = trait.includes(':') ? trait.split(':')[1].trim() : null;
-                        
-                        // Add both the trait name and value if they exist
-                        if (traitName && traitName !== 'Base Otter') {
-                            activeTraits.add(traitName);
-                        }
-                        if (traitValue && traitValue !== 'Base Otter') {
-                            activeTraits.add(traitValue);
+                        if (trait && trait !== 'Base-Normal') {
+                            activeTraits.add(trait);
                         }
                     });
                 });
@@ -3886,7 +3882,7 @@
 
             hasSpecialAbilities() {
                 return this.getActiveTraits().some(trait => 
-                    ['Wizard Hat', 'Laser Eyes', 'Pirate Hat'].includes(trait)
+                    ['Hat-Wizard', 'Eyes-Laser', 'Hat-Pirate'].includes(trait)
                 );
             }
 
