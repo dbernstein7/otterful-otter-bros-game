@@ -2790,6 +2790,7 @@
                             <button onclick="refreshWalletData()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease;">🔄 Refresh Data</button>
                             <button onclick="refreshMetadata()" style="background: linear-gradient(135deg, #2196F3, #1976D2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🌐 Refresh Metadata</button>
                             <button onclick="checkNFTs()" style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔍 Check NFTs</button>
+                            <button onclick="scanAllOtterfulOtters()" style="background: linear-gradient(135deg, #9C27B0, #7B1FA2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔍 Scan All 2222</button>
                             <button onclick="disconnectWalletFromProfile()" style="background: linear-gradient(135deg, #F44336, #D32F2F); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">❌ Disconnect</button>
                         </div>
                     </div>
@@ -3433,24 +3434,36 @@
                 console.log('👤 User address:', this.account);
                 
                 // Get all token IDs owned by this address
-                // This is a simplified approach - in production you'd want to use events or a more efficient method
+                // Scan all 2222 Otterful Otters
                 let errorCount = 0;
-                for (let i = 0; i < 100; i++) { // Check first 100 token IDs (reduced from 1000)
+                const TOTAL_OTTERS = 2222; // Total supply of Otterful Otters
+                console.log(`🔍 Scanning all ${TOTAL_OTTERS} Otterful Otters for owned tokens...`);
+                
+                for (let i = 0; i < TOTAL_OTTERS; i++) {
                     try {
                         const owner = await this.getTokenOwner(i);
-                        console.log(`🔍 Token ${i} owner:`, owner);
                         if (owner && owner.toLowerCase() === this.account.toLowerCase()) {
                             console.log(`✅ Found owned token: ${i}`);
                             tokenIds.push(i);
                         }
+                        
+                        // Show progress every 100 tokens
+                        if (i % 100 === 0) {
+                            console.log(`📊 Scan progress: ${i}/${TOTAL_OTTERS} (${Math.round(i/TOTAL_OTTERS*100)}%)`);
+                        }
                     } catch (error) {
                         console.log(`❌ Error checking token ${i}:`, error.message);
                         errorCount++;
-                        // Stop after 5 consecutive errors to avoid infinite loop
-                        if (errorCount > 5) {
+                        // Stop after 10 consecutive errors to avoid infinite loop
+                        if (errorCount > 10) {
                             console.log('⚠️ Too many errors, stopping scan');
                             break;
                         }
+                    }
+                    
+                    // Reset error count if we found a token
+                    if (tokenIds.length > errorCount) {
+                        errorCount = 0;
                     }
                 }
                 
@@ -16943,6 +16956,23 @@
             } else {
                 console.log('⚠️ Wallet not connected, cannot check NFTs');
             }
+        }
+
+        function scanAllOtterfulOtters() {
+            console.log('🔍 Scanning all 2222 Otterful Otters...');
+            if (!otterWallet || !otterWallet.isConnected) {
+                console.log('⚠️ Wallet not connected');
+                return;
+            }
+            
+            // This will trigger a full scan of all 2222 tokens
+            otterWallet.loadNFTs().then(() => {
+                console.log('✅ Full scan completed');
+                console.log(`📊 Found ${otterWallet.userNFTs.length} NFTs`);
+                updateWalletProfile();
+            }).catch(error => {
+                console.error('❌ Full scan failed:', error);
+            });
         }
         
         function refreshWalletData() {
