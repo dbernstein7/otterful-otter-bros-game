@@ -126,8 +126,9 @@
             <button class="test-btn" onclick="testChainId()">Test Chain ID</button>
             <button class="test-btn" onclick="testContractCall()">Test Contract Call</button>
             <button class="test-btn" onclick="testTokenBalance()">Test Token Balance</button>
-            <button class="test-btn" onclick="scanForTokens()">Scan for Tokens</button>
-            <button class="test-btn" onclick="testMetadata()">Test Metadata</button>
+                         <button class="test-btn" onclick="scanForTokens()">Scan for Tokens</button>
+             <button class="test-btn" onclick="scanHigherRange()">Scan Higher Range</button>
+             <button class="test-btn" onclick="testMetadata()">Test Metadata</button>
         </div>
         
         <div class="debug-section">
@@ -369,10 +370,10 @@
             }
             
             try {
-                log('🔍 Checking ownership of first 20 token IDs...');
+                log('🔍 Checking ownership of first 100 token IDs...');
                 const ownedTokens = [];
                 
-                for (let i = 0; i < 20; i++) {
+                for (let i = 0; i < 100; i++) {
                     try {
                         // Call ownerOf(tokenId)
                         const data = '0x6352211e' + i.toString(16).padStart(64, '0');
@@ -414,7 +415,7 @@
                     // Try to load metadata for the first owned token
                     await testTokenMetadata(ownedTokens[0]);
                 } else {
-                    log('😞 No owned tokens found in the first 20 token IDs');
+                    log('😞 No owned tokens found in the first 100 token IDs');
                     log('💡 Your tokens might have higher IDs, or you might not own any on this chain');
                 }
                 
@@ -459,10 +460,18 @@
                     // Try to decode the URI
                     let uri = '';
                     try {
-                        // Simple hex to string conversion
+                        // Improved hex to string conversion
                         const hex = result.slice(2);
-                        for (let i = 0; i < hex.length; i += 2) {
-                            const charCode = parseInt(hex.substr(i, 2), 16);
+                        log(`🔍 Raw hex: ${hex}`);
+                        
+                        // Skip the first 32 bytes (function selector and padding)
+                        const dataStart = 64; // 32 bytes = 64 hex chars
+                        const dataHex = hex.slice(dataStart);
+                        log(`🔍 Data hex: ${dataHex}`);
+                        
+                        // Decode the string
+                        for (let i = 0; i < dataHex.length; i += 2) {
+                            const charCode = parseInt(dataHex.substr(i, 2), 16);
                             if (charCode === 0) break;
                             if (charCode >= 32 && charCode <= 126) { // Printable ASCII
                                 uri += String.fromCharCode(charCode);
@@ -525,6 +534,60 @@
                 }
             } catch (error) {
                 log(`❌ Error getting token metadata: ${error.message}`);
+            }
+        }
+        
+        async function scanHigherRange() {
+            log('🧪 Scanning higher token range...');
+            
+            if (!wallet) {
+                log('❌ Wallet not connected');
+                return;
+            }
+            
+            try {
+                log('🔍 Checking ownership of tokens 100-500...');
+                const ownedTokens = [];
+                
+                for (let i = 100; i < 500; i++) {
+                    try {
+                        // Call ownerOf(tokenId)
+                        const data = '0x6352211e' + i.toString(16).padStart(64, '0');
+                        
+                        const result = await window.ethereum.request({
+                            method: 'eth_call',
+                            params: [{
+                                to: CONTRACT_ADDRESS,
+                                data: data
+                            }, 'latest']
+                        });
+                        
+                        if (result && result !== '0x' && result.length >= 26) {
+                            const owner = '0x' + result.slice(26).toLowerCase();
+                            
+                            if (owner === wallet.account.toLowerCase()) {
+                                log(`✅ You own token #${i}!`);
+                                ownedTokens.push(i);
+                            }
+                        }
+                    } catch (error) {
+                        // Skip errors for non-existent tokens
+                        continue;
+                    }
+                }
+                
+                if (ownedTokens.length > 0) {
+                    log(`🎉 Found ${ownedTokens.length} owned tokens in higher range: ${ownedTokens.join(', ')}`);
+                    
+                    // Try to load metadata for the first owned token
+                    await testTokenMetadata(ownedTokens[0]);
+                } else {
+                    log('😞 No owned tokens found in range 100-500');
+                    log('💡 Your tokens might be in an even higher range');
+                }
+                
+            } catch (error) {
+                log(`❌ Higher range scan failed: ${error.message}`);
             }
         }
         
