@@ -146,8 +146,44 @@
         let wallet = null;
         let debugLog = [];
         
-        const CONTRACT_ADDRESS = '0x4e5913922b7ddf916c8d27d1016827f799687e66';
-        const APE_CHAIN_ID = '0x8173'; // 33139 in hex
+                 const CONTRACT_ADDRESS = '0x4e5913922b7ddf916c8d27d1016827f799687e66';
+         const APE_CHAIN_ID = '0x8173'; // 33139 in hex
+         
+         function decodeString(hexString) {
+             try {
+                 const hex = hexString.slice(2);
+                 
+                 // Try ABI string decoding first
+                 if (hex.length >= 128) {
+                     const lengthHex = hex.slice(64, 128);
+                     const length = parseInt(lengthHex, 16);
+                     
+                     if (length > 0 && length < 1000) {
+                         const dataHex = hex.slice(128, 128 + (length * 2));
+                         let str = '';
+                         for (let i = 0; i < dataHex.length; i += 2) {
+                             const byte = parseInt(dataHex.substr(i, 2), 16);
+                             if (byte !== 0) str += String.fromCharCode(byte);
+                         }
+                         return str.trim();
+                     }
+                 }
+                 
+                 // Fallback to simple conversion
+                 let str = '';
+                 for (let i = 0; i < hex.length; i += 2) {
+                     const charCode = parseInt(hex.substr(i, 2), 16);
+                     if (charCode === 0) break;
+                     if (charCode >= 32 && charCode <= 126) {
+                         str += String.fromCharCode(charCode);
+                     }
+                 }
+                 return str.trim();
+             } catch (error) {
+                 console.warn('Error decoding string:', error);
+                 return null;
+             }
+         }
         
         function log(message, type = 'info') {
             const timestamp = new Date().toLocaleTimeString();
@@ -460,25 +496,10 @@
                     // Try to decode the URI
                     let uri = '';
                     try {
-                        // Improved hex to string conversion
-                        const hex = result.slice(2);
-                        log(`🔍 Raw hex: ${hex}`);
-                        
-                        // Skip the first 32 bytes (function selector and padding)
-                        const dataStart = 64; // 32 bytes = 64 hex chars
-                        const dataHex = hex.slice(dataStart);
-                        log(`🔍 Data hex: ${dataHex}`);
-                        
-                        // Decode the string
-                        for (let i = 0; i < dataHex.length; i += 2) {
-                            const charCode = parseInt(dataHex.substr(i, 2), 16);
-                            if (charCode === 0) break;
-                            if (charCode >= 32 && charCode <= 126) { // Printable ASCII
-                                uri += String.fromCharCode(charCode);
-                            }
-                        }
-                        
-                        uri = uri.trim();
+                                                 // Use improved decodeString function
+                         uri = decodeString(result);
+                         log(`🔍 Raw hex: ${result.slice(2)}`);
+                         log(`🔗 Decoded URI: "${uri}"`);
                         log(`🔗 Decoded URI: "${uri}"`);
                         
                         if (uri) {
