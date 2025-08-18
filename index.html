@@ -2788,6 +2788,7 @@
                         <div id="walletAddressDisplay" style="font-size: 14px; color: #00FFFF; font-family: monospace; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; margin: 10px 0;">0x0000...0000</div>
                         <div style="margin-top: 15px;">
                             <button onclick="testProfileButton()" style="background: linear-gradient(135deg, #FF5722, #E64A19); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease;">🧪 Test Button</button>
+                            <button onclick="checkProfileAccess()" style="background: linear-gradient(135deg, #607D8B, #455A64); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔍 Check Profile</button>
                             <button onclick="refreshWalletData()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔄 Refresh Data</button>
                             <button onclick="refreshMetadata()" style="background: linear-gradient(135deg, #2196F3, #1976D2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🌐 Refresh Metadata</button>
                             <button onclick="checkNFTs()" style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔍 Check NFTs</button>
@@ -16703,6 +16704,22 @@
                 return;
             }
             
+            // Check if profile elements exist
+            const connectedStatus = document.getElementById('walletConnectedStatus');
+            const disconnectedStatus = document.getElementById('walletDisconnectedStatus');
+            const walletAddressDisplay = document.getElementById('walletAddressDisplay');
+            
+            console.log('🔍 Profile elements found:', {
+                connectedStatus: !!connectedStatus,
+                disconnectedStatus: !!disconnectedStatus,
+                walletAddressDisplay: !!walletAddressDisplay
+            });
+            
+            if (!connectedStatus || !disconnectedStatus || !walletAddressDisplay) {
+                console.error('❌ Profile elements not found - profile may not be open');
+                return;
+            }
+            
             console.log('📊 Current wallet state:', {
                 isConnected: otterWallet.isConnected,
                 account: otterWallet.account,
@@ -16711,9 +16728,6 @@
             });
             
             // Update wallet connection status
-            const connectedStatus = document.getElementById('walletConnectedStatus');
-            const disconnectedStatus = document.getElementById('walletDisconnectedStatus');
-            const walletAddressDisplay = document.getElementById('walletAddressDisplay');
             
             if (otterWallet.isConnected) {
                 connectedStatus.style.display = 'block';
@@ -16951,24 +16965,40 @@
 
         function checkNFTs() {
             console.log('🔍 Checking NFTs...');
+            console.log('🔍 otterWallet exists:', !!otterWallet);
+            console.log('🔍 otterWallet.isConnected:', otterWallet?.isConnected);
+            
             if (otterWallet && otterWallet.isConnected) {
                 console.log('👤 Current wallet address:', otterWallet.account);
                 console.log('📊 Current NFTs:', otterWallet.userNFTs.length);
                 
                 // Show detailed NFT information
                 console.log('🦦 NFT Details:');
-                otterWallet.userNFTs.forEach((nft, index) => {
-                    console.log(`  ${index + 1}. Token #${nft.tokenId}: ${nft.name}`);
-                    console.log(`     Traits: ${nft.traits.join(', ')}`);
-                    console.log(`     Rarity: ${nft.rarity}`);
-                    console.log(`     Multiplier: ${nft.multiplier}x`);
-                });
+                if (otterWallet.userNFTs.length > 0) {
+                    otterWallet.userNFTs.forEach((nft, index) => {
+                        console.log(`  ${index + 1}. Token #${nft.tokenId}: ${nft.name}`);
+                        console.log(`     Traits: ${nft.traits.join(', ')}`);
+                        console.log(`     Rarity: ${nft.rarity}`);
+                        console.log(`     Multiplier: ${nft.multiplier}x`);
+                    });
+                } else {
+                    console.log('  No NFTs found in wallet');
+                }
                 
                 // Update the profile display
-                updateWalletProfile();
-                console.log('✅ NFT check completed');
+                try {
+                    updateWalletProfile();
+                    console.log('✅ NFT check completed');
+                } catch (error) {
+                    console.error('❌ Error updating profile:', error);
+                }
             } else {
                 console.log('⚠️ Wallet not connected, cannot check NFTs');
+                if (!otterWallet) {
+                    console.error('❌ OtterWallet not initialized');
+                } else if (!otterWallet.isConnected) {
+                    console.log('💡 Try connecting your wallet first');
+                }
             }
         }
 
@@ -16986,7 +17016,11 @@
             otterWallet.loadNFTs().then(() => {
                 console.log('✅ Full scan completed');
                 console.log(`📊 Found ${otterWallet.userNFTs.length} NFTs`);
-                updateWalletProfile();
+                try {
+                    updateWalletProfile();
+                } catch (error) {
+                    console.error('❌ Error updating profile after scan:', error);
+                }
             }).catch(error => {
                 console.error('❌ Full scan failed:', error);
             });
@@ -16996,6 +17030,35 @@
         function testProfileButton() {
             console.log('🧪 Profile button test - this function is working!');
             alert('Profile button test - this function is working!');
+        }
+
+        // Function to check if profile is accessible
+        function checkProfileAccess() {
+            console.log('🔍 Checking profile access...');
+            const profileElements = [
+                'walletConnectedStatus',
+                'walletDisconnectedStatus', 
+                'walletAddressDisplay',
+                'profileTotalNFTs',
+                'profileStakedNFTs'
+            ];
+            
+            const results = {};
+            profileElements.forEach(id => {
+                const element = document.getElementById(id);
+                results[id] = !!element;
+                console.log(`  ${id}: ${!!element}`);
+            });
+            
+            const allFound = Object.values(results).every(found => found);
+            console.log(`✅ Profile accessible: ${allFound}`);
+            
+            if (!allFound) {
+                console.log('⚠️ Some profile elements not found - profile may not be open');
+                alert('Profile elements not found. Make sure the Profile → Wallet tab is open!');
+            }
+            
+            return allFound;
         }
         
         function refreshWalletData() {
