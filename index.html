@@ -2787,7 +2787,8 @@
                         <div style="font-size: 18px; font-weight: bold; color: #4CAF50; margin-bottom: 5px;">Connected to ApeChain</div>
                         <div id="walletAddressDisplay" style="font-size: 14px; color: #00FFFF; font-family: monospace; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; margin: 10px 0;">0x0000...0000</div>
                         <div style="margin-top: 15px;">
-                            <button onclick="refreshWalletData()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease;">🔄 Refresh Data</button>
+                            <button onclick="testProfileButton()" style="background: linear-gradient(135deg, #FF5722, #E64A19); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease;">🧪 Test Button</button>
+                            <button onclick="refreshWalletData()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔄 Refresh Data</button>
                             <button onclick="refreshMetadata()" style="background: linear-gradient(135deg, #2196F3, #1976D2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🌐 Refresh Metadata</button>
                             <button onclick="checkNFTs()" style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔍 Check NFTs</button>
                             <button onclick="scanAllOtterfulOtters()" style="background: linear-gradient(135deg, #9C27B0, #7B1FA2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔍 Scan All 2222</button>
@@ -3115,7 +3116,8 @@
 
             init() {
                 this.setupEventListeners();
-                this.checkConnection();
+                // Don't auto-connect - let user manually connect
+                // this.checkConnection();
                 this.startStakingRewardsTimer();
             }
 
@@ -16893,7 +16895,11 @@
         
         function connectWalletFromProfile() {
             console.log('🔗 Connecting wallet from profile...');
+            console.log('🔍 otterWallet exists:', !!otterWallet);
+            console.log('🔍 window.ethereum exists:', !!window.ethereum);
+            
             if (otterWallet) {
+                console.log('✅ OtterWallet found, attempting connection...');
                 otterWallet.connect().then(() => {
                     console.log('✅ Wallet connected from profile');
                     updateWalletProfile();
@@ -16902,6 +16908,14 @@
                 });
             } else {
                 console.error('❌ OtterWallet not initialized');
+                console.log('💡 Trying to reinitialize OtterWallet...');
+                try {
+                    otterWallet = new OtterfulWallet();
+                    console.log('✅ OtterWallet reinitialized');
+                    connectWalletFromProfile(); // Try again
+                } catch (error) {
+                    console.error('❌ Failed to reinitialize OtterWallet:', error);
+                }
             }
         }
 
@@ -16960,6 +16974,9 @@
 
         function scanAllOtterfulOtters() {
             console.log('🔍 Scanning all 2222 Otterful Otters...');
+            console.log('🔍 otterWallet exists:', !!otterWallet);
+            console.log('🔍 otterWallet.isConnected:', otterWallet?.isConnected);
+            
             if (!otterWallet || !otterWallet.isConnected) {
                 console.log('⚠️ Wallet not connected');
                 return;
@@ -16974,11 +16991,18 @@
                 console.error('❌ Full scan failed:', error);
             });
         }
+
+        // Test function to verify buttons are working
+        function testProfileButton() {
+            console.log('🧪 Profile button test - this function is working!');
+            alert('Profile button test - this function is working!');
+        }
         
         function refreshWalletData() {
             console.log('🔄 Refreshing wallet data...');
             console.log('🔍 otterWallet exists:', !!otterWallet);
             console.log('🔍 otterWallet.isConnected:', otterWallet?.isConnected);
+            console.log('🔍 window.ethereum exists:', !!window.ethereum);
             
             if (otterWallet && otterWallet.isConnected) {
                 console.log('👤 Current wallet address:', otterWallet.account);
