@@ -3854,18 +3854,29 @@
                         console.log(`🔍 Metadata validation: Expected token #${tokenId}, got token #${metadataTokenId}`);
                         
                         if (metadataTokenId !== tokenId) {
-                            console.log(`❌ METADATA MISMATCH: Token #${tokenId} metadata points to token #${metadataTokenId} - TRYING LOCAL OVERRIDE`);
-                            this.showMessage(`Warning: Token #${tokenId} metadata mismatch (points to #${metadataTokenId}) - Using local override`, 'warning');
+                            console.log(`❌ METADATA MISMATCH: Token #${tokenId} metadata points to token #${metadataTokenId} - TRYING OVERRIDE`);
+                            this.showMessage(`Warning: Token #${tokenId} metadata mismatch (points to #${metadataTokenId}) - Trying override`, 'warning');
                             
-                            // 🔧 LOCAL OVERRIDE: Try to load correct local metadata
+                            // 🔧 STEP 1: Try local metadata override first
+                            console.log(`📁 Trying local metadata for token #${tokenId}...`);
                             const localMetadata = await this.loadLocalMetadata(tokenId);
                             if (localMetadata) {
                                 console.log(`✅ LOCAL OVERRIDE SUCCESS: Loaded correct metadata for token #${tokenId}`);
                                 return localMetadata;
-                            } else {
-                                console.log(`❌ LOCAL OVERRIDE FAILED: No local metadata for token #${tokenId}`);
-                                return null;
                             }
+                            
+                            // 🔧 STEP 2: Try remote metadata override if local failed
+                            console.log(`🌐 Local failed, trying remote metadata for token #${tokenId}...`);
+                            const remoteMetadata = await this.loadRemoteMetadata(tokenId);
+                            if (remoteMetadata) {
+                                console.log(`✅ REMOTE OVERRIDE SUCCESS: Loaded correct metadata for token #${tokenId}`);
+                                return remoteMetadata;
+                            }
+                            
+                            // 🔧 STEP 3: Both failed - reject the token
+                            console.log(`❌ BOTH OVERRIDES FAILED: No valid metadata for token #${tokenId}`);
+                            this.showMessage(`Error: Cannot load correct metadata for token #${tokenId}`, 'error');
+                            return null;
                         } else {
                             console.log(`✅ Metadata validation passed for token #${tokenId}`);
                         }
@@ -3895,6 +3906,59 @@
                     }
                 } catch (error) {
                     console.log(`❌ Error loading local metadata for token #${tokenId}:`, error);
+                    return null;
+                }
+            }
+
+            // Try to fetch correct metadata from remote sources when local not available
+            async loadRemoteMetadata(tokenId) {
+                try {
+                    console.log(`🌐 Trying remote metadata sources for token #${tokenId}...`);
+                    
+                    // Try multiple IPFS gateways with the correct token ID
+                    const ipfsGateways = [
+                        `https://ipfs.io/ipfs/QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG/${tokenId}.json`,
+                        `https://gateway.pinata.cloud/ipfs/QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG/${tokenId}.json`,
+                        `https://cloudflare-ipfs.com/ipfs/QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG/${tokenId}.json`,
+                        `https://dweb.link/ipfs/QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG/${tokenId}.json`
+                    ];
+                    
+                    for (let i = 0; i < ipfsGateways.length; i++) {
+                        try {
+                            console.log(`🔗 Trying gateway ${i + 1}/${ipfsGateways.length}: ${ipfsGateways[i]}`);
+                            
+                            const controller = new AbortController();
+                            const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+                            
+                            const response = await fetch(ipfsGateways[i], {
+                                signal: controller.signal
+                            });
+                            
+                            clearTimeout(timeoutId);
+                            
+                            if (response.ok) {
+                                const metadata = await response.json();
+                                
+                                // Validate the metadata matches the expected token ID
+                                const metadataTokenId = this.extractTokenIdFromMetadata(metadata);
+                                if (metadataTokenId === tokenId) {
+                                    console.log(`✅ Remote metadata loaded for token #${tokenId} from gateway ${i + 1}`);
+                                    return metadata;
+                                } else {
+                                    console.log(`❌ Remote metadata mismatch: Expected #${tokenId}, got #${metadataTokenId}`);
+                                }
+                            }
+                        } catch (error) {
+                            console.log(`⚠️ Gateway ${i + 1} failed: ${error.message}`);
+                            continue;
+                        }
+                    }
+                    
+                    console.log(`❌ All remote gateways failed for token #${tokenId}`);
+                    return null;
+                    
+                } catch (error) {
+                    console.log(`❌ Error in remote metadata loading for token #${tokenId}:`, error);
                     return null;
                 }
             }
