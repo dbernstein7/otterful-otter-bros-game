@@ -2787,38 +2787,18 @@
                         <div style="font-size: 18px; font-weight: bold; color: #4CAF50; margin-bottom: 5px;">Connected to ApeChain</div>
                         <div id="walletAddressDisplay" style="font-size: 14px; color: #00FFFF; font-family: monospace; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; margin: 10px 0;">0x0000...0000</div>
                         <div style="margin-top: 15px;">
-                            <button onclick="testProfileButton()" style="background: linear-gradient(135deg, #FF5722, #E64A19); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease;">🧪 Test Button</button>
-                            <button onclick="checkProfileAccess()" style="background: linear-gradient(135deg, #607D8B, #455A64); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔍 Check Profile</button>
-                            <button onclick="testLocalMetadata()" style="background: linear-gradient(135deg, #00BCD4, #0097A7); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">📁 Test Local Metadata</button>
-                            <button onclick="testLocalNFTLoading()" style="background: linear-gradient(135deg, #8BC34A, #689F38); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🦦 Test Local NFTs</button>
-                            <button onclick="enableBlockchainScanning()" style="background: linear-gradient(135deg, #FF5722, #E64A19); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔗 Enable Blockchain</button>
-                            <button onclick="testNFTLoading()" style="background: linear-gradient(135deg, #E91E63, #C2185B); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🧪 Test NFT Loading</button>
-                            <button onclick="stakeAllNFTs()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔒 Stake All</button>
+                            <button onclick="stakeAllNFTs()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease;">🔒 Stake All</button>
                             <button onclick="unstakeAllNFTs()" style="background: linear-gradient(135deg, #F44336, #D32F2F); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔓 Unstake All</button>
                             <button onclick="claimAllRewards()" style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">💰 Claim Rewards</button>
                             <button onclick="selectNFTsToStake()" style="background: linear-gradient(135deg, #9C27B0, #7B1FA2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🎯 Select NFTs</button>
                             <button onclick="refreshWalletData()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔄 Refresh Data</button>
-                            <button onclick="scanForMyNFTs()" style="background: linear-gradient(135deg, #2196F3, #1976D2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔍 Scan My NFTs</button>
-                            <button onclick="refreshMetadata()" style="background: linear-gradient(135deg, #2196F3, #1976D2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🌐 Refresh Metadata</button>
-                            <button onclick="checkNFTs()" style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔍 Check NFTs</button>
-                            <button onclick="scanAllOtterfulOtters()" style="background: linear-gradient(135deg, #9C27B0, #7B1FA2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔍 Scan All 2222</button>
                             <button onclick="disconnectWalletFromProfile()" style="background: linear-gradient(135deg, #F44336, #D32F2F); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">❌ Disconnect</button>
-                        </div>
-                        <div style="margin-top: 10px;">
-                            <button onclick="scanTokenRange(0, 499)" style="background: linear-gradient(135deg, #795548, #5D4037); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold; transition: all 0.3s ease;">🔍 Scan 0-499</button>
-                            <button onclick="scanTokenRange(500, 999)" style="background: linear-gradient(135deg, #795548, #5D4037); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold; transition: all 0.3s ease; margin-left: 5px;">🔍 Scan 500-999</button>
-                            <button onclick="scanTokenRange(1000, 1499)" style="background: linear-gradient(135deg, #795548, #5D4037); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold; transition: all 0.3s ease; margin-left: 5px;">🔍 Scan 1000-1499</button>
-                            <button onclick="scanTokenRange(1500, 1999)" style="background: linear-gradient(135deg, #795548, #5D4037); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold; transition: all 0.3s ease; margin-left: 5px;">🔍 Scan 1500-1999</button>
-                            <button onclick="scanTokenRange(2000, 2221)" style="background: linear-gradient(135deg, #795548, #5D4037); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold; transition: all 0.3s ease; margin-left: 5px;">🔍 Scan 2000-2221</button>
                         </div>
                     </div>
                     <div id="walletDisconnectedStatus">
                         <div style="font-size: 24px; margin-bottom: 10px;">🔌</div>
                         <div style="font-size: 18px; font-weight: bold; color: #FF4444; margin-bottom: 10px;">Wallet Not Connected</div>
                         <button onclick="connectWalletFromProfile()" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease;">🔗 Connect Wallet</button>
-                        <button onclick="refreshWalletData()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔄 Refresh Data</button>
-                        <button onclick="testContractConnection()" style="background: linear-gradient(135deg, #FF6B35, #F7931E); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🧪 Test Contract</button>
-                        <button onclick="testMetadataFetching()" style="background: linear-gradient(135deg, #9C27B0, #7B1FA2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🌐 Test Metadata</button>
                     </div>
                 </div>
             </div>
@@ -3375,105 +3355,425 @@
                 }
             }
 
+            // PRODUCTION-READY NFT LOADING SYSTEM
+            // This will work for any user on any computer
             async loadUserNFTsWithMetadata(balance) {
                 this.userNFTs = [];
-                console.log('🚀 SIMPLIFIED NFT LOADING - Starting...');
+                console.log('🚀 PRODUCTION NFT LOADING - Finding real NFTs for any user...');
                 
                 try {
-                    // Step 1: Get your actual owned token IDs (this part works)
-                    console.log('🔍 Step 1: Finding your owned tokens...');
-                    let ownedTokens = [];
+                    // Step 1: Find owned tokens (this works for everyone)
+                    console.log('🔍 Step 1: Scanning blockchain for your owned NFTs...');
+                    const ownedTokens = await this.findOwnedTokens();
                     
-                    try {
-                        // Scan for owned tokens (limit to first 100 for testing)
-                        for (let tokenId = 1; tokenId <= 100; tokenId++) {
-                            try {
-                                const owner = await this.getTokenOwner(tokenId);
-                                if (owner && owner.toLowerCase() === this.account.toLowerCase()) {
-                                    console.log(`✅ YOU OWN TOKEN: ${tokenId}`);
-                                    ownedTokens.push(tokenId);
-                                }
-                                
-                                // Small delay every 10 tokens
-                                if (tokenId % 10 === 0) {
-                                    console.log(`📊 Scanned ${tokenId} tokens, found ${ownedTokens.length} owned`);
-                                    await new Promise(resolve => setTimeout(resolve, 500));
-                                }
-                            } catch (error) {
-                                // Skip individual token errors
-                                if (tokenId % 20 === 0) {
-                                    console.log(`⚠️ Some tokens failed to check, continuing...`);
-                                }
-                            }
-                        }
-                    } catch (error) {
-                        console.log('⚠️ Blockchain scan had issues, using backup method');
-                    }
-                    
-                    // Step 2: If no tokens found, use sample tokens for testing
                     if (ownedTokens.length === 0) {
-                        console.log('📋 No owned tokens found in scan, using sample tokens');
-                        ownedTokens = [1, 50, 100]; // Sample tokens for testing
+                        console.log('📋 No NFTs found for this wallet');
+                        this.showMessage('No Otterful Otters NFTs found in this wallet', 'info');
+                        return;
                     }
                     
-                    console.log('🎯 Processing tokens:', ownedTokens);
+                    console.log(`🎯 Found ${ownedTokens.length} owned NFTs: ${ownedTokens.join(', ')}`);
                     
-                    // Step 3: Create NFT objects WITHOUT trying to fetch external metadata
-                    ownedTokens.forEach((tokenId, index) => {
-                        console.log(`🦦 Creating NFT object for token ${tokenId}...`);
-                        
-                        // Generate traits based on token ID (deterministic)
-                        const traits = this.generateTraitsFromTokenId(tokenId);
-                        
-                        const nft = {
-                            tokenId: tokenId,
-                            name: `Otterful Otter #${tokenId}`,
-                            traits: traits,
-                            multiplier: this.calculateMultiplier(traits),
-                            perks: this.calculatePerks(traits),
-                            rarity: this.calculateRarity(traits),
-                            image: `./images/otter_${tokenId}.png`, // Local image path
-                            description: `Otterful Otter #${tokenId} - ${this.calculateRarity(traits)} rarity`
-                        };
-                        
-                        this.userNFTs.push(nft);
-                        console.log(`✅ Added NFT ${tokenId}:`, {
-                            name: nft.name,
-                            traits: nft.traits,
-                            multiplier: nft.multiplier,
-                            rarity: nft.rarity
-                        });
-                    });
+                    // Step 2: Load metadata for each owned NFT
+                    console.log('📄 Step 2: Loading metadata for each NFT...');
                     
-                    console.log('🎉 SUCCESS! Loaded NFTs:', this.userNFTs.length);
-                    console.log('📋 Your NFTs:');
-                    this.userNFTs.forEach(nft => {
-                        console.log(`  - ${nft.name}: ${nft.traits.join(', ')} (${nft.multiplier}x ${nft.rarity})`);
-                    });
+                    for (let i = 0; i < ownedTokens.length; i++) {
+                        const tokenId = ownedTokens[i];
+                        console.log(`📋 Processing NFT ${i + 1}/${ownedTokens.length}: Token #${tokenId}`);
+                        
+                        try {
+                            // Get the real metadata from blockchain/IPFS
+                            const metadata = await this.getRealNFTMetadata(tokenId);
+                            
+                            if (metadata) {
+                                console.log(`✅ Loaded metadata for token ${tokenId}:`, metadata);
+                                
+                                // Extract traits from the actual metadata
+                                const traits = this.extractTraitsFromMetadata(metadata);
+                                
+                                const nft = {
+                                    tokenId: tokenId,
+                                    name: metadata.name || `Otterful Otter #${tokenId}`,
+                                    traits: traits,
+                                    multiplier: this.calculateMultiplier(traits),
+                                    perks: this.calculatePerks(traits),
+                                    rarity: this.calculateRarity(traits),
+                                    image: this.processImageUrl(metadata.image),
+                                    description: metadata.description || `Otterful Otter #${tokenId}`,
+                                    rawMetadata: metadata // Store for debugging
+                                };
+                                
+                                this.userNFTs.push(nft);
+                                console.log(`🦦 Added NFT: ${nft.name} with traits: ${nft.traits.join(', ')}`);
+                            } else {
+                                console.log(`⚠️ No metadata found for token ${tokenId}, creating basic NFT`);
+                                this.userNFTs.push(this.createBasicNFT(tokenId));
+                            }
+                            
+                            // Small delay between requests to be nice to servers
+                            if (i < ownedTokens.length - 1) {
+                                await new Promise(resolve => setTimeout(resolve, 500));
+                            }
+                            
+                        } catch (error) {
+                            console.warn(`⚠️ Error loading metadata for token ${tokenId}:`, error.message);
+                            // Add basic NFT even if metadata fails
+                            this.userNFTs.push(this.createBasicNFT(tokenId));
+                        }
+                    }
+                    
+                    console.log(`🎉 SUCCESS! Loaded ${this.userNFTs.length} NFTs for this wallet`);
+                    this.updateNFTDisplay();
+                    this.showMessage(`Successfully loaded ${this.userNFTs.length} Otterful Otters!`, 'success');
                     
                 } catch (error) {
-                    console.error('❌ Error in loadUserNFTsWithMetadata:', error);
+                    console.error('❌ Error in production NFT loading:', error);
+                    this.showMessage(`Error loading NFTs: ${error.message}`, 'error');
+                }
+            }
+
+            // Find tokens owned by the current user (works for everyone)
+            async findOwnedTokens() {
+                console.log('🔍 Scanning blockchain for owned tokens...');
+                const ownedTokens = [];
+                
+                try {
+                    // Strategy 1: Use events to find transfers TO this user
+                    console.log('📡 Method 1: Checking recent Transfer events...');
+                    const recentTokens = await this.findTokensFromEvents();
+                    ownedTokens.push(...recentTokens);
                     
-                    // Ultimate fallback - create sample NFTs
-                    console.log('🔄 Creating fallback sample NFTs...');
-                    for (let i = 1; i <= 4; i++) {
-                        const traits = this.generateTraitsFromTokenId(i);
-                        this.userNFTs.push({
-                            tokenId: i,
-                            name: `Sample Otter #${i}`,
-                            traits: traits,
-                            multiplier: this.calculateMultiplier(traits),
-                            perks: this.calculatePerks(traits),
-                            rarity: this.calculateRarity(traits),
-                            image: `./images/otter_${i}.png`,
-                            description: `Sample Otterful Otter #${i}`
-                        });
+                    // Strategy 2: If events don't work, scan a reasonable range
+                    if (ownedTokens.length === 0) {
+                        console.log('🔍 Method 2: Direct ownership scanning...');
+                        const scannedTokens = await this.scanTokenRange(1, 200); // Scan first 200 tokens
+                        ownedTokens.push(...scannedTokens);
+                    }
+                    
+                    // Remove duplicates
+                    const uniqueTokens = [...new Set(ownedTokens)];
+                    console.log(`📊 Found ${uniqueTokens.length} owned tokens total`);
+                    
+                    return uniqueTokens;
+                    
+                } catch (error) {
+                    console.error('❌ Error finding owned tokens:', error);
+                    return [];
+                }
+            }
+
+            // Method 1: Use Transfer events to find NFTs (more efficient)
+            async findTokensFromEvents() {
+                try {
+                    console.log('📡 Searching Transfer events for your address...');
+                    
+                    // Create event topic for Transfer(address,address,uint256)
+                    const transferTopic = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+                    const userAddressPadded = '0x000000000000000000000000' + this.account.slice(2).toLowerCase();
+                    
+                    // Get logs for transfers TO this address
+                    const logs = await window.ethereum.request({
+                        method: 'eth_getLogs',
+                        params: [{
+                            fromBlock: '0x0', // From beginning (you might want to limit this)
+                            toBlock: 'latest',
+                            address: this.contractAddress,
+                            topics: [
+                                transferTopic,
+                                null, // from address (any)
+                                userAddressPadded // to address (this user)
+                            ]
+                        }]
+                    });
+                    
+                    console.log(`📡 Found ${logs.length} transfer events to your address`);
+                    
+                    const tokenIds = logs.map(log => {
+                        // Token ID is in the data field or third topic
+                        if (log.topics.length > 3) {
+                            return parseInt(log.topics[3], 16);
+                        } else if (log.data && log.data !== '0x') {
+                            return parseInt(log.data, 16);
+                        }
+                        return null;
+                    }).filter(id => id !== null);
+                    
+                    console.log('📡 Token IDs from events:', tokenIds);
+                    
+                    // Verify current ownership (they might have transferred these NFTs away)
+                    const currentlyOwned = [];
+                    for (const tokenId of tokenIds) {
+                        try {
+                            const owner = await this.getTokenOwner(tokenId);
+                            if (owner && owner.toLowerCase() === this.account.toLowerCase()) {
+                                currentlyOwned.push(tokenId);
+                            }
+                        } catch (error) {
+                            console.log(`⚠️ Could not verify ownership of token ${tokenId}`);
+                        }
+                    }
+                    
+                    console.log(`📊 Currently owned from events: ${currentlyOwned.length} tokens`);
+                    return currentlyOwned;
+                    
+                } catch (error) {
+                    console.log('⚠️ Event method failed:', error.message);
+                    return [];
+                }
+            }
+
+            // Method 2: Direct scanning (fallback)
+            async scanTokenRange(start, end) {
+                console.log(`🔍 Scanning tokens ${start} to ${end} for ownership...`);
+                const ownedTokens = [];
+                const BATCH_SIZE = 10;
+                
+                for (let i = start; i <= end; i += BATCH_SIZE) {
+                    const batchEnd = Math.min(i + BATCH_SIZE - 1, end);
+                    console.log(`🔍 Scanning batch ${i}-${batchEnd}...`);
+                    
+                    // Check batch of tokens
+                    const batchPromises = [];
+                    for (let tokenId = i; tokenId <= batchEnd; tokenId++) {
+                        batchPromises.push(
+                            this.getTokenOwner(tokenId)
+                                .then(owner => ({ tokenId, owner }))
+                                .catch(() => ({ tokenId, owner: null }))
+                        );
+                    }
+                    
+                    const batchResults = await Promise.all(batchPromises);
+                    
+                    batchResults.forEach(({ tokenId, owner }) => {
+                        if (owner && owner.toLowerCase() === this.account.toLowerCase()) {
+                            console.log(`✅ Found owned token: ${tokenId}`);
+                            ownedTokens.push(tokenId);
+                        }
+                    });
+                    
+                    // Delay between batches to avoid overwhelming RPC
+                    if (batchEnd < end) {
+                        await new Promise(resolve => setTimeout(resolve, 1000));
                     }
                 }
                 
-                // Update the UI after loading
-                console.log('🔄 Updating UI with loaded NFTs...');
-                this.updateNFTDisplay();
+                console.log(`🔍 Scan complete. Found ${ownedTokens.length} owned tokens`);
+                return ownedTokens;
+            }
+
+            // Get real NFT metadata from tokenURI
+            async getRealNFTMetadata(tokenId) {
+                try {
+                    console.log(`🔗 Getting metadata for token ${tokenId}...`);
+                    
+                    // Step 1: Get the tokenURI from the contract
+                    const tokenURI = await this.getTokenURI(tokenId);
+                    console.log(`🔗 Token ${tokenId} URI: ${tokenURI}`);
+                    
+                    if (!tokenURI) {
+                        console.log(`⚠️ No tokenURI found for token ${tokenId}`);
+                        return null;
+                    }
+                    
+                    // Step 2: Fetch the metadata from the URI
+                    const metadata = await this.fetchMetadataFromURI(tokenURI);
+                    
+                    return metadata;
+                    
+                } catch (error) {
+                    console.warn(`⚠️ Error getting metadata for token ${tokenId}:`, error);
+                    return null;
+                }
+            }
+
+            // Improved tokenURI getter with proper ABI decoding
+            async getTokenURI(tokenId) {
+                try {
+                    const data = '0xc87b56dd' + tokenId.toString(16).padStart(64, '0');
+                    
+                    const result = await window.ethereum.request({
+                        method: 'eth_call',
+                        params: [{
+                            to: this.contractAddress,
+                            data: data
+                        }, 'latest']
+                    });
+                    
+                    if (result && result !== '0x' && result.length > 2) {
+                        // Proper ABI string decoding
+                        const uri = this.decodeStringFromHex(result);
+                        console.log(`🔗 Decoded URI for token ${tokenId}: ${uri}`);
+                        return uri;
+                    }
+                    
+                    return null;
+                } catch (error) {
+                    console.error(`❌ Error getting tokenURI for ${tokenId}:`, error);
+                    return null;
+                }
+            }
+
+            // Improved hex string decoder
+            decodeStringFromHex(hexString) {
+                try {
+                    const hex = hexString.slice(2); // Remove 0x
+                    
+                    if (hex.length >= 128) {
+                        // ABI encoded string format
+                        // Skip first 32 bytes (offset), next 32 bytes is length
+                        const lengthHex = hex.slice(64, 128);
+                        const length = parseInt(lengthHex, 16);
+                        
+                        if (length > 0 && length < 1000) { // Reasonable length
+                            const dataHex = hex.slice(128, 128 + (length * 2));
+                            let result = '';
+                            
+                            for (let i = 0; i < dataHex.length; i += 2) {
+                                const byte = parseInt(dataHex.substr(i, 2), 16);
+                                if (byte !== 0) {
+                                    result += String.fromCharCode(byte);
+                                }
+                            }
+                            
+                            return result.trim();
+                        }
+                    }
+                    
+                    // Fallback: try direct conversion
+                    let result = '';
+                    for (let i = 0; i < hex.length; i += 2) {
+                        const byte = parseInt(hex.substr(i, 2), 16);
+                        if (byte === 0) break;
+                        if (byte >= 32 && byte <= 126) { // Printable ASCII
+                            result += String.fromCharCode(byte);
+                        }
+                    }
+                    
+                    return result.trim();
+                    
+                } catch (error) {
+                    console.warn('Error decoding hex string:', error);
+                    return null;
+                }
+            }
+
+            // Fetch metadata from URI (handles HTTP and IPFS)
+            async fetchMetadataFromURI(uri) {
+                try {
+                    let fetchUrl = uri;
+                    
+                    // Convert IPFS URLs to HTTP
+                    if (uri.startsWith('ipfs://')) {
+                        const ipfsHash = uri.replace('ipfs://', '');
+                        // Try multiple IPFS gateways
+                        const gateways = [
+                            'https://ipfs.io/ipfs/',
+                            'https://gateway.pinata.cloud/ipfs/',
+                            'https://cloudflare-ipfs.com/ipfs/'
+                        ];
+                        
+                        for (const gateway of gateways) {
+                            try {
+                                fetchUrl = gateway + ipfsHash;
+                                console.log(`🌐 Trying IPFS gateway: ${fetchUrl}`);
+                                
+                                const response = await fetch(fetchUrl, {
+                                    method: 'GET',
+                                    headers: {
+                                        'Accept': 'application/json'
+                                    },
+                                    // Add timeout
+                                    signal: AbortSignal.timeout(10000) // 10 second timeout
+                                });
+                                
+                                if (response.ok) {
+                                    const metadata = await response.json();
+                                    console.log(`✅ Successfully fetched metadata from ${gateway}`);
+                                    return metadata;
+                                }
+                            } catch (error) {
+                                console.log(`⚠️ Gateway ${gateway} failed: ${error.message}`);
+                                continue;
+                            }
+                        }
+                        
+                        throw new Error('All IPFS gateways failed');
+                        
+                    } else if (uri.startsWith('http')) {
+                        // Direct HTTP fetch
+                        console.log(`🌐 Fetching from HTTP: ${fetchUrl}`);
+                        
+                        const response = await fetch(fetchUrl, {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json'
+                            },
+                            signal: AbortSignal.timeout(10000)
+                        });
+                        
+                        if (response.ok) {
+                            return await response.json();
+                        } else {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        
+                    } else {
+                        throw new Error(`Unsupported URI format: ${uri}`);
+                    }
+                    
+                } catch (error) {
+                    console.warn(`⚠️ Error fetching metadata from ${uri}:`, error.message);
+                    return null;
+                }
+            }
+
+            // Extract traits from the actual NFT metadata
+            extractTraitsFromMetadata(metadata) {
+                const traits = [];
+                
+                if (metadata.attributes && Array.isArray(metadata.attributes)) {
+                    metadata.attributes.forEach(attr => {
+                        if (attr.trait_type && attr.value) {
+                            // Create consistent trait format
+                            const trait = `${attr.trait_type}-${attr.value}`;
+                            traits.push(trait);
+                        }
+                    });
+                }
+                
+                // If no traits found, add a default
+                if (traits.length === 0) {
+                    traits.push('Base-Normal');
+                }
+                
+                console.log(`🎨 Extracted traits:`, traits);
+                return traits;
+            }
+
+            // Process image URLs (convert IPFS to HTTP)
+            processImageUrl(imageUrl) {
+                if (!imageUrl) return null;
+                
+                if (imageUrl.startsWith('ipfs://')) {
+                    const ipfsHash = imageUrl.replace('ipfs://', '');
+                    return `https://ipfs.io/ipfs/${ipfsHash}`;
+                }
+                
+                return imageUrl;
+            }
+
+            // Create basic NFT object when metadata fails
+            createBasicNFT(tokenId) {
+                return {
+                    tokenId: tokenId,
+                    name: `Otterful Otter #${tokenId}`,
+                    traits: ['Base-Normal'],
+                    multiplier: 1.0,
+                    perks: [],
+                    rarity: 'common',
+                    image: null,
+                    description: `Otterful Otter #${tokenId} (metadata unavailable)`
+                };
             }
 
             // Add this new function to generate traits based on token ID
@@ -3603,6 +3903,51 @@
                 `;
                 
                 return nftDiv;
+            }
+
+            // Add message display function
+            showMessage(message, type = 'info') {
+                console.log(`📢 ${type.toUpperCase()}: ${message}`);
+                
+                // Create or find message container
+                let messageContainer = document.getElementById('messageContainer');
+                if (!messageContainer) {
+                    messageContainer = document.createElement('div');
+                    messageContainer.id = 'messageContainer';
+                    messageContainer.style.cssText = `
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        z-index: 10000;
+                        max-width: 300px;
+                        padding: 15px;
+                        border-radius: 8px;
+                        color: white;
+                        font-weight: bold;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                        transition: all 0.3s ease;
+                    `;
+                    document.body.appendChild(messageContainer);
+                }
+                
+                // Set message content and style
+                messageContainer.textContent = message;
+                messageContainer.style.backgroundColor = {
+                    'success': '#4CAF50',
+                    'error': '#f44336',
+                    'warning': '#ff9800',
+                    'info': '#2196F3'
+                }[type] || '#2196F3';
+                
+                // Show message
+                messageContainer.style.opacity = '1';
+                messageContainer.style.transform = 'translateX(0)';
+                
+                // Auto-hide after 5 seconds
+                setTimeout(() => {
+                    messageContainer.style.opacity = '0';
+                    messageContainer.style.transform = 'translateX(100%)';
+                }, 5000);
             }
             
             async getOwnedTokenIds() {
