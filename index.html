@@ -18146,7 +18146,7 @@
                 const rarityColor = getRarityColor(nft.rarity);
                 
                 nftCard.innerHTML = `
-                    <div style="font-size: 24px; margin-bottom: 8px;">🦦</div>
+                    <img src="${nft.image}" alt="${nft.name}" style="width: 100px; height: 100px; object-fit: contain; margin-bottom: 8px; border-radius: 8px;">
                     <div style="font-size: 14px; font-weight: bold; color: #FFD700; margin-bottom: 5px;">${nft.name}</div>
                     <div style="font-size: 12px; color: ${rarityColor}; margin-bottom: 5px; text-transform: capitalize;">${nft.rarity}</div>
                     <div style="font-size: 11px; color: #00FFFF; margin-bottom: 8px;">${nft.multiplier.toFixed(1)}x Multiplier</div>
