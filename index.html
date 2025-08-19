@@ -3854,9 +3854,18 @@
                         console.log(`🔍 Metadata validation: Expected token #${tokenId}, got token #${metadataTokenId}`);
                         
                         if (metadataTokenId !== tokenId) {
-                            console.log(`❌ METADATA MISMATCH: Token #${tokenId} metadata points to token #${metadataTokenId} - REJECTING`);
-                            this.showMessage(`Warning: Token #${tokenId} metadata mismatch (points to #${metadataTokenId})`, 'warning');
-                            return null; // Reject mismatched metadata
+                            console.log(`❌ METADATA MISMATCH: Token #${tokenId} metadata points to token #${metadataTokenId} - TRYING LOCAL OVERRIDE`);
+                            this.showMessage(`Warning: Token #${tokenId} metadata mismatch (points to #${metadataTokenId}) - Using local override`, 'warning');
+                            
+                            // 🔧 LOCAL OVERRIDE: Try to load correct local metadata
+                            const localMetadata = await this.loadLocalMetadata(tokenId);
+                            if (localMetadata) {
+                                console.log(`✅ LOCAL OVERRIDE SUCCESS: Loaded correct metadata for token #${tokenId}`);
+                                return localMetadata;
+                            } else {
+                                console.log(`❌ LOCAL OVERRIDE FAILED: No local metadata for token #${tokenId}`);
+                                return null;
+                            }
                         } else {
                             console.log(`✅ Metadata validation passed for token #${tokenId}`);
                         }
@@ -3866,6 +3875,26 @@
                     
                 } catch (error) {
                     console.warn(`⚠️ Error getting metadata for token ${tokenId}:`, error);
+                    return null;
+                }
+            }
+
+            // Load local metadata file as override for blockchain errors
+            async loadLocalMetadata(tokenId) {
+                try {
+                    console.log(`📁 Loading local metadata for token #${tokenId}...`);
+                    
+                    const response = await fetch(`./metadata/${tokenId}.json`);
+                    if (response.ok) {
+                        const metadata = await response.json();
+                        console.log(`✅ Local metadata loaded for token #${tokenId}:`, metadata);
+                        return metadata;
+                    } else {
+                        console.log(`❌ Local metadata file not found: ${tokenId}.json`);
+                        return null;
+                    }
+                } catch (error) {
+                    console.log(`❌ Error loading local metadata for token #${tokenId}:`, error);
                     return null;
                 }
             }
