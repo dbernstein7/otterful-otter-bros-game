@@ -2793,6 +2793,7 @@
                             <button onclick="clearInvalidNFTs()" style="background: linear-gradient(135deg, #FF5722, #E64A19); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🧹 Clear Invalid</button>
                             <button onclick="resetNFTGallery()" style="background: linear-gradient(135deg, #795548, #5D4037); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔄 Reset Gallery</button>
                             <button onclick="debugToken102Issue()" style="background: linear-gradient(135deg, #607D8B, #455A64); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔍 Debug #102</button>
+                            <button onclick="scanAll2222Tokens()" style="background: linear-gradient(135deg, #E91E63, #C2185B); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔍 Scan All 2222</button>
                             <button onclick="stakeAllNFTs()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔒 Stake All</button>
                             <button onclick="unstakeAllNFTs()" style="background: linear-gradient(135deg, #F44336, #D32F2F); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔓 Unstake All</button>
                             <button onclick="claimAllRewards()" style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">💰 Claim Rewards</button>
@@ -3684,16 +3685,25 @@
             async scanTokenRangeImproved(start, end) {
                 console.log(`🔍 IMPROVED: Scanning tokens ${start} to ${end} for ownership...`);
                 const ownedTokens = [];
-                const BATCH_SIZE = 5; // Smaller batches for better accuracy
+                const BATCH_SIZE = 10; // Increased batch size for faster scanning
+                const totalTokens = end - start + 1;
+                let scannedCount = 0;
                 
                 for (let i = start; i <= end; i += BATCH_SIZE) {
                     const batchEnd = Math.min(i + BATCH_SIZE - 1, end);
-                    console.log(`🔍 Scanning batch ${i}-${batchEnd}...`);
+                    scannedCount += (batchEnd - i + 1);
+                    const progress = Math.round((scannedCount / totalTokens) * 100);
+                    
+                    console.log(`🔍 Scanning batch ${i}-${batchEnd}... (${progress}% complete)`);
+                    
+                    // Show progress message for large scans
+                    if (totalTokens > 200 && scannedCount % 100 === 0) {
+                        this.showMessage(`Scanning progress: ${progress}% (${scannedCount}/${totalTokens} tokens)`, 'info');
+                    }
                     
                     // Check batch of tokens with better error handling
                     for (let tokenId = i; tokenId <= batchEnd; tokenId++) {
                         try {
-                            console.log(`🔍 Checking token #${tokenId}...`);
                             const owner = await this.getTokenOwner(tokenId);
                             
                             if (owner && owner.toLowerCase() === this.account.toLowerCase()) {
@@ -3702,7 +3712,7 @@
                             }
                             
                             // Small delay between checks
-                            await new Promise(resolve => setTimeout(resolve, 100));
+                            await new Promise(resolve => setTimeout(resolve, 50)); // Reduced delay for faster scanning
                             
                         } catch (error) {
                             console.log(`⚠️ Error checking token ${tokenId}: ${error.message}`);
@@ -3711,7 +3721,7 @@
                     
                     // Delay between batches to avoid overwhelming RPC
                     if (batchEnd < end) {
-                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        await new Promise(resolve => setTimeout(resolve, 500)); // Reduced delay
                     }
                 }
                 
@@ -19335,6 +19345,52 @@
             });
             
             otterWallet.showMessage('Debug complete! Check console for results.', 'info');
+        }
+
+        function scanAll2222Tokens() {
+            console.log('🔍 SCANNING ALL 2222 TOKENS - Starting...');
+            
+            if (!otterWallet || !otterWallet.isConnected) {
+                console.log('⚠️ Wallet not connected');
+                return;
+            }
+            
+            const confirmed = confirm('🔍 SCAN ALL 2222 TOKENS?\n\nThis will scan all 2222 Otterful Otters tokens for ownership.\n\n⚠️ WARNING: This may take 5-10 minutes and could cause RPC errors.\n\nAre you sure you want to continue?');
+            
+            if (!confirmed) {
+                console.log('❌ Full scan cancelled by user');
+                return;
+            }
+            
+            console.log('👤 Wallet address:', otterWallet.account);
+            console.log('🔗 Network:', window.ethereum.chainId);
+            
+            // Show progress message
+            otterWallet.showMessage('Starting full scan of all 2222 tokens... This may take 5-10 minutes.', 'info');
+            
+            // Use the improved scanning function with full range
+            otterWallet.scanTokenRangeImproved(1, 2222).then((ownedTokens) => {
+                console.log('✅ Full scan completed!');
+                console.log('📊 Found tokens:', ownedTokens);
+                
+                if (ownedTokens.length > 0) {
+                    // Load metadata for found tokens
+                    otterWallet.loadUserNFTsWithMetadataImproved(ownedTokens.length).then(() => {
+                        console.log('✅ Metadata loading completed');
+                        otterWallet.showMessage(`Full scan complete! Found ${ownedTokens.length} NFTs.`, 'success');
+                        updateWalletProfile();
+                    }).catch(error => {
+                        console.error('❌ Error loading metadata:', error);
+                        otterWallet.showMessage(`Found ${ownedTokens.length} NFTs but metadata loading failed.`, 'warning');
+                    });
+                } else {
+                    otterWallet.showMessage('Full scan complete! No NFTs found in this wallet.', 'info');
+                }
+                
+            }).catch(error => {
+                console.error('❌ Full scan failed:', error);
+                otterWallet.showMessage(`Full scan failed: ${error.message}`, 'error');
+            });
         }
 
         function refreshWalletData() {
