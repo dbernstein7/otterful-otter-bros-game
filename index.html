@@ -8179,6 +8179,13 @@
         function loadLevel(levelNum) {
             console.log('🔫 loadLevel called for level:', levelNum);
             
+            // Safety check: ensure canvas is available
+            if (!canvas) {
+                console.error('❌ Canvas not available in loadLevel, retrying in 100ms...');
+                setTimeout(() => loadLevel(levelNum), 100);
+                return;
+            }
+            
             currentLevel = generateLevel(levelNum);
             platforms = [...currentLevel.platforms];
             fish = currentLevel.fish.map(f => ({ ...f, collected: false }));
@@ -8302,7 +8309,13 @@
             }
             
             game.camera.x = 0;
-            game.camera.y = player.y - canvas.height / 2; // Position camera to show player
+            // Safety check for canvas height
+            if (canvas && canvas.height) {
+                game.camera.y = player.y - canvas.height / 2; // Position camera to show player
+            } else {
+                game.camera.y = player.y - 540; // Default to half of 1080p
+                console.log('⚠️ Using default camera height - canvas not ready');
+            }
             // No limits - camera can follow player anywhere
             game.levelComplete = false;
             game.levelTransition = false;
