@@ -5199,6 +5199,11 @@
         let canvas;
         let ctx;
         
+        // Global safety check for canvas context
+        function isCanvasReady() {
+            return canvas && ctx && canvas.width > 0 && canvas.height > 0;
+        }
+        
         // Game state - Define this BEFORE any functions that use it
         const game = {
             score: 0,
@@ -10049,6 +10054,12 @@
         
         // Draw functions
         function drawBackground() {
+            // Safety check: ensure canvas is ready
+            if (!isCanvasReady()) {
+                console.error('❌ Canvas not ready in drawBackground()');
+                return;
+            }
+            
             if (gameAssets.useCustomAssets && gameAssets.background && gameAssets.backgroundPattern) {
                 // Draw custom background image using cached pattern
                 ctx.save();
@@ -15561,6 +15572,12 @@
         
         // Render game
         function draw() {
+            // Safety check: ensure canvas is ready before drawing
+            if (!isCanvasReady()) {
+                console.error('❌ Canvas not ready in draw() function');
+                return;
+            }
+            
             // Clear and draw background
             drawBackground();
             
@@ -17240,6 +17257,12 @@
 
         // Simple menu drawing function
         function drawMenu() {
+            // Safety check: ensure canvas context is available
+            if (!ctx) {
+                console.error('❌ Canvas context not available in drawMenu');
+                return;
+            }
+            
             // Clear canvas
             ctx.clearRect(0, 0, game.canvasWidth, game.canvasHeight);
             
