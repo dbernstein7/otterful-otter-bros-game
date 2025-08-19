@@ -5302,9 +5302,9 @@
             }
         };
         
-        // Wait for DOM to be fully loaded before initializing
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🎮 DOM loaded, initializing game...');
+        // Single initialization function to prevent multiple executions
+        function initializeGame() {
+            console.log('🎮 Initializing game...');
             
             // Initialize the wallet integration
             try {
@@ -5315,29 +5315,37 @@
                 otterWallet = null;
             }
 
-            console.log('🎮 Game script starting...');
-        
-        canvas = document.getElementById('gameCanvas');
-        if (!canvas) {
-            console.error('❌ Canvas element not found!');
-            alert('Canvas element not found!');
-            throw new Error('Canvas element not found');
+            // Initialize canvas
+            canvas = document.getElementById('gameCanvas');
+            if (!canvas) {
+                console.error('❌ Canvas element not found!');
+                return false;
+            }
+            
+            ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('❌ Canvas context not available!');
+                return false;
+            }
+            
+            console.log('✅ Canvas initialized successfully');
+            
+            // Update game object with canvas dimensions
+            game.canvasWidth = canvas.width;
+            game.canvasHeight = canvas.height;
+            
+            return true;
         }
         
-        ctx = canvas.getContext('2d');
-        if (!ctx) {
-            console.error('❌ Canvas context not available!');
-            alert('Canvas context not available!');
-            throw new Error('Canvas context not available');
-        }
-        
-        console.log('✅ Canvas initialized successfully');
-        
-        // Update game object with canvas dimensions
-        game.canvasWidth = canvas.width;
-        game.canvasHeight = canvas.height;
-        
-        // Responsive canvas setup
+        // Wait for DOM to be fully loaded before initializing
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎮 DOM loaded, initializing game...');
+            
+            // Initialize game components
+            if (!initializeGame()) {
+                console.error('❌ Game initialization failed!');
+                return;
+            }
         function resizeCanvas() {
             const container = document.getElementById('gameContainer');
             const containerRect = container.getBoundingClientRect();
@@ -5369,6 +5377,8 @@
         // Initial resize with delay to ensure DOM is ready
         setTimeout(() => {
             resizeCanvas();
+            // Setup canvas event listeners after canvas is ready
+            setupCanvasEventListeners();
             // Initialize the first level after canvas is fully set up
             loadLevel(1);
             
@@ -8642,19 +8652,26 @@
         // Note: Removed event listeners for deleted buttons (leaderboardBtn, instructionsBtn, instructionsBtn2)
 
         
-        // Mouse tracking for laser aiming
-        canvas.addEventListener('mousemove', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            game.mouseX = e.clientX - rect.left;
-            game.mouseY = e.clientY - rect.top;
-        });
-        
-        // Mouse events for laser charging and shooting
-        let mouseDownTime = 0;
-        let isMouseDown = false;
-        
-        // Mouse down - start charging OR quick shoot (LEFT CLICK ONLY)
-        canvas.addEventListener('mousedown', (e) => {
+        // Setup canvas event listeners after canvas is initialized
+        function setupCanvasEventListeners() {
+            if (!canvas) {
+                console.error('❌ Canvas not available for event listeners');
+                return;
+            }
+            
+            // Mouse tracking for laser aiming
+            canvas.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                game.mouseX = e.clientX - rect.left;
+                game.mouseY = e.clientY - rect.top;
+            });
+            
+            // Mouse events for laser charging and shooting
+            let mouseDownTime = 0;
+            let isMouseDown = false;
+            
+            // Mouse down - start charging OR quick shoot (LEFT CLICK ONLY)
+            canvas.addEventListener('mousedown', (e) => {
             // Only handle left click for laser shooting
             if (e.button === 0 && player.hasLaser && player.laserCooldown <= 0) {
                 // Quick shoot on click (no charging)
@@ -8964,6 +8981,7 @@
                 });
             }
         });
+        }
         
         // Preload otter images
         const otterImages = {
