@@ -4157,8 +4157,10 @@
             processImageUrl(imageUrl, tokenId) {
                 // Only use compressed PNG image if token ID is valid
                 if (tokenId && tokenId >= 1 && tokenId <= 2222) {
-                    console.log(`🖼️ Using compressed PNG for token #${tokenId}: /images_compressed/${tokenId}.png`);
-                    return `/images_compressed/${tokenId}.png`;
+                    // Use a path that should work regardless of deployment
+                    const imagePath = `public/images_compressed/${tokenId}.png`;
+                    console.log(`🖼️ Using compressed PNG for token #${tokenId}: ${imagePath}`);
+                    return imagePath;
                 }
                 
                 // NO FALLBACK - return null if invalid token ID

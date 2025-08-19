@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NFT Image Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-image { width: 200px; height: 200px; border: 2px solid #ccc; margin: 10px; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>NFT Image Loading Test</h1>
+    
+    <h2>Test 1: Relative Path (./images_compressed/66.png)</h2>
+    <img src="./images_compressed/66.png" alt="Test 66 relative" class="test-image" id="test1">
+    <div id="result1">Loading...</div>
+    
+    <h2>Test 2: Absolute Path (/images_compressed/66.png)</h2>
+    <img src="/images_compressed/66.png" alt="Test 66 absolute" class="test-image" id="test2">
+    <div id="result2">Loading...</div>
+    
+    <h2>Test 3: Public Path (images_compressed/66.png)</h2>
+    <img src="images_compressed/66.png" alt="Test 66 public" class="test-image" id="test3">
+    <div id="result3">Loading...</div>
+    
+    <h2>Test 4: Full URL (current domain + path)</h2>
+    <img src="" alt="Test 66 full" class="test-image" id="test4">
+    <div id="result4">Loading...</div>
+    
+    <script>
+        // Test image loading
+        const images = document.querySelectorAll('img');
+        const results = document.querySelectorAll('[id^="result"]');
+        
+        images.forEach((img, index) => {
+            // Set full URL for test 4
+            if (index === 3) {
+                img.src = window.location.origin + '/images_compressed/66.png';
+            }
+            
+            img.onload = () => {
+                results[index].innerHTML = '<span class="success">✅ SUCCESS: Image loaded</span>';
+                console.log(`✅ Image ${index + 1} loaded successfully: ${img.src}`);
+            };
+            
+            img.onerror = () => {
+                results[index].innerHTML = '<span class="error">❌ FAILED: Image not found</span>';
+                console.log(`❌ Image ${index + 1} failed to load: ${img.src}`);
+            };
+        });
+        
+        // Log current location info
+        console.log('Current location:', window.location.href);
+        console.log('Origin:', window.location.origin);
+        console.log('Pathname:', window.location.pathname);
+    </script>
+</body>
+</html>
