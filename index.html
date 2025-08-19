@@ -3122,7 +3122,6 @@
             }
 
             init() {
-                this.setupEventListeners();
                 // Don't auto-connect - let user manually connect
                 // this.checkConnection();
                 this.startStakingRewardsTimer();
@@ -5372,6 +5371,11 @@
             resizeCanvas();
             // Initialize the first level after canvas is fully set up
             loadLevel(1);
+            
+            // Setup wallet event listeners after DOM is fully ready
+            if (otterWallet) {
+                otterWallet.setupEventListeners();
+            }
         }, 100);
         
         // Resize on window resize
