@@ -8882,73 +8882,6 @@
                 });
             }
         });
-        document.getElementById('startGameBtn').addEventListener('click', (event) => {
-            addButtonClickEffect(event.target);
-            
-            console.log('🚀 Start Adventure clicked - starting game immediately!');
-            
-            // Start the game immediately
-            startGame();
-            
-            // Load NFTs in the background if wallet is connected
-            if (otterWallet && otterWallet.isConnected) {
-                console.log('🔄 Loading NFTs in background while game is running...');
-                
-                // Show loading notification
-                showNFTLoadingNotification();
-                
-                // Load NFTs in background with delay to prevent game lag
-                setTimeout(() => {
-                    otterWallet.loadNFTs().then(() => {
-                        console.log('✅ NFTs loaded in background!');
-                        
-                        // Show loaded notification
-                        showNFTLoadedNotification(otterWallet.userNFTs.length);
-                        
-                        // Apply bonuses after NFTs are loaded
-                        const multipliers = otterWallet.getGameMultipliers();
-                        const stakingBonus = otterWallet.getStakingBonus();
-                        
-                        console.log('🎮 Applying wallet bonuses after background load:', multipliers);
-                        console.log('💰 Staking bonus:', stakingBonus);
-                        
-                                            // Don't auto-stake - let user choose which NFTs to stake
-                    console.log('🎯 NFTs loaded - user can choose which to stake');
-                        
-                        // Show trait bonus notification
-                        const activeTraits = otterWallet.getActiveTraits();
-                        if (activeTraits.length > 0) {
-                            showTraitBonusNotification(activeTraits, multipliers);
-                        }
-                        
-                        // Update UI to show loaded NFTs
-                        updateWalletProfile();
-                        
-                    }).catch(error => {
-                        console.error('❌ Error loading NFTs in background:', error);
-                    });
-                }, 1000); // 1 second delay to let game start smoothly
-                
-            } else if (otterWallet) {
-                console.log('🎮 Wallet not connected, starting game without NFT loading');
-            } else {
-                console.log('🎮 No wallet integration, starting game normally');
-            }
-        });
-        document.getElementById('profileBtn').addEventListener('click', (event) => {
-            console.log('👤 Profile button clicked via event listener!');
-            addButtonClickEffect(event.target);
-            toggleProfile();
-        });
-        document.getElementById('marketplaceBtn').addEventListener('click', (event) => {
-            console.log('🛒 Marketplace button clicked via event listener!');
-            addButtonClickEffect(event.target);
-            toggleMarketplace();
-        });
-        document.getElementById('skipCutsceneBtn').addEventListener('click', skipCutscene);
-        // Note: Removed event listeners for deleted buttons (returnToStartBtn, toggleAiBotBtn)
-        
-
         
         // Preload otter images
         const otterImages = {
@@ -22356,6 +22289,75 @@
                 }
             }, 6000);
         }
+
+        // Add event listeners after all functions are defined
+        document.getElementById('startGameBtn').addEventListener('click', (event) => {
+            addButtonClickEffect(event.target);
+            
+            console.log('🚀 Start Adventure clicked - starting game immediately!');
+            
+            // Start the game immediately
+            startGame();
+            
+            // Load NFTs in the background if wallet is connected
+            if (otterWallet && otterWallet.isConnected) {
+                console.log('🔄 Loading NFTs in background while game is running...');
+                
+                // Show loading notification
+                showNFTLoadingNotification();
+                
+                // Load NFTs in background with delay to prevent game lag
+                setTimeout(() => {
+                    otterWallet.loadNFTs().then(() => {
+                        console.log('✅ NFTs loaded in background!');
+                        
+                        // Show loaded notification
+                        showNFTLoadedNotification(otterWallet.userNFTs.length);
+                        
+                        // Apply bonuses after NFTs are loaded
+                        const multipliers = otterWallet.getGameMultipliers();
+                        const stakingBonus = otterWallet.getStakingBonus();
+                        
+                        console.log('🎮 Applying wallet bonuses after background load:', multipliers);
+                        console.log('💰 Staking bonus:', stakingBonus);
+                        
+                        // Don't auto-stake - let user choose which NFTs to stake
+                        console.log('🎯 NFTs loaded - user can choose which to stake');
+                        
+                        // Show trait bonus notification
+                        const activeTraits = otterWallet.getActiveTraits();
+                        if (activeTraits.length > 0) {
+                            showTraitBonusNotification(activeTraits, multipliers);
+                        }
+                        
+                        // Update UI to show loaded NFTs
+                        updateWalletProfile();
+                        
+                    }).catch(error => {
+                        console.error('❌ Error loading NFTs in background:', error);
+                    });
+                }, 1000); // 1 second delay to let game start smoothly
+                
+            } else if (otterWallet) {
+                console.log('🎮 Wallet not connected, starting game without NFT loading');
+            } else {
+                console.log('🎮 No wallet integration, starting game normally');
+            }
+        });
+        
+        document.getElementById('profileBtn').addEventListener('click', (event) => {
+            console.log('👤 Profile button clicked via event listener!');
+            addButtonClickEffect(event.target);
+            toggleProfile();
+        });
+        
+        document.getElementById('marketplaceBtn').addEventListener('click', (event) => {
+            console.log('🛒 Marketplace button clicked via event listener!');
+            addButtonClickEffect(event.target);
+            toggleMarketplace();
+        });
+        
+        document.getElementById('skipCutsceneBtn').addEventListener('click', skipCutscene);
 
         // Add CSS animations for notifications
         const style = document.createElement('style');
