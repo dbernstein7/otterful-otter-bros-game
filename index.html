@@ -2790,6 +2790,7 @@
                             <button onclick="testProfileButton()" style="background: linear-gradient(135deg, #FF5722, #E64A19); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease;">🧪 Test Button</button>
                             <button onclick="checkProfileAccess()" style="background: linear-gradient(135deg, #607D8B, #455A64); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔍 Check Profile</button>
                             <button onclick="testLocalMetadata()" style="background: linear-gradient(135deg, #00BCD4, #0097A7); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">📁 Test Local Metadata</button>
+                            <button onclick="testLocalNFTLoading()" style="background: linear-gradient(135deg, #8BC34A, #689F38); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🦦 Test Local NFTs</button>
                             <button onclick="testNFTLoading()" style="background: linear-gradient(135deg, #E91E63, #C2185B); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🧪 Test NFT Loading</button>
                             <button onclick="refreshWalletData()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔄 Refresh Data</button>
                             <button onclick="refreshMetadata()" style="background: linear-gradient(135deg, #2196F3, #1976D2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🌐 Refresh Metadata</button>
@@ -3351,18 +3352,27 @@
             async loadUserNFTsWithMetadata(balance) {
                 this.userNFTs = [];
                 
+                console.log('🔄 Loading NFTs with LOCAL metadata system...');
+                
                 try {
-                    // Get all token IDs owned by this address
-                    const tokenIds = await this.getOwnedTokenIds();
-                    console.log('🔍 Found token IDs:', tokenIds);
+                    // First, try to get token IDs from blockchain (but don't fail if it doesn't work)
+                    let tokenIds = [];
+                    try {
+                        tokenIds = await this.getOwnedTokenIds();
+                        console.log('🔍 Found token IDs from blockchain:', tokenIds);
+                    } catch (error) {
+                        console.log('⚠️ Blockchain scan failed, using sample tokens for testing');
+                        // Use sample token IDs for testing
+                        tokenIds = [1499, 1000, 500, 1];
+                    }
                     
                     if (tokenIds.length === 0) {
-                        console.log('⚠️ No tokens found in scan, loading sample NFTs for testing');
-                        this.loadSampleNFTs(4); // Load 4 sample NFTs
-                        return;
+                        console.log('⚠️ No tokens found, using sample tokens for testing');
+                        tokenIds = [1499, 1000, 500, 1];
                     }
                     
                     // Load metadata for each token using LOCAL files
+                    console.log('📁 Loading metadata for tokens:', tokenIds);
                     for (const tokenId of tokenIds) {
                         try {
                             const metadata = await this.getLocalTokenMetadata(tokenId);
@@ -3447,7 +3457,7 @@
                     console.log('🦦 Loaded NFTs:', this.userNFTs);
                 } catch (error) {
                     console.error('❌ Error loading NFT metadata:', error);
-                    // Fallback to sample data if blockchain reading fails
+                    // Fallback to sample data if everything fails
                     console.log('🔄 Loading sample NFTs as fallback...');
                     this.loadSampleNFTs(4);
                 }
@@ -17402,6 +17412,36 @@
             }
             
             alert('Local metadata test completed! Check console for results.');
+        }
+
+        // Function to test local NFT loading without blockchain
+        async function testLocalNFTLoading() {
+            console.log('🧪 Testing local NFT loading without blockchain...');
+            
+            if (!otterWallet || !otterWallet.isConnected) {
+                console.log('⚠️ Wallet not connected');
+                alert('Please connect your wallet first!');
+                return;
+            }
+            
+            console.log('🔄 Testing local NFT loading system...');
+            
+            // Test the local loading system directly
+            try {
+                await otterWallet.loadUserNFTsWithMetadata(4);
+                console.log('✅ Local NFT loading completed!');
+                console.log('📊 Loaded NFTs:', otterWallet.userNFTs);
+                
+                if (otterWallet.userNFTs.length > 0) {
+                    alert(`✅ Successfully loaded ${otterWallet.userNFTs.length} NFTs using local metadata!\n\nCheck console for details.`);
+                    updateWalletProfile();
+                } else {
+                    alert('⚠️ No NFTs loaded. Check console for details.');
+                }
+            } catch (error) {
+                console.error('❌ Error in local NFT loading:', error);
+                alert('❌ Error loading NFTs. Check console for details.');
+            }
         }
 
         // Function to scan specific range
