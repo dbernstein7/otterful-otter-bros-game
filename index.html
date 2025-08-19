@@ -2788,6 +2788,7 @@
                         <div id="walletAddressDisplay" style="font-size: 14px; color: #00FFFF; font-family: monospace; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; margin: 10px 0;">0x0000...0000</div>
                         <div style="margin-top: 15px;">
                             <button onclick="loadNFTsManually()" style="background: linear-gradient(135deg, #2196F3, #1976D2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease;">🦦 Load NFTs</button>
+                            <button onclick="checkSpecificToken()" style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔍 Check Token</button>
                             <button onclick="stakeAllNFTs()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔒 Stake All</button>
                             <button onclick="unstakeAllNFTs()" style="background: linear-gradient(135deg, #F44336, #D32F2F); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔓 Unstake All</button>
                             <button onclick="claimAllRewards()" style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">💰 Claim Rewards</button>
@@ -18658,6 +18659,121 @@
                 console.error('❌ Manual NFT loading failed:', error);
                 otterWallet.showMessage(`Error loading NFTs: ${error.message}`, 'error');
             });
+        }
+
+        function checkSpecificToken() {
+            console.log('🔍 MANUAL TOKEN CHECK - Starting...');
+            
+            if (!otterWallet || !otterWallet.isConnected) {
+                console.log('⚠️ Wallet not connected');
+                return;
+            }
+            
+            // Create a simple modal for token input
+            const tokenId = prompt('Enter the Token ID you want to check (e.g., 1234):');
+            
+            if (!tokenId || isNaN(tokenId)) {
+                console.log('❌ Invalid token ID entered');
+                return;
+            }
+            
+            const tokenIdNum = parseInt(tokenId);
+            console.log(`🔍 Checking token #${tokenIdNum}...`);
+            
+            // Check ownership first
+            otterWallet.getTokenOwner(tokenIdNum).then(owner => {
+                console.log(`👤 Token #${tokenIdNum} owner:`, owner);
+                console.log(`👤 Your address:`, otterWallet.account);
+                
+                if (owner && owner.toLowerCase() === otterWallet.account.toLowerCase()) {
+                    console.log(`✅ YOU OWN TOKEN #${tokenIdNum}!`);
+                    otterWallet.showMessage(`You own Token #${tokenIdNum}!`, 'success');
+                    
+                    // Load this specific token
+                    return loadSpecificToken(tokenIdNum);
+                } else {
+                    console.log(`❌ You don't own Token #${tokenIdNum}`);
+                    otterWallet.showMessage(`You don't own Token #${tokenIdNum}`, 'warning');
+                    return null;
+                }
+            }).catch(error => {
+                console.error(`❌ Error checking token #${tokenIdNum}:`, error);
+                otterWallet.showMessage(`Error checking token: ${error.message}`, 'error');
+            });
+        }
+
+        function loadSpecificToken(tokenId) {
+            console.log(`🦦 Loading specific token #${tokenId}...`);
+            
+            // Create NFT object for this specific token
+            const nft = {
+                tokenId: tokenId,
+                name: `Otterful Otter #${tokenId}`,
+                traits: generateTraitsForToken(tokenId),
+                multiplier: 1.0,
+                perks: [],
+                rarity: 'common',
+                image: `./images/otter_${tokenId}.png`,
+                description: `Otterful Otter #${tokenId}`
+            };
+            
+            // Add to userNFTs array
+            otterWallet.userNFTs = [nft];
+            
+            console.log(`✅ Added token #${tokenId} to wallet:`, nft);
+            otterWallet.showMessage(`Loaded Token #${tokenId}!`, 'success');
+            
+            // Update the UI
+            updateWalletProfile();
+            
+            return nft;
+        }
+
+        function generateTraitsForToken(tokenId) {
+            // Generate traits based on token ID (same logic as before)
+            const traits = [];
+            
+            // Hat trait based on token ID
+            if (tokenId <= 10) {
+                traits.push('Hat-Stealth-v2');
+            } else if (tokenId <= 50) {
+                traits.push('Hat-Plumber-v5');
+            } else if (tokenId <= 150) {
+                traits.push('Hat-Plumber-v3');
+            } else if (tokenId <= 500) {
+                traits.push('Hat-Pirate');
+            } else {
+                traits.push('Hat-Baseball');
+            }
+            
+            // Fur trait
+            const furMod = tokenId % 5;
+            switch (furMod) {
+                case 0: traits.push('Fur-Golden'); break;
+                case 1: traits.push('Fur-Rainbow'); break;
+                case 2: traits.push('Fur-Green'); break;
+                case 3: traits.push('Fur-Blue'); break;
+                default: traits.push('Fur-Brown'); break;
+            }
+            
+            // Eyes trait
+            const eyesMod = tokenId % 4;
+            switch (eyesMod) {
+                case 0: traits.push('Eyes-Laser'); break;
+                case 1: traits.push('Eyes-Diamond'); break;
+                case 2: traits.push('Eyes-Yellow-Scanner'); break;
+                default: traits.push('Eyes-Sunglasses'); break;
+            }
+            
+            // Base trait
+            if (tokenId <= 20) {
+                traits.push('Base-Stealth');
+            } else {
+                traits.push('Base-Normal');
+            }
+            
+            console.log(`🎨 Generated traits for token ${tokenId}:`, traits);
+            return traits;
         }
 
         function refreshWalletData() {
