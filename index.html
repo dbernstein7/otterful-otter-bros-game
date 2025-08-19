@@ -3454,6 +3454,12 @@
                         ownedTokens.push(...scannedTokens);
                     }
                     
+                    // Strategy 3: If all else fails, return empty array (user will use manual loading)
+                    if (ownedTokens.length === 0) {
+                        console.log('📋 No tokens found via scanning, use manual token loading');
+                        this.showMessage('No NFTs found via scanning. Use "Check Token" to load specific NFTs.', 'info');
+                    }
+                    
                     // Remove duplicates
                     const uniqueTokens = [...new Set(ownedTokens)];
                     console.log(`📊 Found ${uniqueTokens.length} owned tokens total`);
@@ -3462,6 +3468,7 @@
                     
                 } catch (error) {
                     console.error('❌ Error finding owned tokens:', error);
+                    this.showMessage('Blockchain scanning failed. Use "Check Token" to load specific NFTs.', 'warning');
                     return [];
                 }
             }
@@ -3475,11 +3482,11 @@
                     const transferTopic = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
                     const userAddressPadded = '0x000000000000000000000000' + this.account.slice(2).toLowerCase();
                     
-                    // Get logs for transfers TO this address
+                    // Get logs for transfers TO this address (limit to recent blocks to avoid RPC overload)
                     const logs = await window.ethereum.request({
                         method: 'eth_getLogs',
                         params: [{
-                            fromBlock: '0x0', // From beginning (you might want to limit this)
+                            fromBlock: '0x' + (parseInt(await window.ethereum.request({method: 'eth_blockNumber'})) - 10000).toString(16), // Last 10k blocks
                             toBlock: 'latest',
                             address: this.contractAddress,
                             topics: [
@@ -3512,8 +3519,10 @@
                             if (owner && owner.toLowerCase() === this.account.toLowerCase()) {
                                 currentlyOwned.push(tokenId);
                             }
+                            // Add small delay to prevent RPC overload
+                            await new Promise(resolve => setTimeout(resolve, 100));
                         } catch (error) {
-                            console.log(`⚠️ Could not verify ownership of token ${tokenId}`);
+                            console.log(`⚠️ Could not verify ownership of token ${tokenId}: ${error.message}`);
                         }
                     }
                     
@@ -4027,8 +4036,15 @@
                     
                     return null;
                 } catch (error) {
-                    // Silently fail for individual tokens to avoid spam
-                    return null;
+                    // Check if it's an RPC error and handle gracefully
+                    if (error.code === -32603 || error.message.includes('Internal JSON-RPC error')) {
+                        console.log(`⚠️ RPC error for token ${tokenId}, will retry later`);
+                        // Don't log the full error to avoid spam
+                        return null;
+                    } else {
+                        console.log(`⚠️ Error getting owner for token ${tokenId}: ${error.message}`);
+                        return null;
+                    }
                 }
             }
             
