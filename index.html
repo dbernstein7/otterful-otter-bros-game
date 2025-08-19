@@ -3406,7 +3406,7 @@
                                     multiplier: this.calculateMultiplier(traits),
                                     perks: this.calculatePerks(traits),
                                     rarity: this.calculateRarity(traits),
-                                    image: this.processImageUrl(metadata.image),
+                                    image: this.processImageUrl(metadata.image, tokenId),
                                     description: metadata.description || `Otterful Otter #${tokenId}`,
                                     rawMetadata: metadata // Store for debugging
                                 };
@@ -3518,7 +3518,7 @@
                                     multiplier: this.calculateMultiplier(traits),
                                     perks: this.calculatePerks(traits),
                                     rarity: this.calculateRarity(traits),
-                                    image: this.processImageUrl(metadata.image),
+                                    image: this.processImageUrl(metadata.image, tokenId),
                                     description: metadata.description || `Otterful Otter #${tokenId}`,
                                     rawMetadata: metadata // Store for debugging
                                 };
@@ -4179,16 +4179,17 @@
                 return traits;
             }
 
-            // Process image URLs (convert IPFS to HTTP)
-            processImageUrl(imageUrl) {
-                if (!imageUrl) return null;
-                
-                if (imageUrl.startsWith('ipfs://')) {
-                    const ipfsHash = imageUrl.replace('ipfs://', '');
-                    return `https://ipfs.io/ipfs/${ipfsHash}`;
+            // Process image URL to use local images from public folder
+            processImageUrl(imageUrl, tokenId) {
+                // Always use local image based on token ID
+                if (tokenId) {
+                    console.log(`🖼️ Using local image for token #${tokenId}: ./images/${tokenId}.webp`);
+                    return `./images/${tokenId}.webp`;
                 }
                 
-                return imageUrl;
+                // Fallback to default image
+                console.log(`🖼️ No token ID provided, using default image`);
+                return './images/default_otter.png';
             }
 
             // ❌ REMOVED: No more basic NFTs - only show real metadata
