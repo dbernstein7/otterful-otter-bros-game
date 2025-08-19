@@ -5368,7 +5368,11 @@
         }
         
         // Initial resize with delay to ensure DOM is ready
-        setTimeout(resizeCanvas, 100);
+        setTimeout(() => {
+            resizeCanvas();
+            // Initialize the first level after canvas is fully set up
+            loadLevel(1);
+        }, 100);
         
         // Resize on window resize
         window.addEventListener('resize', resizeCanvas);
@@ -8460,9 +8464,6 @@
         let lasers = []; // Array to store enemy lasers
         let playerLasers = []; // Array to store player lasers
         let bossLasers = []; // Array to store boss lasers
-        
-        // Initialize the first level properly
-        loadLevel(1);
         
         // Load saved stats from localStorage
         loadStats();
