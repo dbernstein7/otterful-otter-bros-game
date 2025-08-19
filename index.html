@@ -3848,10 +3848,61 @@
                     // Step 2: Fetch the metadata from the URI
                     const metadata = await this.fetchMetadataFromURI(tokenURI);
                     
+                    // 🛡️ CRITICAL: Validate that metadata matches expected token ID
+                    if (metadata) {
+                        const metadataTokenId = this.extractTokenIdFromMetadata(metadata);
+                        console.log(`🔍 Metadata validation: Expected token #${tokenId}, got token #${metadataTokenId}`);
+                        
+                        if (metadataTokenId !== tokenId) {
+                            console.log(`❌ METADATA MISMATCH: Token #${tokenId} metadata points to token #${metadataTokenId} - REJECTING`);
+                            this.showMessage(`Warning: Token #${tokenId} metadata mismatch (points to #${metadataTokenId})`, 'warning');
+                            return null; // Reject mismatched metadata
+                        } else {
+                            console.log(`✅ Metadata validation passed for token #${tokenId}`);
+                        }
+                    }
+                    
                     return metadata;
                     
                 } catch (error) {
                     console.warn(`⚠️ Error getting metadata for token ${tokenId}:`, error);
+                    return null;
+                }
+            }
+
+            // Extract token ID from metadata (from name or other fields)
+            extractTokenIdFromMetadata(metadata) {
+                try {
+                    // Method 1: Extract from name field (e.g., "Otterful Otters #102")
+                    if (metadata.name) {
+                        const nameMatch = metadata.name.match(/#(\d+)/);
+                        if (nameMatch) {
+                            return parseInt(nameMatch[1]);
+                        }
+                    }
+                    
+                    // Method 2: Extract from description field
+                    if (metadata.description) {
+                        const descMatch = metadata.description.match(/#(\d+)/);
+                        if (descMatch) {
+                            return parseInt(descMatch[1]);
+                        }
+                    }
+                    
+                    // Method 3: Check if there's a token_id field
+                    if (metadata.token_id !== undefined) {
+                        return parseInt(metadata.token_id);
+                    }
+                    
+                    // Method 4: Check if there's an id field
+                    if (metadata.id !== undefined) {
+                        return parseInt(metadata.id);
+                    }
+                    
+                    console.log(`⚠️ Could not extract token ID from metadata:`, metadata);
+                    return null;
+                } catch (error) {
+                    console.log(`⚠️ Error extracting token ID from metadata:`, error);
                     return null;
                 }
             }
