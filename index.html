@@ -3855,32 +3855,30 @@
                 }
             }
 
-            // Load local metadata file as override for blockchain errors
+            // Load local metadata file - LOCAL PATHS ONLY
             async loadLocalMetadata(tokenId) {
                 try {
                     console.log(`📁 Loading local metadata for token #${tokenId}...`);
                     
-                    // Try multiple possible paths for local metadata
+                    // ONLY use relative local paths - no absolute paths that resolve to remote URLs
                     const possiblePaths = [
-                        `./metadata/${tokenId}.json`,
                         `./public/metadata/${tokenId}.json`,
-                        `/metadata/${tokenId}.json`,
-                        `/public/metadata/${tokenId}.json`
+                        `./metadata/${tokenId}.json`
                     ];
                     
                     for (const path of possiblePaths) {
                         try {
-                            console.log(`🔍 Trying path: ${path}`);
+                            console.log(`🔍 Trying LOCAL path: ${path}`);
                             const response = await fetch(path);
                             if (response.ok) {
                                 const metadata = await response.json();
                                 console.log(`✅ Local metadata loaded for token #${tokenId} from ${path}:`, metadata);
                                 return metadata;
                             } else {
-                                console.log(`❌ Path ${path} returned ${response.status}`);
+                                console.log(`❌ Local path ${path} returned ${response.status}`);
                             }
                         } catch (error) {
-                            console.log(`❌ Path ${path} failed: ${error.message}`);
+                            console.log(`❌ Local path ${path} failed: ${error.message}`);
                         }
                     }
                     
