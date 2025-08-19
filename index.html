@@ -2794,6 +2794,7 @@
                             <button onclick="resetNFTGallery()" style="background: linear-gradient(135deg, #795548, #5D4037); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔄 Reset Gallery</button>
                             <button onclick="debugToken102Issue()" style="background: linear-gradient(135deg, #607D8B, #455A64); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔍 Debug #102</button>
                             <button onclick="scanAll2222Tokens()" style="background: linear-gradient(135deg, #E91E63, #C2185B); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔍 Scan All 2222</button>
+                            <button onclick="forceRefreshNFTs()" style="background: linear-gradient(135deg, #FF5722, #E64A19); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔄 Force Refresh</button>
                             <button onclick="stakeAllNFTs()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔒 Stake All</button>
                             <button onclick="unstakeAllNFTs()" style="background: linear-gradient(135deg, #F44336, #D32F2F); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔓 Unstake All</button>
                             <button onclick="claimAllRewards()" style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">💰 Claim Rewards</button>
@@ -19297,6 +19298,44 @@
             }).catch(error => {
                 console.error('❌ Full scan failed:', error);
                 otterWallet.showMessage(`Full scan failed: ${error.message}`, 'error');
+            });
+        }
+
+        function forceRefreshNFTs() {
+            console.log('🔄 FORCE REFRESH NFTS - Starting...');
+            
+            if (!otterWallet || !otterWallet.isConnected) {
+                console.log('⚠️ Wallet not connected');
+                return;
+            }
+            
+            // Completely clear the NFT array
+            console.log('🧹 Clearing all NFTs from memory...');
+            otterWallet.userNFTs = [];
+            otterWallet.stakedNFTs = [];
+            
+            // Clear any cached data
+            console.log('🧹 Clearing any cached data...');
+            
+            // Force a fresh blockchain scan
+            console.log('🔍 Starting fresh blockchain scan...');
+            otterWallet.showMessage('Force refreshing NFTs from blockchain...', 'info');
+            
+            // Use the improved loading function
+            otterWallet.loadUserNFTsWithMetadataImproved(0).then(() => {
+                console.log('✅ Force refresh completed!');
+                console.log('📊 Current NFTs:', otterWallet.userNFTs);
+                
+                if (otterWallet.userNFTs.length > 0) {
+                    otterWallet.showMessage(`Force refresh complete! Found ${otterWallet.userNFTs.length} real NFTs.`, 'success');
+                } else {
+                    otterWallet.showMessage('Force refresh complete! No NFTs found in this wallet.', 'info');
+                }
+                
+                updateWalletProfile();
+            }).catch(error => {
+                console.error('❌ Force refresh failed:', error);
+                otterWallet.showMessage(`Force refresh failed: ${error.message}`, 'error');
             });
         }
 
