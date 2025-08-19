@@ -4330,111 +4330,18 @@
                         }
                     }
                     
-                    // If local files fail, use embedded sample metadata
-                    console.log(`📋 Using embedded metadata for token ${tokenId}`);
-                    return this.getEmbeddedMetadata(tokenId);
+                    // If local files fail, return null (NO EMBEDDED FALLBACK)
+                    console.log(`❌ No metadata found for token ${tokenId} - returning null`);
+                    return null;
                     
                 } catch (error) {
                     console.warn(`⚠️ Error loading metadata for token ${tokenId}:`, error);
-                    return this.getEmbeddedMetadata(tokenId);
+                    return null; // NO EMBEDDED FALLBACK
                 }
             }
 
-            // Add this new function to your OtterfulWallet class
-            getEmbeddedMetadata(tokenId) {
-                // Sample metadata based on different token ranges
-                const metadataTemplates = [
-                    // Legendary Otters (1-100)
-                    {
-                        name: `Legendary Otter #${tokenId}`,
-                        description: "A legendary Otterful Otter with rare traits and powerful abilities.",
-                        image: `./images/legendary_${tokenId % 5}.png`, // Assumes you have 5 legendary images
-                        attributes: [
-                            { trait_type: "Hat", value: "Stealth-v2" },
-                            { trait_type: "Fur", value: "Golden" },
-                            { trait_type: "Eyes", value: "Laser" },
-                            { trait_type: "Shirt", value: "Overalls-V3" },
-                            { trait_type: "Base", value: "Stealth" }
-                        ]
-                    },
-                    // Epic Otters (101-500)
-                    {
-                        name: `Epic Otter #${tokenId}`,
-                        description: "An epic Otterful Otter with powerful plumber abilities.",
-                        image: `./images/epic_${tokenId % 8}.png`, // Assumes you have 8 epic images
-                        attributes: [
-                            { trait_type: "Hat", value: "Plumber-v3" },
-                            { trait_type: "Fur", value: "Rainbow" },
-                            { trait_type: "Eyes", value: "Diamond" },
-                            { trait_type: "Shirt", value: "Overalls-Orange" }
-                        ]
-                    },
-                    // Rare Otters (501-1000)
-                    {
-                        name: `Rare Otter #${tokenId}`,
-                        description: "A rare Otterful Otter with special pirate traits.",
-                        image: `./images/rare_${tokenId % 10}.png`, // Assumes you have 10 rare images
-                        attributes: [
-                            { trait_type: "Hat", value: "Pirate" },
-                            { trait_type: "Fur", value: "Green" },
-                            { trait_type: "Eyes", value: "Sunglasses" },
-                            { trait_type: "Shirt", value: "Overalls-Blue" }
-                        ]
-                    },
-                    // Common Otters (1001+)
-                    {
-                        name: `Common Otter #${tokenId}`,
-                        description: "A common but loveable Otterful Otter.",
-                        image: `./images/common_${tokenId % 15}.png`, // Assumes you have 15 common images
-                        attributes: [
-                            { trait_type: "Hat", value: "Baseball" },
-                            { trait_type: "Fur", value: "Brown" },
-                            { trait_type: "Eyes", value: "Happy" },
-                            { trait_type: "Base", value: "Normal" }
-                        ]
-                    }
-                ];
-                
-                // Choose template based on token ID
-                let templateIndex = 3; // Default to common
-                if (tokenId <= 100) templateIndex = 0; // Legendary
-                else if (tokenId <= 500) templateIndex = 1; // Epic
-                else if (tokenId <= 1000) templateIndex = 2; // Rare
-                
-                const template = metadataTemplates[templateIndex];
-                
-                // Customize the template for this specific token
-                return {
-                    ...template,
-                    name: template.name,
-                    tokenId: tokenId,
-                    // Add some variation to attributes based on token ID
-                    attributes: template.attributes.map(attr => ({
-                        ...attr,
-                        // Add some randomness based on token ID
-                        rarity: this.calculateAttributeRarity(attr.value, tokenId)
-                    }))
-                };
-            }
-
-            // Add this helper function
-            calculateAttributeRarity(value, tokenId) {
-                const rarityMap = {
-                    'Stealth-v2': 'ultra-rare',
-                    'Plumber-v5': 'ultra-rare', 
-                    'Plumber-v3': 'epic',
-                    'Golden': 'rare',
-                    'Rainbow': 'rare',
-                    'Laser': 'rare',
-                    'Diamond': 'rare',
-                    'Pirate': 'uncommon',
-                    'Crown': 'uncommon',
-                    'Baseball': 'common',
-                    'Normal': 'common'
-                };
-                
-                return rarityMap[value] || 'common';
-            }
+            // REMOVED: getEmbeddedMetadata function - was causing fake NFTs to appear
+            // REMOVED: calculateAttributeRarity function - was part of embedded metadata system
 
             async getTokenMetadata(tokenId) {
                 try {
