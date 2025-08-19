@@ -2793,6 +2793,8 @@
                             <button onclick="testLocalNFTLoading()" style="background: linear-gradient(135deg, #8BC34A, #689F38); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🦦 Test Local NFTs</button>
                             <button onclick="enableBlockchainScanning()" style="background: linear-gradient(135deg, #FF5722, #E64A19); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔗 Enable Blockchain</button>
                             <button onclick="testNFTLoading()" style="background: linear-gradient(135deg, #E91E63, #C2185B); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🧪 Test NFT Loading</button>
+                            <button onclick="stakeAllNFTs()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔒 Stake All</button>
+                            <button onclick="claimAllRewards()" style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">💰 Claim Rewards</button>
                             <button onclick="refreshWalletData()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔄 Refresh Data</button>
                             <button onclick="refreshMetadata()" style="background: linear-gradient(135deg, #2196F3, #1976D2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🌐 Refresh Metadata</button>
                             <button onclick="checkNFTs()" style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔍 Check NFTs</button>
@@ -3049,6 +3051,7 @@
                 this.isConnected = false;
                 this.isLoadingNFTs = false; // Track loading state to prevent duplicate calls
                 this.contractAddress = '0x4e5913922b7ddf916c8d27d1016827f799687e66';
+                this.stakingContractAddress = '0x0000000000000000000000000000000000000000'; // TODO: Deploy staking contract
                 this.apeChainId = '0x8173'; // 33139 in hex
                 this.userNFTs = [];
                 this.stakedNFTs = [];
@@ -4000,7 +4003,7 @@
                 };
             }
 
-            // Auto-stake all NFTs for demo purposes
+            // Auto-stake all NFTs for demo purposes (simulated)
             autoStakeAll() {
                 this.userNFTs.forEach(nft => {
                     if (!this.stakedNFTs.some(staked => staked.tokenId === nft.tokenId)) {
@@ -4009,7 +4012,175 @@
                     }
                 });
                 this.updateUI();
-                this.showMessage('All otters auto-staked for demo!', 'success');
+                this.showMessage('All otters auto-staked for demo! (Simulated)', 'success');
+            }
+
+            // Real blockchain staking functions
+            async stakeNFT(tokenId) {
+                console.log(`🔒 Staking NFT ${tokenId} on blockchain...`);
+                
+                try {
+                    // Check if user owns the NFT
+                    const owner = await this.getTokenOwner(tokenId);
+                    if (owner.toLowerCase() !== this.account.toLowerCase()) {
+                        throw new Error('You do not own this NFT');
+                    }
+
+                    // Approve staking contract to transfer NFT
+                    const approveData = '0x095ea7b3' + 
+                        '000000000000000000000000' + this.stakingContractAddress.slice(2) + // staking contract address
+                        '0000000000000000000000000000000000000000000000000000000000000001'; // tokenId
+                    
+                    console.log('🔐 Approving staking contract...');
+                    const approveTx = await window.ethereum.request({
+                        method: 'eth_sendTransaction',
+                        params: [{
+                            from: this.account,
+                            to: this.contractAddress,
+                            data: approveData
+                        }]
+                    });
+                    
+                    console.log('✅ Approval transaction:', approveTx);
+                    
+                    // Wait for approval confirmation
+                    await this.waitForTransaction(approveTx);
+                    
+                    // Stake the NFT
+                    const stakeData = '0x23b872dd' + // transferFrom function
+                        '000000000000000000000000' + this.account.slice(2) + // from
+                        '000000000000000000000000' + this.stakingContractAddress.slice(2) + // to (staking contract)
+                        '0000000000000000000000000000000000000000000000000000000000000001'; // tokenId
+                    
+                    console.log('🔒 Staking NFT...');
+                    const stakeTx = await window.ethereum.request({
+                        method: 'eth_sendTransaction',
+                        params: [{
+                            from: this.account,
+                            to: this.contractAddress,
+                            data: stakeData
+                        }]
+                    });
+                    
+                    console.log('✅ Stake transaction:', stakeTx);
+                    await this.waitForTransaction(stakeTx);
+                    
+                    // Update local state
+                    const nft = this.userNFTs.find(n => n.tokenId === tokenId);
+                    if (nft) {
+                        this.stakedNFTs.push(nft);
+                        this.stakingStartTimes[tokenId] = Date.now();
+                        this.userNFTs = this.userNFTs.filter(n => n.tokenId !== tokenId);
+                    }
+                    
+                    this.updateUI();
+                    this.showMessage(`NFT ${tokenId} staked successfully!`, 'success');
+                    
+                } catch (error) {
+                    console.error('❌ Error staking NFT:', error);
+                    this.showMessage(`Staking failed: ${error.message}`, 'error');
+                }
+            }
+
+            async unstakeNFT(tokenId) {
+                console.log(`🔓 Unstaking NFT ${tokenId} from blockchain...`);
+                
+                try {
+                    // Call unstake function on staking contract
+                    const unstakeData = '0x' + // unstake function selector
+                        '0000000000000000000000000000000000000000000000000000000000000001'; // tokenId
+                    
+                    const unstakeTx = await window.ethereum.request({
+                        method: 'eth_sendTransaction',
+                        params: [{
+                            from: this.account,
+                            to: this.stakingContractAddress,
+                            data: unstakeData
+                        }]
+                    });
+                    
+                    console.log('✅ Unstake transaction:', unstakeTx);
+                    await this.waitForTransaction(unstakeTx);
+                    
+                    // Update local state
+                    const nft = this.stakedNFTs.find(n => n.tokenId === tokenId);
+                    if (nft) {
+                        this.userNFTs.push(nft);
+                        this.stakedNFTs = this.stakedNFTs.filter(n => n.tokenId !== tokenId);
+                        delete this.stakingStartTimes[tokenId];
+                    }
+                    
+                    this.updateUI();
+                    this.showMessage(`NFT ${tokenId} unstaked successfully!`, 'success');
+                    
+                } catch (error) {
+                    console.error('❌ Error unstaking NFT:', error);
+                    this.showMessage(`Unstaking failed: ${error.message}`, 'error');
+                }
+            }
+
+            async claimRewards() {
+                console.log('💰 Claiming staking rewards...');
+                
+                try {
+                    // Call claim function on staking contract
+                    const claimData = '0x'; // claim function selector
+                    
+                    const claimTx = await window.ethereum.request({
+                        method: 'eth_sendTransaction',
+                        params: [{
+                            from: this.account,
+                            to: this.stakingContractAddress,
+                            data: claimData
+                        }]
+                    });
+                    
+                    console.log('✅ Claim transaction:', claimTx);
+                    await this.waitForTransaction(claimTx);
+                    
+                    // Reset local fish coins (claimed on blockchain)
+                    this.fishCoins = 0;
+                    this.updateUI();
+                    this.showMessage('Rewards claimed successfully!', 'success');
+                    
+                } catch (error) {
+                    console.error('❌ Error claiming rewards:', error);
+                    this.showMessage(`Claim failed: ${error.message}`, 'error');
+                }
+            }
+
+            async waitForTransaction(txHash) {
+                console.log('⏳ Waiting for transaction confirmation...');
+                
+                return new Promise((resolve, reject) => {
+                    const checkInterval = setInterval(async () => {
+                        try {
+                            const receipt = await window.ethereum.request({
+                                method: 'eth_getTransactionReceipt',
+                                params: [txHash]
+                            });
+                            
+                            if (receipt) {
+                                clearInterval(checkInterval);
+                                if (receipt.status === '0x1') {
+                                    console.log('✅ Transaction confirmed!');
+                                    resolve(receipt);
+                                } else {
+                                    reject(new Error('Transaction failed'));
+                                }
+                            }
+                        } catch (error) {
+                            clearInterval(checkInterval);
+                            reject(error);
+                        }
+                    }, 2000); // Check every 2 seconds
+                    
+                    // Timeout after 5 minutes
+                    setTimeout(() => {
+                        clearInterval(checkInterval);
+                        reject(new Error('Transaction timeout'));
+                    }, 300000);
+                });
             }
         }
 
@@ -17484,6 +17655,85 @@
             } catch (error) {
                 console.error('❌ Error in blockchain scanning:', error);
                 alert('❌ Error during blockchain scan. Check console for details.');
+            }
+        }
+
+        // Function to stake all NFTs on blockchain
+        async function stakeAllNFTs() {
+            console.log('🔒 Staking all NFTs on blockchain...');
+            
+            if (!otterWallet || !otterWallet.isConnected) {
+                console.log('⚠️ Wallet not connected');
+                alert('Please connect your wallet first!');
+                return;
+            }
+            
+            if (otterWallet.userNFTs.length === 0) {
+                alert('No NFTs available to stake!');
+                return;
+            }
+            
+            const confirmed = confirm(`🔒 STAKE ALL NFTS?\n\nThis will transfer ${otterWallet.userNFTs.length} NFTs to the staking contract.\n\n⚠️ WARNING: This requires a staking contract to be deployed!\n\nAre you sure you want to continue?`);
+            
+            if (!confirmed) {
+                console.log('❌ Staking cancelled by user');
+                return;
+            }
+            
+            console.log('🔒 Starting blockchain staking...');
+            
+            try {
+                for (const nft of otterWallet.userNFTs) {
+                    console.log(`🔒 Staking NFT ${nft.tokenId}...`);
+                    await otterWallet.stakeNFT(nft.tokenId);
+                    
+                    // Add delay between stakes to prevent nonce issues
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                }
+                
+                console.log('✅ All NFTs staked successfully!');
+                alert('✅ All NFTs staked successfully!\n\nCheck your wallet for transaction confirmations.');
+                updateWalletProfile();
+                
+            } catch (error) {
+                console.error('❌ Error staking NFTs:', error);
+                alert(`❌ Error staking NFTs: ${error.message}`);
+            }
+        }
+
+        // Function to claim all staking rewards
+        async function claimAllRewards() {
+            console.log('💰 Claiming all staking rewards...');
+            
+            if (!otterWallet || !otterWallet.isConnected) {
+                console.log('⚠️ Wallet not connected');
+                alert('Please connect your wallet first!');
+                return;
+            }
+            
+            if (otterWallet.stakedNFTs.length === 0) {
+                alert('No staked NFTs found!');
+                return;
+            }
+            
+            const confirmed = confirm(`💰 CLAIM REWARDS?\n\nThis will claim all accumulated $FISH rewards from staking.\n\n⚠️ WARNING: This requires a staking contract to be deployed!\n\nAre you sure you want to continue?`);
+            
+            if (!confirmed) {
+                console.log('❌ Claim cancelled by user');
+                return;
+            }
+            
+            console.log('💰 Claiming staking rewards...');
+            
+            try {
+                await otterWallet.claimRewards();
+                console.log('✅ Rewards claimed successfully!');
+                alert('✅ Rewards claimed successfully!\n\nCheck your wallet for transaction confirmation.');
+                updateWalletProfile();
+                
+            } catch (error) {
+                console.error('❌ Error claiming rewards:', error);
+                alert(`❌ Error claiming rewards: ${error.message}`);
             }
         }
 
