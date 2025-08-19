@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #333;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        #testCanvas {
+            width: 400px;
+            height: 300px;
+            border: 2px solid #FFD700;
+            background: #87CEEB;
+        }
+    </style>
+</head>
+<body>
+    <h1>Simple Test</h1>
+    <canvas id="testCanvas"></canvas>
+    <div id="output"></div>
+
+    <script>
+        console.log('🔍 Simple test starting...');
+        
+        // Test 1: Basic DOM
+        const canvas = document.getElementById('testCanvas');
+        const output = document.getElementById('output');
+        
+        if (canvas) {
+            output.innerHTML += '<p style="color: green;">✅ Canvas found</p>';
+        } else {
+            output.innerHTML += '<p style="color: red;">❌ Canvas not found</p>';
+        }
+        
+        // Test 2: Canvas context
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+            output.innerHTML += '<p style="color: green;">✅ Canvas context works</p>';
+        } else {
+            output.innerHTML += '<p style="color: red;">❌ Canvas context failed</p>';
+        }
+        
+        // Test 3: Draw something
+        canvas.width = 400;
+        canvas.height = 300;
+        ctx.fillStyle = 'red';
+        ctx.fillRect(50, 50, 100, 100);
+        output.innerHTML += '<p style="color: green;">✅ Drawing works</p>';
+        
+        // Test 4: Check if main game file exists
+        fetch('./index.html')
+            .then(response => {
+                if (response.ok) {
+                    output.innerHTML += '<p style="color: green;">✅ Main game file accessible</p>';
+                    return response.text();
+                } else {
+                    output.innerHTML += '<p style="color: red;">❌ Main game file not accessible: ' + response.status + '</p>';
+                    throw new Error('File not accessible');
+                }
+            })
+            .then(text => {
+                output.innerHTML += '<p style="color: green;">✅ Main game file loaded (' + text.length + ' characters)</p>';
+                
+                // Check for specific elements
+                if (text.includes('gameCanvas')) {
+                    output.innerHTML += '<p style="color: green;">✅ gameCanvas element found in main file</p>';
+                } else {
+                    output.innerHTML += '<p style="color: red;">❌ gameCanvas element not found in main file</p>';
+                }
+                
+                if (text.includes('OtterfulWallet')) {
+                    output.innerHTML += '<p style="color: green;">✅ OtterfulWallet class found in main file</p>';
+                } else {
+                    output.innerHTML += '<p style="color: red;">❌ OtterfulWallet class not found in main file</p>';
+                }
+                
+                // Check for DOMContentLoaded
+                if (text.includes('DOMContentLoaded')) {
+                    output.innerHTML += '<p style="color: green;">✅ DOMContentLoaded event listener found</p>';
+                } else {
+                    output.innerHTML += '<p style="color: red;">❌ DOMContentLoaded event listener not found</p>';
+                }
+            })
+            .catch(error => {
+                output.innerHTML += '<p style="color: red;">❌ Error: ' + error.message + '</p>';
+            });
+        
+        console.log('🔍 Simple test completed');
+    </script>
+</body>
+</html>

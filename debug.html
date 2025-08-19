@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #333;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        #gameContainer {
+            width: 800px;
+            height: 600px;
+            border: 2px solid #FFD700;
+            background: #1a1a2e;
+            position: relative;
+        }
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            background: #87CEEB;
+        }
+        .debug-info {
+            margin-top: 20px;
+            padding: 10px;
+            background: #444;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Debug Test</h1>
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+    </div>
+    <div class="debug-info" id="debugInfo">
+        <h3>Debug Information:</h3>
+        <div id="debugOutput"></div>
+    </div>
+
+    <script>
+        console.log('🔍 Debug script starting...');
+        
+        // Test basic DOM elements
+        const canvas = document.getElementById('gameCanvas');
+        const debugOutput = document.getElementById('debugOutput');
+        
+        if (!canvas) {
+            debugOutput.innerHTML += '<p style="color: red;">❌ Canvas element not found!</p>';
+            console.error('Canvas element not found!');
+        } else {
+            debugOutput.innerHTML += '<p style="color: green;">✅ Canvas element found</p>';
+            console.log('Canvas element found');
+        }
+        
+        // Test canvas context
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            debugOutput.innerHTML += '<p style="color: red;">❌ Canvas context not available!</p>';
+            console.error('Canvas context not available!');
+        } else {
+            debugOutput.innerHTML += '<p style="color: green;">✅ Canvas context available</p>';
+            console.log('Canvas context available');
+        }
+        
+        // Set canvas size
+        canvas.width = 800;
+        canvas.height = 600;
+        debugOutput.innerHTML += '<p style="color: green;">✅ Canvas size set to 800x600</p>';
+        
+        // Draw a test rectangle
+        ctx.fillStyle = 'red';
+        ctx.fillRect(100, 100, 200, 100);
+        debugOutput.innerHTML += '<p style="color: green;">✅ Test rectangle drawn</p>';
+        
+        // Test if we can access the main game file
+        debugOutput.innerHTML += '<p>🔍 Testing main game file access...</p>';
+        
+        // Try to load the main game file
+        fetch('./index.html')
+            .then(response => {
+                if (response.ok) {
+                    debugOutput.innerHTML += '<p style="color: green;">✅ Main game file accessible</p>';
+                    return response.text();
+                } else {
+                    debugOutput.innerHTML += '<p style="color: red;">❌ Main game file not accessible: ' + response.status + '</p>';
+                    throw new Error('File not accessible');
+                }
+            })
+            .then(text => {
+                debugOutput.innerHTML += '<p style="color: green;">✅ Main game file loaded (' + text.length + ' characters)</p>';
+                
+                // Check for common issues
+                if (text.includes('OtterfulWallet')) {
+                    debugOutput.innerHTML += '<p style="color: green;">✅ OtterfulWallet class found</p>';
+                } else {
+                    debugOutput.innerHTML += '<p style="color: red;">❌ OtterfulWallet class not found</p>';
+                }
+                
+                if (text.includes('gameCanvas')) {
+                    debugOutput.innerHTML += '<p style="color: green;">✅ gameCanvas element found</p>';
+                } else {
+                    debugOutput.innerHTML += '<p style="color: red;">❌ gameCanvas element not found</p>';
+                }
+            })
+            .catch(error => {
+                debugOutput.innerHTML += '<p style="color: red;">❌ Error loading main game file: ' + error.message + '</p>';
+            });
+        
+        console.log('🔍 Debug script completed');
+    </script>
+</body>
+</html>
