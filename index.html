@@ -4083,19 +4083,19 @@
                 return imageUrl;
             }
 
-            // Create basic NFT object when metadata fails
-            createBasicNFT(tokenId) {
-                return {
-                    tokenId: tokenId,
-                    name: `Otterful Otter #${tokenId}`,
-                    traits: ['Base-Normal'],
-                    multiplier: 1.0,
-                    perks: [],
-                    rarity: 'common',
-                    image: null,
-                    description: `Otterful Otter #${tokenId} (metadata unavailable)`
-                };
-            }
+            // ❌ REMOVED: No more basic NFTs - only show real metadata
+            // createBasicNFT(tokenId) {
+            //     return {
+            //         tokenId: tokenId,
+            //         name: `Otterful Otter #${tokenId}`,
+            //         traits: ['Base-Normal'],
+            //         multiplier: 1.0,
+            //         perks: [],
+            //         rarity: 'common',
+            //         image: null,
+            //         description: `Otterful Otter #${tokenId} (metadata unavailable)`
+            //     };
+            // }
 
             // Add this new function to generate traits based on token ID
             generateTraitsFromTokenId(tokenId) {
