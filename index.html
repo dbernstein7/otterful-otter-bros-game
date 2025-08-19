@@ -5193,41 +5193,10 @@
         // Initialize the wallet integration globally
         let otterWallet;
         
-        // Wait for DOM to be fully loaded before initializing
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🎮 DOM loaded, initializing game...');
-            
-            // Initialize the wallet integration
-            try {
-                otterWallet = new OtterfulWallet();
-                console.log('🔗 OtterfulWallet initialized successfully');
-            } catch (error) {
-                console.error('❌ Failed to initialize OtterfulWallet:', error);
-                otterWallet = null;
-            }
-
-            console.log('🎮 Game script starting...');
-        
-        const canvas = document.getElementById('gameCanvas');
-        if (!canvas) {
-            console.error('❌ Canvas element not found!');
-            alert('Canvas element not found!');
-            throw new Error('Canvas element not found');
-        }
-        
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-            console.error('❌ Canvas context not available!');
-            alert('Canvas context not available!');
-            throw new Error('Canvas context not available');
-        }
-        
-        console.log('✅ Canvas initialized successfully');
-        
         // Global variables
         let aiOwlBotEnabled = true;
         
-        // Game state - Define this BEFORE resizeCanvas function
+        // Game state - Define this BEFORE any functions that use it
         const game = {
             score: 0,
             lives: 3,
@@ -5269,10 +5238,101 @@
                 glowIntensity: 0,
                 lookDirection: 1, // Track owl's looking direction
                 scale: 1,
-                canvasWidth: canvas.width,
-                canvasHeight: canvas.height
+                canvasWidth: 1920, // Default values until canvas is initialized
+                canvasHeight: 1080
+            },
+            // Marketplace system
+            marketplace: { /* ... */ },
+            // Profile system
+            profile: { /* ... */ },
+            // Mouse tracking for laser aiming
+            mouseX: 0,
+            mouseY: 0,
+            // Laser cycling system
+            laserCycleIndex: 0,
+            laserCycleTimer: 0,
+            laserCycleSpeed: 200, // Change every 200ms
+            // Responsive scaling
+            scale: 1,
+            canvasWidth: 1920,
+            canvasHeight: 1080,
+            // Leaderboard tracking
+            sessionStats: { /* ... */ },
+            // Checkpoint system
+            checkpoints: [],
+            activeCheckpoint: null,
+            checkpointProgress: {},
+            // Boss system
+            currentBoss: null,
+            bossActive: false,
+            // Secret system
+            secrets: [],
+            secretRooms: [],
+            // Environmental effects
+            particles: [],
+            screenShake: 0,
+            freezeFrame: 0,
+            // Water system
+            waterLevel: 1400,
+            waterDepth: 2000,
+            deathBarrier: 2400,
+            // Lava system for boss levels
+            lavaLevel: 1400,
+            lavaDepth: 2000,
+            inLava: false,
+            lavaSinkTime: 0,
+            lavaSinkDuration: 1500,
+            lavaBouncePower: 8,
+            lavaDamageInvulnerability: 2000,
+            // Extra abilities
+            // Story system
+            storyMode: false,
+            cutsceneActive: false,
+            cutsceneText: '',
+            cutsceneIndex: 0,
+            typewriterInterval: null,
+            // Real-time collectibles tracking
+            collectiblesCount: {
+                coinsCollected: 0,
+                chestsCollected: 0,
+                goldenChestsCollected: 0
             }
         };
+        
+        // Wait for DOM to be fully loaded before initializing
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎮 DOM loaded, initializing game...');
+            
+            // Initialize the wallet integration
+            try {
+                otterWallet = new OtterfulWallet();
+                console.log('🔗 OtterfulWallet initialized successfully');
+            } catch (error) {
+                console.error('❌ Failed to initialize OtterfulWallet:', error);
+                otterWallet = null;
+            }
+
+            console.log('🎮 Game script starting...');
+        
+        const canvas = document.getElementById('gameCanvas');
+        if (!canvas) {
+            console.error('❌ Canvas element not found!');
+            alert('Canvas element not found!');
+            throw new Error('Canvas element not found');
+        }
+        
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            console.error('❌ Canvas context not available!');
+            alert('Canvas context not available!');
+            throw new Error('Canvas context not available');
+        }
+        
+        console.log('✅ Canvas initialized successfully');
+        
+        // Update game object with canvas dimensions
+        game.canvasWidth = canvas.width;
+        game.canvasHeight = canvas.height;
         
         // Responsive canvas setup
         function resizeCanvas() {
