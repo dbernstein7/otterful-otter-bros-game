@@ -2787,7 +2787,7 @@
                         <div style="font-size: 18px; font-weight: bold; color: #4CAF50; margin-bottom: 5px;">Connected to ApeChain</div>
                         <div id="walletAddressDisplay" style="font-size: 14px; color: #00FFFF; font-family: monospace; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; margin: 10px 0;">0x0000...0000</div>
                         <div style="margin-top: 15px;">
-                            <button onclick="loadNFTsManually()" style="background: linear-gradient(135deg, #2196F3, #1976D2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease;">🦦 Load NFTs (Disabled)</button>
+                            <button onclick="loadNFTsManually()" style="background: linear-gradient(135deg, #2196F3, #1976D2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease;">🦦 Load NFTs</button>
                             <button onclick="checkSpecificToken()" style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔍 Check Token</button>
                             <button onclick="loadMultipleTokens()" style="background: linear-gradient(135deg, #9C27B0, #7B1FA2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">📦 Load Multiple</button>
                             <button onclick="clearInvalidNFTs()" style="background: linear-gradient(135deg, #FF5722, #E64A19); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🧹 Clear Invalid</button>
@@ -3473,6 +3473,250 @@
                     this.showMessage('Blockchain scanning failed. Use "Check Token" to load specific NFTs.', 'warning');
                     return [];
                 }
+            }
+
+            // IMPROVED NFT LOADING FUNCTION - PREVENTS TOKEN #102 ISSUE
+            async loadUserNFTsWithMetadataImproved(balance) {
+                this.userNFTs = [];
+                console.log('🚀 IMPROVED NFT LOADING - Finding real NFTs with better validation...');
+                
+                try {
+                    // Step 1: Find owned tokens with improved validation
+                    console.log('🔍 Step 1: Scanning blockchain for your owned NFTs...');
+                    const ownedTokens = await this.findOwnedTokensImproved();
+                    
+                    if (ownedTokens.length === 0) {
+                        console.log('📋 No NFTs found for this wallet');
+                        this.showMessage('No Otterful Otters NFTs found in this wallet', 'info');
+                        return;
+                    }
+                    
+                    console.log(`🎯 Found ${ownedTokens.length} owned NFTs: ${ownedTokens.join(', ')}`);
+                    
+                    // Step 2: Load metadata for each owned NFT
+                    console.log('📄 Step 2: Loading metadata for each NFT...');
+                    
+                    for (let i = 0; i < ownedTokens.length; i++) {
+                        const tokenId = ownedTokens[i];
+                        console.log(`📋 Processing NFT ${i + 1}/${ownedTokens.length}: Token #${tokenId}`);
+                        
+                        try {
+                            // Get the real metadata from blockchain/IPFS
+                            const metadata = await this.getRealNFTMetadata(tokenId);
+                            
+                            if (metadata) {
+                                console.log(`✅ Loaded metadata for token ${tokenId}:`, metadata);
+                                
+                                // Extract traits from the actual metadata
+                                const traits = this.extractTraitsFromMetadata(metadata);
+                                
+                                const nft = {
+                                    tokenId: tokenId,
+                                    name: metadata.name || `Otterful Otter #${tokenId}`,
+                                    traits: traits,
+                                    multiplier: this.calculateMultiplier(traits),
+                                    perks: this.calculatePerks(traits),
+                                    rarity: this.calculateRarity(traits),
+                                    image: this.processImageUrl(metadata.image),
+                                    description: metadata.description || `Otterful Otter #${tokenId}`,
+                                    rawMetadata: metadata // Store for debugging
+                                };
+                                
+                                this.userNFTs.push(nft);
+                                console.log(`🦦 Added NFT: ${nft.name} with traits: ${nft.traits.join(', ')}`);
+                            } else {
+                                console.log(`⚠️ No metadata found for token ${tokenId}, creating basic NFT`);
+                                this.userNFTs.push(this.createBasicNFT(tokenId));
+                            }
+                            
+                            // Small delay between requests to be nice to servers
+                            if (i < ownedTokens.length - 1) {
+                                await new Promise(resolve => setTimeout(resolve, 500));
+                            }
+                            
+                        } catch (error) {
+                            console.warn(`⚠️ Error loading metadata for token ${tokenId}:`, error.message);
+                            // Add basic NFT even if metadata fails
+                            this.userNFTs.push(this.createBasicNFT(tokenId));
+                        }
+                    }
+                    
+                    console.log(`🎉 SUCCESS! Loaded ${this.userNFTs.length} NFTs for this wallet`);
+                    this.updateNFTDisplay();
+                    this.showMessage(`Successfully loaded ${this.userNFTs.length} Otterful Otters!`, 'success');
+                    
+                } catch (error) {
+                    console.error('❌ Error in improved NFT loading:', error);
+                    this.showMessage(`Error loading NFTs: ${error.message}`, 'error');
+                }
+            }
+
+            // IMPROVED TOKEN FINDING WITH BETTER VALIDATION
+            async findOwnedTokensImproved() {
+                console.log('🔍 IMPROVED SCANNING - Finding owned tokens with better validation...');
+                const ownedTokens = [];
+                
+                try {
+                    // Strategy 1: Use events to find transfers TO this user (with better validation)
+                    console.log('📡 Method 1: Checking recent Transfer events with validation...');
+                    const recentTokens = await this.findTokensFromEventsImproved();
+                    ownedTokens.push(...recentTokens);
+                    
+                    // Strategy 2: If events don't work, scan a reasonable range with validation
+                    if (ownedTokens.length === 0) {
+                        console.log('🔍 Method 2: Direct ownership scanning with validation...');
+                        const scannedTokens = await this.scanTokenRangeImproved(1, 200); // Scan first 200 tokens
+                        ownedTokens.push(...scannedTokens);
+                    }
+                    
+                    // Strategy 3: If all else fails, return empty array
+                    if (ownedTokens.length === 0) {
+                        console.log('📋 No tokens found via improved scanning');
+                        this.showMessage('No NFTs found via scanning. Use "Check Token" to load specific NFTs.', 'info');
+                    }
+                    
+                    // Remove duplicates and validate each token
+                    const uniqueTokens = [...new Set(ownedTokens)];
+                    console.log(`📊 Found ${uniqueTokens.length} owned tokens before validation`);
+                    
+                    // DOUBLE-CHECK OWNERSHIP TO PREVENT FALSE POSITIVES
+                    const validatedTokens = [];
+                    for (const tokenId of uniqueTokens) {
+                        try {
+                            console.log(`🔍 Double-checking ownership of token #${tokenId}...`);
+                            const owner = await this.getTokenOwner(tokenId);
+                            
+                            if (owner && owner.toLowerCase() === this.account.toLowerCase()) {
+                                console.log(`✅ Confirmed ownership of token #${tokenId}`);
+                                validatedTokens.push(tokenId);
+                            } else {
+                                console.log(`❌ Token #${tokenId} ownership check failed - removing from list`);
+                            }
+                            
+                            // Small delay to prevent RPC overload
+                            await new Promise(resolve => setTimeout(resolve, 200));
+                            
+                        } catch (error) {
+                            console.log(`⚠️ Error validating token #${tokenId}: ${error.message} - removing from list`);
+                        }
+                    }
+                    
+                    console.log(`📊 Final validated tokens: ${validatedTokens.length} (${validatedTokens.join(', ')})`);
+                    return validatedTokens;
+                    
+                } catch (error) {
+                    console.error('❌ Error in improved token finding:', error);
+                    this.showMessage('Blockchain scanning failed. Use "Check Token" to load specific NFTs.', 'warning');
+                    return [];
+                }
+            }
+
+            // IMPROVED EVENT SCANNING WITH BETTER VALIDATION
+            async findTokensFromEventsImproved() {
+                try {
+                    console.log('📡 IMPROVED: Searching Transfer events for your address...');
+                    
+                    // Create event topic for Transfer(address,address,uint256)
+                    const transferTopic = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+                    const userAddressPadded = '0x000000000000000000000000' + this.account.slice(2).toLowerCase();
+                    
+                    // Get logs for transfers TO this address (limit to recent blocks to avoid RPC overload)
+                    const logs = await window.ethereum.request({
+                        method: 'eth_getLogs',
+                        params: [{
+                            fromBlock: '0x' + (parseInt(await window.ethereum.request({method: 'eth_blockNumber'})) - 10000).toString(16), // Last 10k blocks
+                            toBlock: 'latest',
+                            address: this.contractAddress,
+                            topics: [
+                                transferTopic,
+                                null, // from address (any)
+                                userAddressPadded // to address (this user)
+                            ]
+                        }]
+                    });
+                    
+                    console.log(`📡 Found ${logs.length} transfer events to your address`);
+                    
+                    const tokenIds = logs.map(log => {
+                        // Token ID is in the data field or third topic
+                        if (log.topics.length > 3) {
+                            return parseInt(log.topics[3], 16);
+                        } else if (log.data && log.data !== '0x') {
+                            return parseInt(log.data, 16);
+                        }
+                        return null;
+                    }).filter(id => id !== null && id >= 1 && id <= 2222); // Filter valid token IDs
+                    
+                    console.log('📡 Valid token IDs from events:', tokenIds);
+                    
+                    // Verify current ownership with better error handling
+                    const currentlyOwned = [];
+                    for (const tokenId of tokenIds) {
+                        try {
+                            console.log(`🔍 Verifying ownership of token #${tokenId}...`);
+                            const owner = await this.getTokenOwner(tokenId);
+                            
+                            if (owner && owner.toLowerCase() === this.account.toLowerCase()) {
+                                console.log(`✅ Confirmed ownership of token #${tokenId}`);
+                                currentlyOwned.push(tokenId);
+                            } else {
+                                console.log(`❌ Token #${tokenId} not owned by you (owner: ${owner})`);
+                            }
+                            
+                            // Add small delay to prevent RPC overload
+                            await new Promise(resolve => setTimeout(resolve, 200));
+                            
+                        } catch (error) {
+                            console.log(`⚠️ Could not verify ownership of token ${tokenId}: ${error.message}`);
+                        }
+                    }
+                    
+                    console.log(`📊 Currently owned from events: ${currentlyOwned.length} tokens`);
+                    return currentlyOwned;
+                    
+                } catch (error) {
+                    console.log('⚠️ Improved event method failed:', error.message);
+                    return [];
+                }
+            }
+
+            // IMPROVED DIRECT SCANNING WITH BETTER VALIDATION
+            async scanTokenRangeImproved(start, end) {
+                console.log(`🔍 IMPROVED: Scanning tokens ${start} to ${end} for ownership...`);
+                const ownedTokens = [];
+                const BATCH_SIZE = 5; // Smaller batches for better accuracy
+                
+                for (let i = start; i <= end; i += BATCH_SIZE) {
+                    const batchEnd = Math.min(i + BATCH_SIZE - 1, end);
+                    console.log(`🔍 Scanning batch ${i}-${batchEnd}...`);
+                    
+                    // Check batch of tokens with better error handling
+                    for (let tokenId = i; tokenId <= batchEnd; tokenId++) {
+                        try {
+                            console.log(`🔍 Checking token #${tokenId}...`);
+                            const owner = await this.getTokenOwner(tokenId);
+                            
+                            if (owner && owner.toLowerCase() === this.account.toLowerCase()) {
+                                console.log(`✅ Found owned token: ${tokenId}`);
+                                ownedTokens.push(tokenId);
+                            }
+                            
+                            // Small delay between checks
+                            await new Promise(resolve => setTimeout(resolve, 100));
+                            
+                        } catch (error) {
+                            console.log(`⚠️ Error checking token ${tokenId}: ${error.message}`);
+                        }
+                    }
+                    
+                    // Delay between batches to avoid overwhelming RPC
+                    if (batchEnd < end) {
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                }
+                
+                console.log(`🔍 Improved scan complete. Found ${ownedTokens.length} owned tokens`);
+                return ownedTokens;
             }
 
             // Method 1: Use Transfer events to find NFTs (more efficient)
@@ -18667,30 +18911,27 @@
             console.log('👤 Wallet address:', otterWallet.account);
             console.log('🔗 Network:', window.ethereum.chainId);
             
-            // DISABLED AUTOMATIC SCANNING TO PREVENT TOKEN #102 ISSUE
-            // Instead, guide user to use manual token checking
-            console.log('⚠️ Automatic scanning disabled to prevent false positives');
-            console.log('📋 Use "🔍 Check Token" to load your specific NFTs');
+            // RE-ENABLED WITH IMPROVED SCANNING TO PREVENT TOKEN #102 ISSUE
+            console.log('🔍 Starting improved automatic scanning...');
+            otterWallet.showMessage('Scanning blockchain for your NFTs...', 'info');
             
-            otterWallet.showMessage('Use "🔍 Check Token" to load your specific NFTs. Automatic scanning disabled to prevent false positives.', 'info');
-            
-            // Don't call loadUserNFTsWithMetadata - it causes token #102 issue
-            // otterWallet.loadUserNFTsWithMetadata(0).then(() => {
-            //     console.log('✅ Manual NFT loading completed');
-            //     console.log('📊 NFTs found:', otterWallet.userNFTs.length);
-            //     console.log('📋 NFT details:', otterWallet.userNFTs);
-            //     
-            //     if (otterWallet.userNFTs.length > 0) {
-            //         otterWallet.showMessage(`Found ${otterWallet.userNFTs.length} NFTs!`, 'success');
-            //     } else {
-            //         otterWallet.showMessage('No NFTs found in this wallet', 'warning');
-            //     }
-            //     
-            //     updateWalletProfile();
-            // }).catch(error => {
-            //     console.error('❌ Manual NFT loading failed:', error);
-            //     otterWallet.showMessage(`Error loading NFTs: ${error.message}`, 'error');
-            // });
+            // Use improved NFT loading with better error handling
+            otterWallet.loadUserNFTsWithMetadataImproved(0).then(() => {
+                console.log('✅ Improved automatic NFT loading completed');
+                console.log('📊 NFTs found:', otterWallet.userNFTs.length);
+                console.log('📋 NFT details:', otterWallet.userNFTs);
+                
+                if (otterWallet.userNFTs.length > 0) {
+                    otterWallet.showMessage(`Found ${otterWallet.userNFTs.length} NFTs!`, 'success');
+                } else {
+                    otterWallet.showMessage('No NFTs found in this wallet', 'warning');
+                }
+                
+                updateWalletProfile();
+            }).catch(error => {
+                console.error('❌ Improved automatic NFT loading failed:', error);
+                otterWallet.showMessage(`Error loading NFTs: ${error.message}`, 'error');
+            });
         }
 
         function checkSpecificToken() {
