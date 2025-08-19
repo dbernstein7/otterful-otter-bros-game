@@ -19032,7 +19032,7 @@
             });
         }
 
-        function loadSpecificToken(tokenId) {
+        async function loadSpecificToken(tokenId) {
             console.log(`🦦 Loading specific token #${tokenId}...`);
             console.log(`🦦 Input validation: tokenId=${tokenId}, type=${typeof tokenId}`);
             console.log(`📋 Current NFTs before loading:`, otterWallet.userNFTs.map(n => n.tokenId));
@@ -19045,34 +19045,56 @@
                 return otterWallet.userNFTs[existingIndex];
             }
             
-            // Create NFT object for this specific token
-            console.log(`🎨 Creating NFT object for token #${tokenId}...`);
-            const nft = {
-                tokenId: tokenId,
-                name: `Otterful Otter #${tokenId}`,
-                traits: generateTraitsForToken(tokenId),
-                multiplier: calculateMultiplierForTraits(generateTraitsForToken(tokenId)),
-                perks: calculatePerksForTraits(generateTraitsForToken(tokenId)),
-                rarity: calculateRarityForTraits(generateTraitsForToken(tokenId)),
-                image: otterWallet.processImageUrl(null, tokenId),
-                description: `Otterful Otter #${tokenId}`
-            };
-            
-            console.log(`🎨 Created NFT object:`, nft);
-            console.log(`🎨 NFT tokenId verification: ${nft.tokenId} === ${tokenId}? ${nft.tokenId === tokenId}`);
-            
-            // Add to userNFTs array (don't replace, add to existing)
-            otterWallet.userNFTs.push(nft);
-            
-            console.log(`✅ Added token #${tokenId} to wallet:`, nft);
-            console.log(`📊 Total NFTs in gallery: ${otterWallet.userNFTs.length}`);
-            console.log(`📋 All NFTs after adding:`, otterWallet.userNFTs.map(n => n.tokenId));
-            otterWallet.showMessage(`Added Token #${tokenId} to gallery! (Total: ${otterWallet.userNFTs.length})`, 'success');
-            
-            // Update the UI
-            updateWalletProfile();
-            
-            return nft;
+            try {
+                // Load real metadata from blockchain/IPFS (same as automatic loading)
+                console.log(`📄 Loading real metadata for token #${tokenId}...`);
+                const metadata = await otterWallet.getRealNFTMetadata(tokenId);
+                
+                if (metadata) {
+                    console.log(`✅ Loaded real metadata for token ${tokenId}:`, metadata);
+                    
+                    // Extract traits from the actual metadata
+                    const traits = otterWallet.extractTraitsFromMetadata(metadata);
+                    
+                    // Create NFT object with real metadata
+                    console.log(`🎨 Creating NFT object for token #${tokenId}...`);
+                    const nft = {
+                        tokenId: tokenId,
+                        name: metadata.name || `Otterful Otter #${tokenId}`,
+                        traits: traits,
+                        multiplier: otterWallet.calculateMultiplier(traits),
+                        perks: otterWallet.calculatePerks(traits),
+                        rarity: otterWallet.calculateRarity(traits),
+                        image: otterWallet.processImageUrl(metadata.image, tokenId),
+                        description: metadata.description || `Otterful Otter #${tokenId}`,
+                        rawMetadata: metadata // Store for debugging
+                    };
+                    
+                    console.log(`🎨 Created NFT object:`, nft);
+                    console.log(`🎨 NFT tokenId verification: ${nft.tokenId} === ${tokenId}? ${nft.tokenId === tokenId}`);
+                    
+                    // Add to userNFTs array (don't replace, add to existing)
+                    otterWallet.userNFTs.push(nft);
+                    
+                    console.log(`✅ Added token #${tokenId} to wallet:`, nft);
+                    console.log(`📊 Total NFTs in gallery: ${otterWallet.userNFTs.length}`);
+                    console.log(`📋 All NFTs after adding:`, otterWallet.userNFTs.map(n => n.tokenId));
+                    otterWallet.showMessage(`Added Token #${tokenId} to gallery! (Total: ${otterWallet.userNFTs.length})`, 'success');
+                    
+                    // Update the UI
+                    updateWalletProfile();
+                    
+                    return nft;
+                } else {
+                    console.log(`❌ No metadata found for token ${tokenId}`);
+                    otterWallet.showMessage(`No metadata found for Token #${tokenId}`, 'warning');
+                    return null;
+                }
+            } catch (error) {
+                console.error(`❌ Error loading metadata for token ${tokenId}:`, error);
+                otterWallet.showMessage(`Error loading Token #${tokenId}: ${error.message}`, 'error');
+                return null;
+            }
         }
 
         function generateTraitsForToken(tokenId) {
@@ -19213,8 +19235,8 @@
                         console.log(`✅ You own token #${tokenIdNum}`);
                         ownedCount++;
                         
-                        // Load the token
-                        const nft = loadSpecificToken(tokenIdNum);
+                        // Load the token (now async)
+                        const nft = await loadSpecificToken(tokenIdNum);
                         if (nft) loadedCount++;
                         
                         return { tokenId: tokenIdNum, owned: true, loaded: true };
