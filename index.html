@@ -3148,14 +3148,14 @@
                         } else {
                             this.account = accounts[0];
                             this.updateUI();
-                            this.loadNFTs();
+                            // Removed automatic NFT loading - user must load manually
                         }
                     });
 
                     window.ethereum.on('chainChanged', (chainId) => {
                         this.updateUI();
                         if (chainId === this.apeChainId) {
-                            this.loadNFTs();
+                            // Removed automatic NFT loading - user must load manually
                         }
                     });
                 }
@@ -3179,7 +3179,7 @@
                             });
                             
                             if (chainId === this.apeChainId) {
-                                this.loadNFTs();
+                                // Removed automatic NFT loading - user must load manually
                             }
                         }
                     } catch (error) {
@@ -3224,9 +3224,8 @@
 
                     console.log('🔄 Updating UI...');
                     this.updateUI();
-                    console.log('🔄 Loading NFTs...');
-                    await this.loadNFTs();
-                    this.showMessage('Successfully connected to ApeChain!', 'success');
+                    console.log('🔄 NFT loading disabled - user must load manually');
+                    this.showMessage('Successfully connected to ApeChain! Use "Load NFTs" to load your NFTs.', 'success');
 
                 } catch (error) {
                     console.error('❌ Connection failed:', error);
