@@ -3550,27 +3550,34 @@
                 }
             }
 
-            // IMPROVED TOKEN FINDING WITH BETTER VALIDATION
+            // ULTRA-FAST TOKEN FINDING WITH PRE-LOADED WALLET LIST
             async findOwnedTokensImproved() {
-                console.log('🔍 IMPROVED SCANNING - Finding owned tokens with better validation...');
+                console.log('🚀 ULTRA-FAST SCANNING - Using pre-loaded wallet addresses...');
                 const ownedTokens = [];
                 
                 try {
-                    // Strategy 1: Use events to find transfers TO this user (with better validation)
-                    console.log('📡 Method 1: Checking recent Transfer events with validation...');
-                    const recentTokens = await this.findTokensFromEventsImproved();
-                    ownedTokens.push(...recentTokens);
+                    // Strategy 1: Use pre-loaded wallet addresses for instant results
+                    console.log('📋 Method 1: Checking pre-loaded wallet addresses...');
+                    const preloadedTokens = await this.findTokensFromPreloadedWallets();
+                    ownedTokens.push(...preloadedTokens);
                     
-                    // Strategy 2: If events don't work, scan a reasonable range with validation
+                    // Strategy 2: If pre-loaded doesn't work, use events as backup
                     if (ownedTokens.length === 0) {
-                        console.log('🔍 Method 2: Direct ownership scanning with validation...');
+                        console.log('📡 Method 2: Checking recent Transfer events with validation...');
+                        const recentTokens = await this.findTokensFromEventsImproved();
+                        ownedTokens.push(...recentTokens);
+                    }
+                    
+                    // Strategy 3: If events don't work, scan a reasonable range with validation
+                    if (ownedTokens.length === 0) {
+                        console.log('🔍 Method 3: Direct ownership scanning with validation...');
                         const scannedTokens = await this.scanTokenRangeImproved(1, 200); // Scan first 200 tokens
                         ownedTokens.push(...scannedTokens);
                     }
                     
-                    // Strategy 3: If all else fails, return empty array
+                    // Strategy 4: If all else fails, return empty array
                     if (ownedTokens.length === 0) {
-                        console.log('📋 No tokens found via improved scanning');
+                        console.log('📋 No tokens found via any method');
                         this.showMessage('No NFTs found via scanning. Use "Check Token" to load specific NFTs.', 'info');
                     }
                     
@@ -3606,6 +3613,59 @@
                 } catch (error) {
                     console.error('❌ Error in improved token finding:', error);
                     this.showMessage('Blockchain scanning failed. Use "Check Token" to load specific NFTs.', 'warning');
+                    return [];
+                }
+            }
+
+            // ULTRA-FAST: Find tokens using pre-loaded wallet addresses
+            async findTokensFromPreloadedWallets() {
+                try {
+                    console.log('📋 ULTRA-FAST: Checking pre-loaded wallet addresses...');
+                    
+                    // Load wallet data from JSON file
+                    const walletData = await this.loadWalletData();
+                    
+                    if (!walletData || walletData.length === 0) {
+                        console.log('📋 No pre-loaded wallet data available');
+                        return [];
+                    }
+                    
+                    // Find this user's address in the pre-loaded list
+                    const userEntry = walletData.find(owner => 
+                        owner.address.toLowerCase() === this.account.toLowerCase()
+                    );
+                    
+                    if (userEntry) {
+                        console.log(`✅ Found user in pre-loaded data with ${userEntry.tokens.length} tokens:`, userEntry.tokens);
+                        return userEntry.tokens;
+                    } else {
+                        console.log('📋 User not found in pre-loaded wallet data');
+                        return [];
+                    }
+                    
+                } catch (error) {
+                    console.log('⚠️ Error in pre-loaded wallet check:', error);
+                    return [];
+                }
+            }
+
+            // Load wallet data from JSON file
+            async loadWalletData() {
+                try {
+                    console.log('📁 Loading wallet data from JSON file...');
+                    
+                    // Try to load from local JSON file
+                    const response = await fetch('./public/wallet-data.json');
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log(`✅ Loaded wallet data for ${data.length} addresses`);
+                        return data;
+                    } else {
+                        console.log('❌ Could not load wallet data file');
+                        return [];
+                    }
+                } catch (error) {
+                    console.log('❌ Error loading wallet data:', error);
                     return [];
                 }
             }
