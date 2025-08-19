@@ -3047,6 +3047,7 @@
                 this.provider = null;
                 this.account = null;
                 this.isConnected = false;
+                this.isLoadingNFTs = false; // Track loading state to prevent duplicate calls
                 this.contractAddress = '0x4e5913922b7ddf916c8d27d1016827f799687e66';
                 this.apeChainId = '0x8173'; // 33139 in hex
                 this.userNFTs = [];
@@ -3278,6 +3279,13 @@
             }
 
             async loadNFTs() {
+                // Prevent multiple simultaneous calls
+                if (this.isLoadingNFTs) {
+                    console.log('⏳ NFTs already loading, skipping duplicate call');
+                    return;
+                }
+                
+                this.isLoadingNFTs = true;
                 console.log('🚀 loadNFTs() called');
                 console.log('🔗 isConnected:', this.isConnected);
                 console.log('🔗 provider:', this.provider);
@@ -3285,6 +3293,14 @@
                 
                 if (!this.isConnected || !this.provider) {
                     console.log('❌ Not connected or no provider, returning');
+                    this.isLoadingNFTs = false;
+                    return;
+                }
+
+                // Check if we already have NFTs loaded for this account
+                if (this.userNFTs && this.userNFTs.length > 0) {
+                    console.log('✅ NFTs already loaded, skipping reload');
+                    this.isLoadingNFTs = false;
                     return;
                 }
 
@@ -3300,6 +3316,7 @@
                     if (chainId !== this.apeChainId) {
                         console.log('⚠️ Wrong chain, switching to ApeChain...');
                         await this.switchToApeChain();
+                        this.isLoadingNFTs = false;
                         return;
                     }
 
@@ -3323,6 +3340,8 @@
                     console.log('🔄 Loading sample data as fallback...');
                     this.loadSampleNFTs(4); // Load sample data on error
                     this.showMessage(`Error loading NFTs: ${error.message}`, 'error');
+                } finally {
+                    this.isLoadingNFTs = false;
                 }
             }
 
@@ -3884,6 +3903,7 @@
                 this.provider = null;
                 this.account = null;
                 this.isConnected = false;
+                this.isLoadingNFTs = false; // Reset loading state
                 this.userNFTs = [];
                 this.stakedNFTs = [];
                 this.fishCoins = 0;
@@ -7810,37 +7830,39 @@
                 // Show loading notification
                 showNFTLoadingNotification();
                 
-                // Load NFTs in background
-                otterWallet.loadNFTs().then(() => {
-                    console.log('✅ NFTs loaded in background!');
-                    
-                    // Show loaded notification
-                    showNFTLoadedNotification(otterWallet.userNFTs.length);
-                    
-                    // Apply bonuses after NFTs are loaded
-                    const multipliers = otterWallet.getGameMultipliers();
-                    const stakingBonus = otterWallet.getStakingBonus();
-                    
-                    console.log('🎮 Applying wallet bonuses after background load:', multipliers);
-                    console.log('💰 Staking bonus:', stakingBonus);
-                    
-                    // Auto-stake all NFTs for demo
-                    if (otterWallet.userNFTs.length > 0) {
-                        otterWallet.autoStakeAll();
-                    }
-                    
-                    // Show trait bonus notification
-                    const activeTraits = otterWallet.getActiveTraits();
-                    if (activeTraits.length > 0) {
-                        showTraitBonusNotification(activeTraits, multipliers);
-                    }
-                    
-                    // Update UI to show loaded NFTs
-                    updateWalletProfile();
-                    
-                }).catch(error => {
-                    console.error('❌ Error loading NFTs in background:', error);
-                });
+                // Load NFTs in background with delay to prevent game lag
+                setTimeout(() => {
+                    otterWallet.loadNFTs().then(() => {
+                        console.log('✅ NFTs loaded in background!');
+                        
+                        // Show loaded notification
+                        showNFTLoadedNotification(otterWallet.userNFTs.length);
+                        
+                        // Apply bonuses after NFTs are loaded
+                        const multipliers = otterWallet.getGameMultipliers();
+                        const stakingBonus = otterWallet.getStakingBonus();
+                        
+                        console.log('🎮 Applying wallet bonuses after background load:', multipliers);
+                        console.log('💰 Staking bonus:', stakingBonus);
+                        
+                        // Auto-stake all NFTs for demo
+                        if (otterWallet.userNFTs.length > 0) {
+                            otterWallet.autoStakeAll();
+                        }
+                        
+                        // Show trait bonus notification
+                        const activeTraits = otterWallet.getActiveTraits();
+                        if (activeTraits.length > 0) {
+                            showTraitBonusNotification(activeTraits, multipliers);
+                        }
+                        
+                        // Update UI to show loaded NFTs
+                        updateWalletProfile();
+                        
+                    }).catch(error => {
+                        console.error('❌ Error loading NFTs in background:', error);
+                    });
+                }, 1000); // 1 second delay to let game start smoothly
                 
             } else if (otterWallet) {
                 console.log('🎮 Wallet not connected, starting game without NFT loading');
