@@ -2787,7 +2787,8 @@
                         <div style="font-size: 18px; font-weight: bold; color: #4CAF50; margin-bottom: 5px;">Connected to ApeChain</div>
                         <div id="walletAddressDisplay" style="font-size: 14px; color: #00FFFF; font-family: monospace; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; margin: 10px 0;">0x0000...0000</div>
                         <div style="margin-top: 15px;">
-                            <button onclick="stakeAllNFTs()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease;">🔒 Stake All</button>
+                            <button onclick="loadNFTsManually()" style="background: linear-gradient(135deg, #2196F3, #1976D2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease;">🦦 Load NFTs</button>
+                            <button onclick="stakeAllNFTs()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔒 Stake All</button>
                             <button onclick="unstakeAllNFTs()" style="background: linear-gradient(135deg, #F44336, #D32F2F); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔓 Unstake All</button>
                             <button onclick="claimAllRewards()" style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">💰 Claim Rewards</button>
                             <button onclick="selectNFTsToStake()" style="background: linear-gradient(135deg, #9C27B0, #7B1FA2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🎯 Select NFTs</button>
@@ -18629,6 +18630,36 @@
             return tokenIds;
         }
         
+        function loadNFTsManually() {
+            console.log('🦦 MANUAL NFT LOADING - Starting...');
+            
+            if (!otterWallet || !otterWallet.isConnected) {
+                console.log('⚠️ Wallet not connected');
+                return;
+            }
+            
+            console.log('👤 Wallet address:', otterWallet.account);
+            console.log('🔗 Network:', window.ethereum.chainId);
+            
+            // Force load NFTs with detailed logging
+            otterWallet.loadUserNFTsWithMetadata(0).then(() => {
+                console.log('✅ Manual NFT loading completed');
+                console.log('📊 NFTs found:', otterWallet.userNFTs.length);
+                console.log('📋 NFT details:', otterWallet.userNFTs);
+                
+                if (otterWallet.userNFTs.length > 0) {
+                    otterWallet.showMessage(`Found ${otterWallet.userNFTs.length} NFTs!`, 'success');
+                } else {
+                    otterWallet.showMessage('No NFTs found in this wallet', 'warning');
+                }
+                
+                updateWalletProfile();
+            }).catch(error => {
+                console.error('❌ Manual NFT loading failed:', error);
+                otterWallet.showMessage(`Error loading NFTs: ${error.message}`, 'error');
+            });
+        }
+
         function refreshWalletData() {
             console.log('🔄 Refreshing wallet data...');
             console.log('🔍 otterWallet exists:', !!otterWallet);
@@ -18639,10 +18670,23 @@
                 console.log('👤 Current wallet address:', otterWallet.account);
                 console.log('🔗 Current network:', window.ethereum.chainId);
                 
-                otterWallet.loadNFTs().then(() => {
+                // First try to get balance to see if we have any NFTs
+                otterWallet.getTokenBalance().then(balance => {
+                    console.log('📊 Token balance:', balance);
+                    
+                    if (balance > 0) {
+                        console.log('🎉 Found NFTs in wallet! Loading metadata...');
+                        return otterWallet.loadUserNFTsWithMetadata(balance);
+                    } else {
+                        console.log('⚠️ No NFTs found in wallet balance');
+                        // Still try to load NFTs in case balance check fails
+                        return otterWallet.loadUserNFTsWithMetadata(0);
+                    }
+                }).then(() => {
                     updateWalletProfile();
                     console.log('✅ Wallet data refreshed');
                     console.log('📊 Total NFTs loaded:', otterWallet.userNFTs.length);
+                    console.log('📋 NFT details:', otterWallet.userNFTs);
                 }).catch(error => {
                     console.error('❌ Failed to refresh wallet data:', error);
                 });
