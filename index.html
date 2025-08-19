@@ -3414,8 +3414,8 @@
                                 this.userNFTs.push(nft);
                                 console.log(`🦦 Added NFT: ${nft.name} with traits: ${nft.traits.join(', ')}`);
                             } else {
-                                console.log(`⚠️ No metadata found for token ${tokenId}, creating basic NFT`);
-                                this.userNFTs.push(this.createBasicNFT(tokenId));
+                                console.log(`⚠️ No metadata found for token ${tokenId}, skipping this token`);
+                                // DO NOT ADD ANYTHING - skip invalid tokens
                             }
                             
                             // Small delay between requests to be nice to servers
@@ -3425,8 +3425,7 @@
                             
                         } catch (error) {
                             console.warn(`⚠️ Error loading metadata for token ${tokenId}:`, error.message);
-                            // Add basic NFT even if metadata fails
-                            this.userNFTs.push(this.createBasicNFT(tokenId));
+                            // DO NOT ADD ANYTHING - skip invalid tokens
                         }
                     }
                     
@@ -3527,8 +3526,8 @@
                                 this.userNFTs.push(nft);
                                 console.log(`🦦 Added NFT: ${nft.name} with traits: ${nft.traits.join(', ')}`);
                             } else {
-                                console.log(`⚠️ No metadata found for token ${tokenId}, creating basic NFT`);
-                                this.userNFTs.push(this.createBasicNFT(tokenId));
+                                console.log(`⚠️ No metadata found for token ${tokenId}, skipping this token`);
+                                // DO NOT ADD ANYTHING - skip invalid tokens
                             }
                             
                             // Small delay between requests to be nice to servers
@@ -3538,8 +3537,7 @@
                             
                         } catch (error) {
                             console.warn(`⚠️ Error loading metadata for token ${tokenId}:`, error.message);
-                            // Add basic NFT even if metadata fails
-                            this.userNFTs.push(this.createBasicNFT(tokenId));
+                            // DO NOT ADD ANYTHING - skip invalid tokens
                         }
                     }
                     
@@ -3895,15 +3893,32 @@
                 try {
                     console.log(`📁 Loading local metadata for token #${tokenId}...`);
                     
-                    const response = await fetch(`./metadata/${tokenId}.json`);
-                    if (response.ok) {
-                        const metadata = await response.json();
-                        console.log(`✅ Local metadata loaded for token #${tokenId}:`, metadata);
-                        return metadata;
-                    } else {
-                        console.log(`❌ Local metadata file not found: ${tokenId}.json`);
-                        return null;
+                    // Try multiple possible paths for local metadata
+                    const possiblePaths = [
+                        `./metadata/${tokenId}.json`,
+                        `./public/metadata/${tokenId}.json`,
+                        `/metadata/${tokenId}.json`,
+                        `/public/metadata/${tokenId}.json`
+                    ];
+                    
+                    for (const path of possiblePaths) {
+                        try {
+                            console.log(`🔍 Trying path: ${path}`);
+                            const response = await fetch(path);
+                            if (response.ok) {
+                                const metadata = await response.json();
+                                console.log(`✅ Local metadata loaded for token #${tokenId} from ${path}:`, metadata);
+                                return metadata;
+                            } else {
+                                console.log(`❌ Path ${path} returned ${response.status}`);
+                            }
+                        } catch (error) {
+                            console.log(`❌ Path ${path} failed: ${error.message}`);
+                        }
                     }
+                    
+                    console.log(`❌ All local paths failed for token #${tokenId}`);
+                    return null;
                 } catch (error) {
                     console.log(`❌ Error loading local metadata for token #${tokenId}:`, error);
                     return null;
