@@ -5190,17 +5190,21 @@
             }
         }
 
-        // Initialize the wallet integration immediately
-        let otterWallet;
-        try {
-            otterWallet = new OtterfulWallet();
-            console.log('🔗 OtterfulWallet initialized successfully');
-        } catch (error) {
-            console.error('❌ Failed to initialize OtterfulWallet:', error);
-            otterWallet = null;
-        }
+        // Wait for DOM to be fully loaded before initializing
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎮 DOM loaded, initializing game...');
+            
+            // Initialize the wallet integration
+            let otterWallet;
+            try {
+                otterWallet = new OtterfulWallet();
+                console.log('🔗 OtterfulWallet initialized successfully');
+            } catch (error) {
+                console.error('❌ Failed to initialize OtterfulWallet:', error);
+                otterWallet = null;
+            }
 
-        console.log('🎮 Game script starting...');
+            console.log('🎮 Game script starting...');
         
         const canvas = document.getElementById('gameCanvas');
         if (!canvas) {
@@ -22501,6 +22505,7 @@
             }
         `;
         document.head.appendChild(style);
+        }); // Close DOMContentLoaded event listener
 
         function testMetadataFetching() {
             console.log('🌐 Testing metadata fetching for your wallet...');
