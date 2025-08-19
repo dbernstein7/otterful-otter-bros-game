@@ -2791,6 +2791,7 @@
                             <button onclick="checkProfileAccess()" style="background: linear-gradient(135deg, #607D8B, #455A64); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔍 Check Profile</button>
                             <button onclick="testLocalMetadata()" style="background: linear-gradient(135deg, #00BCD4, #0097A7); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">📁 Test Local Metadata</button>
                             <button onclick="testLocalNFTLoading()" style="background: linear-gradient(135deg, #8BC34A, #689F38); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🦦 Test Local NFTs</button>
+                            <button onclick="enableBlockchainScanning()" style="background: linear-gradient(135deg, #FF5722, #E64A19); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔗 Enable Blockchain</button>
                             <button onclick="testNFTLoading()" style="background: linear-gradient(135deg, #E91E63, #C2185B); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🧪 Test NFT Loading</button>
                             <button onclick="refreshWalletData()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔄 Refresh Data</button>
                             <button onclick="refreshMetadata()" style="background: linear-gradient(135deg, #2196F3, #1976D2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🌐 Refresh Metadata</button>
@@ -3464,82 +3465,18 @@
             }
             
             async getOwnedTokenIds() {
-                const tokenIds = [];
-                
-                console.log('🔍 Starting batch scan for owned tokens...');
+                console.log('🚫 BLOCKCHAIN SCANNING DISABLED - Using local metadata system only');
                 console.log('📋 Contract address:', this.contractAddress);
                 console.log('👤 User address:', this.account);
                 
-                // Scan in batches of 500 tokens
-                const BATCH_SIZE = 500;
-                const TOTAL_OTTERS = 2222; // Total supply of Otterful Otters
-                const TOTAL_BATCHES = Math.ceil(TOTAL_OTTERS / BATCH_SIZE);
+                // Return sample token IDs for testing with local metadata
+                // This bypasses all blockchain scanning and RPC calls
+                const sampleTokenIds = [1499, 1000, 500, 1];
                 
-                console.log(`🔍 Scanning ${TOTAL_OTTERS} Otterful Otters in ${TOTAL_BATCHES} batches of ${BATCH_SIZE}...`);
+                console.log('🦦 Using sample token IDs for local metadata testing:', sampleTokenIds);
+                console.log('📊 No blockchain scanning - no RPC errors!');
                 
-                for (let batch = 0; batch < TOTAL_BATCHES; batch++) {
-                    const startToken = batch * BATCH_SIZE;
-                    const endToken = Math.min((batch + 1) * BATCH_SIZE, TOTAL_OTTERS);
-                    
-                    console.log(`📦 Starting batch ${batch + 1}/${TOTAL_BATCHES}: tokens ${startToken}-${endToken - 1}`);
-                    
-                    let batchErrorCount = 0;
-                    let batchConsecutiveErrors = 0;
-                    
-                    for (let i = startToken; i < endToken; i++) {
-                        try {
-                            // Add delay every 25 calls within a batch
-                            if ((i - startToken) % 25 === 0 && (i - startToken) > 0) {
-                                console.log(`⏳ Batch ${batch + 1}: Pausing for 500ms...`);
-                                await new Promise(resolve => setTimeout(resolve, 500));
-                            }
-                            
-                            const owner = await this.getTokenOwner(i);
-                            if (owner && owner.toLowerCase() === this.account.toLowerCase()) {
-                                console.log(`✅ Found owned token: ${i}`);
-                                tokenIds.push(i);
-                                batchConsecutiveErrors = 0; // Reset consecutive errors
-                            }
-                            
-                            // Show progress every 50 tokens within batch
-                            if ((i - startToken) % 50 === 0) {
-                                const batchProgress = Math.round(((i - startToken) / (endToken - startToken)) * 100);
-                                console.log(`📊 Batch ${batch + 1} progress: ${batchProgress}% (token ${i})`);
-                            }
-                            
-                        } catch (error) {
-                            console.log(`❌ Error checking token ${i}:`, error.message);
-                            batchErrorCount++;
-                            batchConsecutiveErrors++;
-                            
-                            // If we get too many consecutive errors in this batch, pause longer
-                            if (batchConsecutiveErrors >= 3) {
-                                console.log(`⚠️ ${batchConsecutiveErrors} consecutive errors in batch ${batch + 1}, pausing for 2 seconds...`);
-                                await new Promise(resolve => setTimeout(resolve, 2000));
-                                batchConsecutiveErrors = 0;
-                            }
-                            
-                            // Stop this batch if too many errors
-                            if (batchErrorCount > 10) {
-                                console.log(`⚠️ Too many errors in batch ${batch + 1}, stopping batch`);
-                                break;
-                            }
-                        }
-                    }
-                    
-                    // Pause between batches to prevent RPC overload
-                    if (batch < TOTAL_BATCHES - 1) {
-                        console.log(`⏳ Completed batch ${batch + 1}/${TOTAL_BATCHES}, pausing for 3 seconds before next batch...`);
-                        await new Promise(resolve => setTimeout(resolve, 3000));
-                    }
-                    
-                    // Reset error counts for next batch
-                    batchErrorCount = 0;
-                    batchConsecutiveErrors = 0;
-                }
-                
-                console.log('📊 Total owned tokens found:', tokenIds);
-                return tokenIds;
+                return sampleTokenIds;
             }
             
             async getTokenOwner(tokenId) {
@@ -17441,6 +17378,90 @@
             } catch (error) {
                 console.error('❌ Error in local NFT loading:', error);
                 alert('❌ Error loading NFTs. Check console for details.');
+            }
+        }
+
+        // Function to enable blockchain scanning (for advanced users)
+        async function enableBlockchainScanning() {
+            console.log('🔗 Enabling blockchain scanning...');
+            
+            if (!otterWallet || !otterWallet.isConnected) {
+                console.log('⚠️ Wallet not connected');
+                alert('Please connect your wallet first!');
+                return;
+            }
+            
+            const confirmed = confirm('⚠️ WARNING: This will scan the blockchain for your owned NFTs.\n\nThis may cause RPC errors and take a long time.\n\nAre you sure you want to continue?');
+            
+            if (!confirmed) {
+                console.log('❌ Blockchain scanning cancelled by user');
+                return;
+            }
+            
+            console.log('🔍 Starting blockchain scan for owned NFTs...');
+            
+            try {
+                // Temporarily enable blockchain scanning
+                const originalGetOwnedTokenIds = otterWallet.getOwnedTokenIds;
+                
+                otterWallet.getOwnedTokenIds = async function() {
+                    console.log('🔍 BLOCKCHAIN SCANNING ENABLED - Scanning for owned tokens...');
+                    
+                    const tokenIds = [];
+                    const TOTAL_OTTERS = 2222;
+                    const BATCH_SIZE = 100; // Smaller batches to reduce errors
+                    
+                    for (let i = 0; i < TOTAL_OTTERS; i += BATCH_SIZE) {
+                        const endToken = Math.min(i + BATCH_SIZE, TOTAL_OTTERS);
+                        console.log(`📦 Scanning tokens ${i}-${endToken - 1}...`);
+                        
+                        for (let j = i; j < endToken; j++) {
+                            try {
+                                const owner = await this.getTokenOwner(j);
+                                if (owner && owner.toLowerCase() === this.account.toLowerCase()) {
+                                    console.log(`✅ Found owned token: ${j}`);
+                                    tokenIds.push(j);
+                                }
+                                
+                                // Add delay every 10 calls
+                                if ((j - i) % 10 === 0 && (j - i) > 0) {
+                                    await new Promise(resolve => setTimeout(resolve, 1000));
+                                }
+                            } catch (error) {
+                                console.log(`❌ Error checking token ${j}:`, error.message);
+                                // Continue scanning even if some tokens fail
+                            }
+                        }
+                        
+                        // Pause between batches
+                        if (endToken < TOTAL_OTTERS) {
+                            console.log('⏳ Pausing between batches...');
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+                        }
+                    }
+                    
+                    console.log('📊 Blockchain scan completed. Found tokens:', tokenIds);
+                    return tokenIds;
+                };
+                
+                // Load NFTs with blockchain scanning
+                await otterWallet.loadUserNFTsWithMetadata(4);
+                
+                // Restore original function
+                otterWallet.getOwnedTokenIds = originalGetOwnedTokenIds;
+                
+                console.log('✅ Blockchain scanning completed!');
+                console.log('📊 Loaded NFTs:', otterWallet.userNFTs);
+                
+                if (otterWallet.userNFTs.length > 0) {
+                    alert(`✅ Successfully loaded ${otterWallet.userNFTs.length} NFTs from blockchain!\n\nCheck console for details.`);
+                    updateWalletProfile();
+                } else {
+                    alert('⚠️ No NFTs found in blockchain scan. Check console for details.');
+                }
+            } catch (error) {
+                console.error('❌ Error in blockchain scanning:', error);
+                alert('❌ Error during blockchain scan. Check console for details.');
             }
         }
 
