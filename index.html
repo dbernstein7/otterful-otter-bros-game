@@ -2792,6 +2792,7 @@
                             <button onclick="loadMultipleTokens()" style="background: linear-gradient(135deg, #9C27B0, #7B1FA2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">📦 Load Multiple</button>
                             <button onclick="clearInvalidNFTs()" style="background: linear-gradient(135deg, #FF5722, #E64A19); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🧹 Clear Invalid</button>
                             <button onclick="resetNFTGallery()" style="background: linear-gradient(135deg, #795548, #5D4037); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔄 Reset Gallery</button>
+                            <button onclick="debugToken102Issue()" style="background: linear-gradient(135deg, #607D8B, #455A64); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔍 Debug #102</button>
                             <button onclick="stakeAllNFTs()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔒 Stake All</button>
                             <button onclick="unstakeAllNFTs()" style="background: linear-gradient(135deg, #F44336, #D32F2F); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔓 Unstake All</button>
                             <button onclick="claimAllRewards()" style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">💰 Claim Rewards</button>
@@ -18703,6 +18704,7 @@
             
             const tokenIdNum = parseInt(tokenId);
             console.log(`🔍 Checking token #${tokenIdNum}...`);
+            console.log(`🔍 Input validation: tokenId="${tokenId}", tokenIdNum=${tokenIdNum}, type=${typeof tokenIdNum}`);
             
             // Check ownership first
             otterWallet.getTokenOwner(tokenIdNum).then(owner => {
@@ -18714,7 +18716,10 @@
                     otterWallet.showMessage(`You own Token #${tokenIdNum}!`, 'success');
                     
                     // Load this specific token
-                    return loadSpecificToken(tokenIdNum);
+                    console.log(`🦦 About to call loadSpecificToken(${tokenIdNum})...`);
+                    const result = loadSpecificToken(tokenIdNum);
+                    console.log(`🦦 loadSpecificToken returned:`, result);
+                    return result;
                 } else {
                     console.log(`❌ You don't own Token #${tokenIdNum}`);
                     otterWallet.showMessage(`You don't own Token #${tokenIdNum}`, 'warning');
@@ -18728,6 +18733,7 @@
 
         function loadSpecificToken(tokenId) {
             console.log(`🦦 Loading specific token #${tokenId}...`);
+            console.log(`🦦 Input validation: tokenId=${tokenId}, type=${typeof tokenId}`);
             console.log(`📋 Current NFTs before loading:`, otterWallet.userNFTs.map(n => n.tokenId));
             
             // Check if token is already loaded
@@ -18739,6 +18745,7 @@
             }
             
             // Create NFT object for this specific token
+            console.log(`🎨 Creating NFT object for token #${tokenId}...`);
             const nft = {
                 tokenId: tokenId,
                 name: `Otterful Otter #${tokenId}`,
@@ -18749,6 +18756,9 @@
                 image: `./images/otter_${tokenId}.png`,
                 description: `Otterful Otter #${tokenId}`
             };
+            
+            console.log(`🎨 Created NFT object:`, nft);
+            console.log(`🎨 NFT tokenId verification: ${nft.tokenId} === ${tokenId}? ${nft.tokenId === tokenId}`);
             
             // Add to userNFTs array (don't replace, add to existing)
             otterWallet.userNFTs.push(nft);
@@ -19008,6 +19018,58 @@
             
             // Update the UI
             updateWalletProfile();
+        }
+
+        function debugToken102Issue() {
+            console.log('🔍 DEBUGGING TOKEN #102 ISSUE - Starting...');
+            
+            if (!otterWallet || !otterWallet.isConnected) {
+                console.log('⚠️ Wallet not connected');
+                return;
+            }
+            
+            console.log('📋 Current NFTs in gallery:', otterWallet.userNFTs);
+            console.log('📋 Token IDs in gallery:', otterWallet.userNFTs.map(n => n.tokenId));
+            
+            // Check if token #102 exists
+            const token102 = otterWallet.userNFTs.find(n => n.tokenId === 102);
+            if (token102) {
+                console.log('❌ TOKEN #102 FOUND IN GALLERY:', token102);
+                console.log('❌ This token should not be here!');
+            } else {
+                console.log('✅ Token #102 not found in gallery (good!)');
+            }
+            
+            // Check for any suspicious tokens
+            const suspiciousTokens = otterWallet.userNFTs.filter(n => 
+                !n.tokenId || 
+                isNaN(n.tokenId) || 
+                n.tokenId < 1 || 
+                n.tokenId > 2222 ||
+                n.tokenId === 102
+            );
+            
+            if (suspiciousTokens.length > 0) {
+                console.log('⚠️ SUSPICIOUS TOKENS FOUND:', suspiciousTokens);
+            } else {
+                console.log('✅ No suspicious tokens found');
+            }
+            
+            // Check if any functions are being called that might add token #102
+            console.log('🔍 Checking for potential sources of token #102...');
+            
+            // Test if getLocalTokenMetadata is being called
+            console.log('🔍 Testing getLocalTokenMetadata function...');
+            otterWallet.getLocalTokenMetadata(102).then(metadata => {
+                console.log('⚠️ getLocalTokenMetadata(102) returned:', metadata);
+                if (metadata) {
+                    console.log('❌ This might be the source of token #102!');
+                }
+            }).catch(error => {
+                console.log('✅ getLocalTokenMetadata(102) failed (good!):', error.message);
+            });
+            
+            otterWallet.showMessage('Debug complete! Check console for results.', 'info');
         }
 
         function refreshWalletData() {
