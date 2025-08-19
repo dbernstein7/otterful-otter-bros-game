@@ -19234,32 +19234,38 @@
             let loadedCount = 0;
             let ownedCount = 0;
             
-            // Process each token
-            Promise.all(tokenIdArray.map(async (tokenId) => {
-                try {
-                    const tokenIdNum = parseInt(tokenId);
-                    console.log(`🔍 Checking token #${tokenIdNum}...`);
-                    
-                    const owner = await otterWallet.getTokenOwner(tokenIdNum);
-                    
-                    if (owner && owner.toLowerCase() === otterWallet.account.toLowerCase()) {
-                        console.log(`✅ You own token #${tokenIdNum}`);
-                        ownedCount++;
+            // Process each token sequentially to avoid race conditions
+            const processTokens = async () => {
+                for (let i = 0; i < tokenIdArray.length; i++) {
+                    const tokenId = tokenIdArray[i];
+                    try {
+                        const tokenIdNum = parseInt(tokenId);
+                        console.log(`🔍 Checking token #${tokenIdNum} (${i + 1}/${tokenIdArray.length})...`);
                         
-                        // Load the token (now async)
-                        const nft = await loadSpecificToken(tokenIdNum);
-                        if (nft) loadedCount++;
+                        const owner = await otterWallet.getTokenOwner(tokenIdNum);
                         
-                        return { tokenId: tokenIdNum, owned: true, loaded: true };
-                    } else {
-                        console.log(`❌ You don't own token #${tokenIdNum}`);
-                        return { tokenId: tokenIdNum, owned: false, loaded: false };
+                        if (owner && owner.toLowerCase() === otterWallet.account.toLowerCase()) {
+                            console.log(`✅ You own token #${tokenIdNum}`);
+                            ownedCount++;
+                            
+                            // Load the token (now async)
+                            const nft = await loadSpecificToken(tokenIdNum);
+                            if (nft) loadedCount++;
+                            
+                            console.log(`✅ Successfully processed token #${tokenIdNum}`);
+                        } else {
+                            console.log(`❌ You don't own token #${tokenIdNum}`);
+                        }
+                        
+                        // Small delay between tokens to be nice to servers
+                        if (i < tokenIdArray.length - 1) {
+                            await new Promise(resolve => setTimeout(resolve, 500));
+                        }
+                    } catch (error) {
+                        console.error(`❌ Error checking token #${tokenId}:`, error);
                     }
-                } catch (error) {
-                    console.error(`❌ Error checking token #${tokenId}:`, error);
-                    return { tokenId: parseInt(tokenId), owned: false, loaded: false, error: error.message };
                 }
-            })).then(results => {
+                
                 console.log('📦 Multiple token loading completed');
                 console.log(`📊 Results: ${ownedCount} owned, ${loadedCount} loaded`);
                 
@@ -19267,7 +19273,9 @@
                 
                 // Update the UI
                 updateWalletProfile();
-            }).catch(error => {
+            };
+            
+            processTokens().catch(error => {
                 console.error('❌ Multiple token loading failed:', error);
                 otterWallet.showMessage(`Error loading tokens: ${error.message}`, 'error');
             });
