@@ -19054,7 +19054,7 @@
                 multiplier: calculateMultiplierForTraits(generateTraitsForToken(tokenId)),
                 perks: calculatePerksForTraits(generateTraitsForToken(tokenId)),
                 rarity: calculateRarityForTraits(generateTraitsForToken(tokenId)),
-                image: `./images/otter_${tokenId}.png`,
+                image: otterWallet.processImageUrl(null, tokenId),
                 description: `Otterful Otter #${tokenId}`
             };
             
