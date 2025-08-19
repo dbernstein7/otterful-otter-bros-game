@@ -7851,31 +7851,55 @@
         document.getElementById('startGameBtn').addEventListener('click', (event) => {
             addButtonClickEffect(event.target);
             
-            // Check if wallet is connected and show trait bonuses
-            if (otterWallet && otterWallet.isConnected) {
-                const multipliers = otterWallet.getGameMultipliers();
-                const stakingBonus = otterWallet.getStakingBonus();
-                
-                console.log('🎮 Starting game with wallet bonuses:', multipliers);
-                console.log('💰 Staking bonus:', stakingBonus);
-                
-                // Auto-stake all NFTs for demo
-                if (otterWallet.userNFTs.length > 0) {
-                    otterWallet.autoStakeAll();
-                }
-                
-                // Show trait bonus notification
-                const activeTraits = otterWallet.getActiveTraits();
-                if (activeTraits.length > 0) {
-                    showTraitBonusNotification(activeTraits, multipliers);
-                }
-            } else if (otterWallet) {
-                console.log('🎮 Starting game without wallet connection');
-            } else {
-                console.log('🎮 Starting game without wallet integration');
-            }
+            console.log('🚀 Start Adventure clicked - starting game immediately!');
             
+            // Start the game immediately
             startGame();
+            
+            // Load NFTs in the background if wallet is connected
+            if (otterWallet && otterWallet.isConnected) {
+                console.log('🔄 Loading NFTs in background while game is running...');
+                
+                // Show loading notification
+                showNFTLoadingNotification();
+                
+                // Load NFTs in background
+                otterWallet.loadNFTs().then(() => {
+                    console.log('✅ NFTs loaded in background!');
+                    
+                    // Show loaded notification
+                    showNFTLoadedNotification(otterWallet.userNFTs.length);
+                    
+                    // Apply bonuses after NFTs are loaded
+                    const multipliers = otterWallet.getGameMultipliers();
+                    const stakingBonus = otterWallet.getStakingBonus();
+                    
+                    console.log('🎮 Applying wallet bonuses after background load:', multipliers);
+                    console.log('💰 Staking bonus:', stakingBonus);
+                    
+                    // Auto-stake all NFTs for demo
+                    if (otterWallet.userNFTs.length > 0) {
+                        otterWallet.autoStakeAll();
+                    }
+                    
+                    // Show trait bonus notification
+                    const activeTraits = otterWallet.getActiveTraits();
+                    if (activeTraits.length > 0) {
+                        showTraitBonusNotification(activeTraits, multipliers);
+                    }
+                    
+                    // Update UI to show loaded NFTs
+                    updateWalletProfile();
+                    
+                }).catch(error => {
+                    console.error('❌ Error loading NFTs in background:', error);
+                });
+                
+            } else if (otterWallet) {
+                console.log('🎮 Wallet not connected, starting game without NFT loading');
+            } else {
+                console.log('🎮 No wallet integration, starting game normally');
+            }
         });
         document.getElementById('profileBtn').addEventListener('click', (event) => {
             console.log('👤 Profile button clicked via event listener!');
@@ -17163,6 +17187,77 @@
         function testProfileButton() {
             console.log('🧪 Profile button test - this function is working!');
             alert('Profile button test - this function is working!');
+        }
+
+        function showNFTLoadingNotification() {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #2196F3, #1976D2);
+                color: white;
+                padding: 15px 20px;
+                border-radius: 10px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                z-index: 10000;
+                font-family: 'SuperMario', 'Orbitron', 'Arial Black', sans-serif;
+                font-size: 14px;
+                max-width: 300px;
+                animation: slideInRight 0.5s ease-out;
+            `;
+            
+            notification.innerHTML = `
+                <div style="font-weight: bold; margin-bottom: 8px;">🔄 Loading NFTs...</div>
+                <div style="font-size: 12px;">Your NFTs are being loaded in the background while you play!</div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.5s ease-in';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 500);
+            }, 3000);
+        }
+
+        function showNFTLoadedNotification(nftCount) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #4CAF50, #45a049);
+                color: white;
+                padding: 15px 20px;
+                border-radius: 10px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                z-index: 10000;
+                font-family: 'SuperMario', 'Orbitron', 'Arial Black', sans-serif;
+                font-size: 14px;
+                max-width: 300px;
+                animation: slideInRight 0.5s ease-out;
+            `;
+            
+            notification.innerHTML = `
+                <div style="font-weight: bold; margin-bottom: 8px;">✅ NFTs Loaded!</div>
+                <div style="font-size: 12px;">Found ${nftCount} NFTs - bonuses applied!</div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.5s ease-in';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 500);
+            }, 4000);
         }
 
         // Function to check if profile is accessible
