@@ -17910,28 +17910,65 @@
         }
         
         function saveMarketplaceData() {
-            localStorage.setItem('otterBrosMarketplace', JSON.stringify({
-                coins: game.marketplace.coins,
-                ownedHats: game.marketplace.ownedHats,
-                ownedSkins: game.marketplace.ownedSkins,
-                ownedAbilities: game.marketplace.ownedAbilities,
-                currentHat: game.marketplace.currentHat,
-                currentSkin: game.marketplace.currentSkin,
-                currentAbilities: game.marketplace.currentAbilities
-            }));
+            try {
+                const marketplaceData = {
+                    coins: game.marketplace.coins,
+                    ownedHats: game.marketplace.ownedHats,
+                    ownedSkins: game.marketplace.ownedSkins,
+                    ownedAbilities: game.marketplace.ownedAbilities,
+                    currentHat: game.marketplace.currentHat,
+                    currentSkin: game.marketplace.currentSkin,
+                    currentAbilities: game.marketplace.currentAbilities,
+                    timestamp: Date.now()
+                };
+                localStorage.setItem('otterBrosMarketplace', JSON.stringify(marketplaceData));
+                console.log('💾 Saved marketplace data to local storage');
+            } catch (error) {
+                console.error('❌ Error saving marketplace data:', error);
+            }
         }
         
         function loadMarketplaceData() {
-            console.log('🛒 Starting fresh marketplace - no saved data loaded');
+            console.log('🛒 Loading marketplace data...');
             
-            // Reset marketplace to fresh state
-            game.marketplace.coins = 0;
-            game.marketplace.ownedHats = [];
-            game.marketplace.ownedSkins = [];
-            game.marketplace.ownedAbilities = [];
-            game.marketplace.currentHat = null;
-            game.marketplace.currentSkin = null;
-            game.marketplace.currentAbilities = [];
+            try {
+                const savedData = localStorage.getItem('otterBrosMarketplace');
+                if (savedData) {
+                    const marketplaceData = JSON.parse(savedData);
+                    console.log('💾 Found saved marketplace data:', marketplaceData);
+                    
+                    // Load saved marketplace data
+                    game.marketplace.coins = marketplaceData.coins || 0;
+                    game.marketplace.ownedHats = marketplaceData.ownedHats || [];
+                    game.marketplace.ownedSkins = marketplaceData.ownedSkins || [];
+                    game.marketplace.ownedAbilities = marketplaceData.ownedAbilities || [];
+                    game.marketplace.currentHat = marketplaceData.currentHat || null;
+                    game.marketplace.currentSkin = marketplaceData.currentSkin || null;
+                    game.marketplace.currentAbilities = marketplaceData.currentAbilities || [];
+                    
+                    console.log('✅ Loaded marketplace data successfully');
+                } else {
+                    console.log('🆕 No saved marketplace data found, starting fresh');
+                    // Reset marketplace to fresh state
+                    game.marketplace.coins = 0;
+                    game.marketplace.ownedHats = [];
+                    game.marketplace.ownedSkins = [];
+                    game.marketplace.ownedAbilities = [];
+                    game.marketplace.currentHat = null;
+                    game.marketplace.currentSkin = null;
+                    game.marketplace.currentAbilities = [];
+                }
+            } catch (error) {
+                console.error('❌ Error loading marketplace data:', error);
+                // Reset marketplace to fresh state on error
+                game.marketplace.coins = 0;
+                game.marketplace.ownedHats = [];
+                game.marketplace.ownedSkins = [];
+                game.marketplace.ownedAbilities = [];
+                game.marketplace.currentHat = null;
+                game.marketplace.currentSkin = null;
+                game.marketplace.currentAbilities = [];
+            }
             
             // Reset all marketplace items but keep defaults
                 marketplaceItems.hats.forEach(hat => {
