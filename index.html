@@ -2789,6 +2789,7 @@
                         <div style="margin-top: 15px;">
                             <button onclick="loadNFTsManually()" style="background: linear-gradient(135deg, #2196F3, #1976D2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease;">🦦 Load NFTs</button>
                             <button onclick="checkSpecificToken()" style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔍 Check Token</button>
+                            <button onclick="loadMultipleTokens()" style="background: linear-gradient(135deg, #9C27B0, #7B1FA2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">📦 Load Multiple</button>
                             <button onclick="stakeAllNFTs()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔒 Stake All</button>
                             <button onclick="unstakeAllNFTs()" style="background: linear-gradient(135deg, #F44336, #D32F2F); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔓 Unstake All</button>
                             <button onclick="claimAllRewards()" style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">💰 Claim Rewards</button>
@@ -18705,23 +18706,32 @@
         function loadSpecificToken(tokenId) {
             console.log(`🦦 Loading specific token #${tokenId}...`);
             
+            // Check if token is already loaded
+            const existingIndex = otterWallet.userNFTs.findIndex(nft => nft.tokenId === tokenId);
+            if (existingIndex !== -1) {
+                console.log(`⚠️ Token #${tokenId} already loaded`);
+                otterWallet.showMessage(`Token #${tokenId} already in gallery!`, 'info');
+                return otterWallet.userNFTs[existingIndex];
+            }
+            
             // Create NFT object for this specific token
             const nft = {
                 tokenId: tokenId,
                 name: `Otterful Otter #${tokenId}`,
                 traits: generateTraitsForToken(tokenId),
-                multiplier: 1.0,
-                perks: [],
-                rarity: 'common',
+                multiplier: calculateMultiplierForTraits(generateTraitsForToken(tokenId)),
+                perks: calculatePerksForTraits(generateTraitsForToken(tokenId)),
+                rarity: calculateRarityForTraits(generateTraitsForToken(tokenId)),
                 image: `./images/otter_${tokenId}.png`,
                 description: `Otterful Otter #${tokenId}`
             };
             
-            // Add to userNFTs array
-            otterWallet.userNFTs = [nft];
+            // Add to userNFTs array (don't replace, add to existing)
+            otterWallet.userNFTs.push(nft);
             
             console.log(`✅ Added token #${tokenId} to wallet:`, nft);
-            otterWallet.showMessage(`Loaded Token #${tokenId}!`, 'success');
+            console.log(`📊 Total NFTs in gallery: ${otterWallet.userNFTs.length}`);
+            otterWallet.showMessage(`Added Token #${tokenId} to gallery! (Total: ${otterWallet.userNFTs.length})`, 'success');
             
             // Update the UI
             updateWalletProfile();
@@ -18774,6 +18784,124 @@
             
             console.log(`🎨 Generated traits for token ${tokenId}:`, traits);
             return traits;
+        }
+
+        function calculateMultiplierForTraits(traits) {
+            let multiplier = 1.0;
+            
+            traits.forEach(trait => {
+                if (trait.includes('Stealth-v2')) multiplier += 1.5;
+                else if (trait.includes('Plumber-v5')) multiplier += 1.3;
+                else if (trait.includes('Plumber-v3')) multiplier += 1.0;
+                else if (trait.includes('Golden')) multiplier += 0.5;
+                else if (trait.includes('Rainbow')) multiplier += 0.4;
+                else if (trait.includes('Laser')) multiplier += 0.3;
+                else if (trait.includes('Diamond')) multiplier += 0.3;
+                else if (trait.includes('Pirate')) multiplier += 0.2;
+            });
+            
+            return Math.round(multiplier * 10) / 10; // Round to 1 decimal
+        }
+
+        function calculatePerksForTraits(traits) {
+            const perks = [];
+            
+            traits.forEach(trait => {
+                if (trait.includes('Stealth-v2')) perks.push('Stealth Mode');
+                else if (trait.includes('Plumber-v5')) perks.push('Super Plumber');
+                else if (trait.includes('Laser')) perks.push('Laser Vision');
+                else if (trait.includes('Diamond')) perks.push('Diamond Hard');
+                else if (trait.includes('Golden')) perks.push('Golden Touch');
+            });
+            
+            return perks;
+        }
+
+        function calculateRarityForTraits(traits) {
+            let rarityScore = 0;
+            
+            traits.forEach(trait => {
+                if (trait.includes('Stealth-v2')) rarityScore += 5;
+                else if (trait.includes('Plumber-v5')) rarityScore += 4;
+                else if (trait.includes('Plumber-v3')) rarityScore += 3;
+                else if (trait.includes('Golden')) rarityScore += 2;
+                else if (trait.includes('Rainbow')) rarityScore += 2;
+                else if (trait.includes('Laser')) rarityScore += 2;
+                else if (trait.includes('Diamond')) rarityScore += 2;
+                else if (trait.includes('Pirate')) rarityScore += 1;
+            });
+            
+            if (rarityScore >= 8) return 'legendary';
+            else if (rarityScore >= 5) return 'epic';
+            else if (rarityScore >= 3) return 'rare';
+            else return 'common';
+        }
+
+        function loadMultipleTokens() {
+            console.log('📦 LOADING MULTIPLE TOKENS - Starting...');
+            
+            if (!otterWallet || !otterWallet.isConnected) {
+                console.log('⚠️ Wallet not connected');
+                return;
+            }
+            
+            // Create a simple modal for multiple token input
+            const tokenIds = prompt('Enter Token IDs separated by commas (e.g., 1234, 5678, 9999):');
+            
+            if (!tokenIds) {
+                console.log('❌ No token IDs entered');
+                return;
+            }
+            
+            const tokenIdArray = tokenIds.split(',').map(id => id.trim()).filter(id => !isNaN(id));
+            
+            if (tokenIdArray.length === 0) {
+                console.log('❌ No valid token IDs found');
+                return;
+            }
+            
+            console.log(`📦 Loading ${tokenIdArray.length} tokens:`, tokenIdArray);
+            
+            let loadedCount = 0;
+            let ownedCount = 0;
+            
+            // Process each token
+            Promise.all(tokenIdArray.map(async (tokenId) => {
+                try {
+                    const tokenIdNum = parseInt(tokenId);
+                    console.log(`🔍 Checking token #${tokenIdNum}...`);
+                    
+                    const owner = await otterWallet.getTokenOwner(tokenIdNum);
+                    
+                    if (owner && owner.toLowerCase() === otterWallet.account.toLowerCase()) {
+                        console.log(`✅ You own token #${tokenIdNum}`);
+                        ownedCount++;
+                        
+                        // Load the token
+                        const nft = loadSpecificToken(tokenIdNum);
+                        if (nft) loadedCount++;
+                        
+                        return { tokenId: tokenIdNum, owned: true, loaded: true };
+                    } else {
+                        console.log(`❌ You don't own token #${tokenIdNum}`);
+                        return { tokenId: tokenIdNum, owned: false, loaded: false };
+                    }
+                } catch (error) {
+                    console.error(`❌ Error checking token #${tokenId}:`, error);
+                    return { tokenId: parseInt(tokenId), owned: false, loaded: false, error: error.message };
+                }
+            })).then(results => {
+                console.log('📦 Multiple token loading completed');
+                console.log(`📊 Results: ${ownedCount} owned, ${loadedCount} loaded`);
+                
+                otterWallet.showMessage(`Loaded ${loadedCount} NFTs! (${ownedCount} owned out of ${tokenIdArray.length} checked)`, 'success');
+                
+                // Update the UI
+                updateWalletProfile();
+            }).catch(error => {
+                console.error('❌ Multiple token loading failed:', error);
+                otterWallet.showMessage(`Error loading tokens: ${error.message}`, 'error');
+            });
         }
 
         function refreshWalletData() {
