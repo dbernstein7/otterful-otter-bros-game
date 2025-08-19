@@ -4984,7 +4984,48 @@
 
             showMessage(text, type = 'info') {
                 console.log(`${type.toUpperCase()}: ${text}`);
-                // You can add a notification system here
+                
+                // Create or find message container
+                let messageContainer = document.getElementById('messageContainer');
+                if (!messageContainer) {
+                    messageContainer = document.createElement('div');
+                    messageContainer.id = 'messageContainer';
+                    messageContainer.style.cssText = `
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        z-index: 10000;
+                        max-width: 300px;
+                        padding: 15px;
+                        border-radius: 8px;
+                        color: white;
+                        font-weight: bold;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                        transition: all 0.3s ease;
+                        opacity: 0;
+                        transform: translateX(100%);
+                    `;
+                    document.body.appendChild(messageContainer);
+                }
+                
+                // Set message content and style
+                messageContainer.textContent = text;
+                messageContainer.style.backgroundColor = {
+                    'success': '#4CAF50',
+                    'error': '#f44336',
+                    'warning': '#ff9800',
+                    'info': '#2196F3'
+                }[type] || '#2196F3';
+                
+                // Show message
+                messageContainer.style.opacity = '1';
+                messageContainer.style.transform = 'translateX(0)';
+                
+                // Auto-hide after 5 seconds
+                setTimeout(() => {
+                    messageContainer.style.opacity = '0';
+                    messageContainer.style.transform = 'translateX(100%)';
+                }, 5000);
             }
 
             // Game integration methods
