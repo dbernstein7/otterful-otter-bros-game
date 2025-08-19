@@ -18961,13 +18961,16 @@
             console.log('👤 Wallet address:', otterWallet.account);
             console.log('🔗 Network:', window.ethereum.chainId);
             
-            // RE-ENABLED WITH IMPROVED SCANNING TO PREVENT TOKEN #102 ISSUE
-            console.log('🔍 Starting improved automatic scanning...');
+            // Use the same function as automatic loading for consistency
+            console.log('🔍 Starting manual NFT loading...');
             otterWallet.showMessage('Scanning blockchain for your NFTs...', 'info');
             
-            // Use improved NFT loading with better error handling
-            otterWallet.loadUserNFTsWithMetadataImproved(0).then(() => {
-                console.log('✅ Improved automatic NFT loading completed');
+            // Clear existing NFTs to force fresh load
+            otterWallet.userNFTs = [];
+            
+            // Use the same function as automatic loading
+            otterWallet.loadNFTs().then(() => {
+                console.log('✅ Manual NFT loading completed');
                 console.log('📊 NFTs found:', otterWallet.userNFTs.length);
                 console.log('📋 NFT details:', otterWallet.userNFTs);
                 
@@ -18979,7 +18982,7 @@
                 
                 updateWalletProfile();
             }).catch(error => {
-                console.error('❌ Improved automatic NFT loading failed:', error);
+                console.error('❌ Manual NFT loading failed:', error);
                 otterWallet.showMessage(`Error loading NFTs: ${error.message}`, 'error');
             });
         }
