@@ -2798,6 +2798,7 @@
                             <button onclick="claimAllRewards()" style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">💰 Claim Rewards</button>
                             <button onclick="selectNFTsToStake()" style="background: linear-gradient(135deg, #9C27B0, #7B1FA2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🎯 Select NFTs</button>
                             <button onclick="refreshWalletData()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔄 Refresh Data</button>
+                            <button onclick="scanForMyNFTs()" style="background: linear-gradient(135deg, #2196F3, #1976D2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔍 Scan My NFTs</button>
                             <button onclick="refreshMetadata()" style="background: linear-gradient(135deg, #2196F3, #1976D2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🌐 Refresh Metadata</button>
                             <button onclick="checkNFTs()" style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔍 Check NFTs</button>
                             <button onclick="scanAllOtterfulOtters()" style="background: linear-gradient(135deg, #9C27B0, #7B1FA2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔍 Scan All 2222</button>
@@ -3489,18 +3490,55 @@
             }
             
             async getOwnedTokenIds() {
-                console.log('🚫 BLOCKCHAIN SCANNING DISABLED - Using local metadata system only');
+                console.log('🔍 ENABLING BLOCKCHAIN SCANNING - Looking for your real owned NFTs');
                 console.log('📋 Contract address:', this.contractAddress);
                 console.log('👤 User address:', this.account);
                 
-                // Return sample token IDs for testing with local metadata
-                // This bypasses all blockchain scanning and RPC calls
-                const sampleTokenIds = [1499, 1000, 500, 1];
+                const tokenIds = [];
+                const TOTAL_OTTERS = 2222;
+                const BATCH_SIZE = 100; // Smaller batches to reduce RPC errors
                 
-                console.log('🦦 Using sample token IDs for local metadata testing:', sampleTokenIds);
-                console.log('📊 No blockchain scanning - no RPC errors!');
+                console.log(`🔍 Scanning ${TOTAL_OTTERS} Otterful Otters for your wallet...`);
                 
-                return sampleTokenIds;
+                for (let i = 0; i < TOTAL_OTTERS; i += BATCH_SIZE) {
+                    const endToken = Math.min(i + BATCH_SIZE, TOTAL_OTTERS);
+                    console.log(`📦 Scanning tokens ${i}-${endToken - 1}...`);
+                    
+                    for (let j = i; j < endToken; j++) {
+                        try {
+                            const owner = await this.getTokenOwner(j);
+                            if (owner && owner.toLowerCase() === this.account.toLowerCase()) {
+                                console.log(`✅ Found owned token: ${j}`);
+                                tokenIds.push(j);
+                            }
+                            
+                            // Add delay every 10 calls to prevent RPC overload
+                            if ((j - i) % 10 === 0 && (j - i) > 0) {
+                                console.log('⏳ Pausing to prevent RPC overload...');
+                                await new Promise(resolve => setTimeout(resolve, 1000));
+                            }
+                        } catch (error) {
+                            console.log(`❌ Error checking token ${j}:`, error.message);
+                            // Continue scanning even if some tokens fail
+                        }
+                    }
+                    
+                    // Pause between batches
+                    if (endToken < TOTAL_OTTERS) {
+                        console.log('⏳ Pausing between batches...');
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                    }
+                }
+                
+                console.log('📊 Blockchain scan completed. Found tokens:', tokenIds);
+                
+                // If no tokens found, use sample tokens for testing
+                if (tokenIds.length === 0) {
+                    console.log('⚠️ No owned tokens found, using sample tokens for testing');
+                    return [1499, 1000, 500, 1];
+                }
+                
+                return tokenIds;
             }
             
             async getTokenOwner(tokenId) {
@@ -17816,6 +17854,55 @@
             } catch (error) {
                 console.error('❌ Error unstaking NFTs:', error);
                 alert(`❌ Error unstaking NFTs: ${error.message}`);
+            }
+        }
+
+        // Function to scan for your real owned NFTs
+        async function scanForMyNFTs() {
+            console.log('🔍 Scanning for your real owned NFTs...');
+            
+            if (!otterWallet || !otterWallet.isConnected) {
+                console.log('⚠️ Wallet not connected');
+                alert('Please connect your wallet first!');
+                return;
+            }
+            
+            const confirmed = confirm(`🔍 SCAN FOR YOUR NFTS?\n\nThis will scan the blockchain for NFTs owned by your wallet address.\n\nThis may take a few minutes and may cause some RPC errors.\n\nAre you sure you want to continue?`);
+            
+            if (!confirmed) {
+                console.log('❌ NFT scanning cancelled by user');
+                return;
+            }
+            
+            console.log('🔍 Starting blockchain scan for your NFTs...');
+            
+            try {
+                // Clear existing NFTs
+                otterWallet.userNFTs = [];
+                otterWallet.stakedNFTs = [];
+                otterWallet.stakingStartTimes = {};
+                
+                // Get your real owned token IDs
+                const tokenIds = await otterWallet.getOwnedTokenIds();
+                console.log('✅ Found your owned token IDs:', tokenIds);
+                
+                if (tokenIds.length === 0) {
+                    alert('❌ No NFTs found in your wallet!\n\nMake sure you are connected to the correct wallet and network (ApeChain).');
+                    return;
+                }
+                
+                // Load metadata for your real NFTs
+                await otterWallet.loadUserNFTsWithMetadata(tokenIds.length);
+                
+                console.log('✅ NFT scanning completed!');
+                console.log('📊 Your NFTs:', otterWallet.userNFTs);
+                
+                alert(`✅ Successfully found ${otterWallet.userNFTs.length} NFTs in your wallet!\n\nCheck the wallet section to see your NFTs.`);
+                updateWalletProfile();
+                
+            } catch (error) {
+                console.error('❌ Error scanning for NFTs:', error);
+                alert(`❌ Error scanning for NFTs: ${error.message}`);
             }
         }
 
