@@ -1,0 +1,3 @@
+[33m2ddbde1[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m Add force refresh function to completely clear NFT cache and reload from blockchain
+[33m45c9f04[m Remove embedded metadata fallback - fix token #102 issue by eliminating fake NFT generation
+[33ma589b7c[m Add full 2222 token scanning option with progress tracking and improved performance
