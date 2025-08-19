@@ -14947,13 +14947,11 @@
                         const patrolRange = 200; // How far from original position to patrol
                         if (Math.abs(enemy.x - enemy.originalX) > patrolRange) {
                             enemy.patrolDirection *= -1;
-                            console.log('🐊 Gator patrol boundary reached - turning around at X:', enemy.x.toFixed(0));
                         }
                         
                         // Turn around at screen edges
                         if (enemy.x < game.camera.x - 100 || enemy.x > game.camera.x + game.canvasWidth + 100) {
                             enemy.patrolDirection *= -1;
-                            console.log('🐊 Gator screen edge reached - turning around at X:', enemy.x.toFixed(0));
                         }
                     }
                 } else if (enemy.type === 'wizgator') {
@@ -14996,24 +14994,18 @@
                         const patrolRange = 200; // How far from original position to patrol
                         if (Math.abs(enemy.x - enemy.originalX) > patrolRange) {
                             enemy.patrolDirection *= -1;
-                            console.log('🔮 Wizgator patrol boundary reached - turning around at X:', enemy.x.toFixed(0));
                         }
                         
                         // Turn around at screen edges
                         if (enemy.x < game.camera.x - 100 || enemy.x > game.camera.x + game.canvasWidth + 100) {
                             enemy.patrolDirection *= -1;
-                            console.log('🔮 Wizgator screen edge reached - turning around at X:', enemy.x.toFixed(0));
                         }
                     }
                     
-                    // Debug wizgator shooting conditions
-                    if (enemy.type === 'wizgator') {
-                        console.log('🔮 WIZGATOR SHOOTING CHECK - CanShoot:', enemy.canShoot, 'TimeSinceLastShot:', Date.now() - enemy.lastShot, 'Cooldown:', enemy.shotCooldown, 'ShouldShoot:', enemy.canShoot && Date.now() - enemy.lastShot > enemy.shotCooldown);
-                    }
+
                     
                     // Wizgator fireball shooting logic
                     if (enemy.type === 'wizgator' && enemy.canShoot && Date.now() - enemy.lastShot > enemy.shotCooldown) {
-                        console.log('🔥 Wizgator firing fireball! Enemy:', enemy.x, enemy.y, 'Player:', player.x, player.y, 'CanShoot:', enemy.canShoot, 'TimeSinceLastShot:', Date.now() - enemy.lastShot, 'Cooldown:', enemy.shotCooldown);
                         
                         // Shoot fireball from mouth
                         const mouthX = enemy.x + (enemy.direction === 1 ? enemy.width - 10 : 10);
