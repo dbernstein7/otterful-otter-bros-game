@@ -2794,7 +2794,9 @@
                             <button onclick="enableBlockchainScanning()" style="background: linear-gradient(135deg, #FF5722, #E64A19); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔗 Enable Blockchain</button>
                             <button onclick="testNFTLoading()" style="background: linear-gradient(135deg, #E91E63, #C2185B); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🧪 Test NFT Loading</button>
                             <button onclick="stakeAllNFTs()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔒 Stake All</button>
+                            <button onclick="unstakeAllNFTs()" style="background: linear-gradient(135deg, #F44336, #D32F2F); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔓 Unstake All</button>
                             <button onclick="claimAllRewards()" style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">💰 Claim Rewards</button>
+                            <button onclick="selectNFTsToStake()" style="background: linear-gradient(135deg, #9C27B0, #7B1FA2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🎯 Select NFTs</button>
                             <button onclick="refreshWalletData()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔄 Refresh Data</button>
                             <button onclick="refreshMetadata()" style="background: linear-gradient(135deg, #2196F3, #1976D2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🌐 Refresh Metadata</button>
                             <button onclick="checkNFTs()" style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔍 Check NFTs</button>
@@ -4013,6 +4015,56 @@
                 });
                 this.updateUI();
                 this.showMessage('All otters auto-staked for demo! (Simulated)', 'success');
+            }
+
+            // Simulated staking functions for testing without contract
+            simulateStakeNFT(tokenId) {
+                const nft = this.userNFTs.find(n => n.tokenId === tokenId);
+                if (nft && !this.stakedNFTs.some(staked => staked.tokenId === tokenId)) {
+                    this.stakedNFTs.push(nft);
+                    this.stakingStartTimes[tokenId] = Date.now();
+                    this.userNFTs = this.userNFTs.filter(n => n.tokenId !== tokenId);
+                    this.updateUI();
+                    this.showMessage(`NFT ${tokenId} staked (simulated)!`, 'success');
+                    return true;
+                }
+                return false;
+            }
+
+            simulateUnstakeNFT(tokenId) {
+                const nft = this.stakedNFTs.find(n => n.tokenId === tokenId);
+                if (nft) {
+                    this.userNFTs.push(nft);
+                    this.stakedNFTs = this.stakedNFTs.filter(n => n.tokenId !== tokenId);
+                    delete this.stakingStartTimes[tokenId];
+                    this.updateUI();
+                    this.showMessage(`NFT ${tokenId} unstaked (simulated)!`, 'success');
+                    return true;
+                }
+                return false;
+            }
+
+            simulateStakeMultiple(tokenIds) {
+                let stakedCount = 0;
+                tokenIds.forEach(tokenId => {
+                    if (this.simulateStakeNFT(tokenId)) {
+                        stakedCount++;
+                    }
+                });
+                this.showMessage(`${stakedCount} NFTs staked (simulated)!`, 'success');
+                return stakedCount;
+            }
+
+            simulateUnstakeAll() {
+                const stakedCount = this.stakedNFTs.length;
+                this.stakedNFTs.forEach(nft => {
+                    this.userNFTs.push(nft);
+                });
+                this.stakedNFTs = [];
+                this.stakingStartTimes = {};
+                this.updateUI();
+                this.showMessage(`All ${stakedCount} NFTs unstaked (simulated)!`, 'success');
+                return stakedCount;
             }
 
             // Real blockchain staking functions
@@ -8016,10 +8068,8 @@
                         console.log('🎮 Applying wallet bonuses after background load:', multipliers);
                         console.log('💰 Staking bonus:', stakingBonus);
                         
-                        // Auto-stake all NFTs for demo
-                        if (otterWallet.userNFTs.length > 0) {
-                            otterWallet.autoStakeAll();
-                        }
+                                            // Don't auto-stake - let user choose which NFTs to stake
+                    console.log('🎯 NFTs loaded - user can choose which to stake');
                         
                         // Show trait bonus notification
                         const activeTraits = otterWallet.getActiveTraits();
@@ -17658,9 +17708,9 @@
             }
         }
 
-        // Function to stake all NFTs on blockchain
+        // Function to stake all NFTs (simulated for now)
         async function stakeAllNFTs() {
-            console.log('🔒 Staking all NFTs on blockchain...');
+            console.log('🔒 Staking all NFTs (simulated)...');
             
             if (!otterWallet || !otterWallet.isConnected) {
                 console.log('⚠️ Wallet not connected');
@@ -17673,26 +17723,21 @@
                 return;
             }
             
-            const confirmed = confirm(`🔒 STAKE ALL NFTS?\n\nThis will transfer ${otterWallet.userNFTs.length} NFTs to the staking contract.\n\n⚠️ WARNING: This requires a staking contract to be deployed!\n\nAre you sure you want to continue?`);
+            const confirmed = confirm(`🔒 STAKE ALL NFTS?\n\nThis will stake ${otterWallet.userNFTs.length} NFTs (simulated).\n\nNFTs will earn $FISH rewards but cannot be traded while staked.\n\nAre you sure you want to continue?`);
             
             if (!confirmed) {
                 console.log('❌ Staking cancelled by user');
                 return;
             }
             
-            console.log('🔒 Starting blockchain staking...');
+            console.log('🔒 Starting simulated staking...');
             
             try {
-                for (const nft of otterWallet.userNFTs) {
-                    console.log(`🔒 Staking NFT ${nft.tokenId}...`);
-                    await otterWallet.stakeNFT(nft.tokenId);
-                    
-                    // Add delay between stakes to prevent nonce issues
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                }
+                const tokenIds = otterWallet.userNFTs.map(nft => nft.tokenId);
+                const stakedCount = otterWallet.simulateStakeMultiple(tokenIds);
                 
                 console.log('✅ All NFTs staked successfully!');
-                alert('✅ All NFTs staked successfully!\n\nCheck your wallet for transaction confirmations.');
+                alert(`✅ Successfully staked ${stakedCount} NFTs!\n\nYour NFTs are now earning $FISH rewards.`);
                 updateWalletProfile();
                 
             } catch (error) {
@@ -17735,6 +17780,179 @@
                 console.error('❌ Error claiming rewards:', error);
                 alert(`❌ Error claiming rewards: ${error.message}`);
             }
+        }
+
+        // Function to unstake all NFTs (easy unlock button - simulated)
+        async function unstakeAllNFTs() {
+            console.log('🔓 Unstaking all NFTs (simulated)...');
+            
+            if (!otterWallet || !otterWallet.isConnected) {
+                console.log('⚠️ Wallet not connected');
+                alert('Please connect your wallet first!');
+                return;
+            }
+            
+            if (otterWallet.stakedNFTs.length === 0) {
+                alert('No staked NFTs found!');
+                return;
+            }
+            
+            const confirmed = confirm(`🔓 UNSTAKE ALL NFTS?\n\nThis will return ${otterWallet.stakedNFTs.length} NFTs from staking to your wallet.\n\nYour NFTs will no longer earn $FISH rewards but can be traded again.\n\nAre you sure you want to continue?`);
+            
+            if (!confirmed) {
+                console.log('❌ Unstaking cancelled by user');
+                return;
+            }
+            
+            console.log('🔓 Starting simulated unstaking...');
+            
+            try {
+                const unstakedCount = otterWallet.simulateUnstakeAll();
+                
+                console.log('✅ All NFTs unstaked successfully!');
+                alert(`✅ Successfully unstaked ${unstakedCount} NFTs!\n\nYour NFTs are now back in your wallet and can be traded.`);
+                updateWalletProfile();
+                
+            } catch (error) {
+                console.error('❌ Error unstaking NFTs:', error);
+                alert(`❌ Error unstaking NFTs: ${error.message}`);
+            }
+        }
+
+        // Function to select specific NFTs to stake
+        function selectNFTsToStake() {
+            console.log('🎯 Opening NFT selection interface...');
+            
+            if (!otterWallet || !otterWallet.isConnected) {
+                console.log('⚠️ Wallet not connected');
+                alert('Please connect your wallet first!');
+                return;
+            }
+            
+            if (otterWallet.userNFTs.length === 0) {
+                alert('No NFTs available to stake!');
+                return;
+            }
+            
+            // Create NFT selection modal
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+            `;
+            
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background: linear-gradient(135deg, #1a1a2e, #16213e);
+                border: 3px solid #FFD700;
+                border-radius: 20px;
+                padding: 30px;
+                max-width: 800px;
+                max-height: 80vh;
+                overflow-y: auto;
+                color: white;
+                font-family: 'SuperMario', 'Orbitron', sans-serif;
+            `;
+            
+            modalContent.innerHTML = `
+                <h2 style="text-align: center; color: #FFD700; margin-bottom: 20px;">🎯 Select NFTs to Stake</h2>
+                <p style="text-align: center; margin-bottom: 20px; color: #ccc;">
+                    Choose which NFTs you want to stake. Staked NFTs will earn $FISH rewards but cannot be traded.
+                </p>
+                <div id="nftSelectionGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                </div>
+                <div style="text-align: center;">
+                    <button id="stakeSelectedBtn" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 15px 30px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; margin-right: 10px;">🔒 Stake Selected</button>
+                    <button id="cancelSelectionBtn" style="background: linear-gradient(135deg, #F44336, #D32F2F); color: white; border: none; padding: 15px 30px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold;">❌ Cancel</button>
+                </div>
+            `;
+            
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+            
+            // Populate NFT grid
+            const nftGrid = modalContent.querySelector('#nftSelectionGrid');
+            const selectedNFTs = new Set();
+            
+            otterWallet.userNFTs.forEach(nft => {
+                const nftCard = document.createElement('div');
+                nftCard.style.cssText = `
+                    background: linear-gradient(135deg, #2a2a4e, #1a1a3e);
+                    border: 2px solid #FFD700;
+                    border-radius: 15px;
+                    padding: 15px;
+                    text-align: center;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                `;
+                
+                nftCard.innerHTML = `
+                    <div style="font-size: 18px; font-weight: bold; color: #FFD700; margin-bottom: 10px;">
+                        ${nft.name}
+                    </div>
+                    <div style="font-size: 14px; color: #ccc; margin-bottom: 10px;">
+                        ID: ${nft.tokenId}
+                    </div>
+                    <div style="font-size: 12px; color: #aaa; margin-bottom: 10px;">
+                        Multiplier: ${nft.multiplier}x
+                    </div>
+                    <div style="font-size: 12px; color: #aaa;">
+                        ${nft.traits.slice(0, 2).join(', ')}
+                    </div>
+                `;
+                
+                nftCard.addEventListener('click', () => {
+                    if (selectedNFTs.has(nft.tokenId)) {
+                        selectedNFTs.delete(nft.tokenId);
+                        nftCard.style.border = '2px solid #FFD700';
+                        nftCard.style.background = 'linear-gradient(135deg, #2a2a4e, #1a1a3e)';
+                    } else {
+                        selectedNFTs.add(nft.tokenId);
+                        nftCard.style.border = '2px solid #4CAF50';
+                        nftCard.style.background = 'linear-gradient(135deg, #2a4e2a, #1a3e1a)';
+                    }
+                });
+                
+                nftGrid.appendChild(nftCard);
+            });
+            
+            // Handle stake selected button
+            modalContent.querySelector('#stakeSelectedBtn').addEventListener('click', async () => {
+                if (selectedNFTs.size === 0) {
+                    alert('Please select at least one NFT to stake!');
+                    return;
+                }
+                
+                const confirmed = confirm(`🔒 STAKE ${selectedNFTs.size} NFTS?\n\nThis will stake the selected NFTs (simulated).\n\nNFTs will earn $FISH rewards but cannot be traded while staked.\n\nAre you sure you want to continue?`);
+                
+                if (!confirmed) return;
+                
+                try {
+                    const tokenIds = Array.from(selectedNFTs);
+                    const stakedCount = otterWallet.simulateStakeMultiple(tokenIds);
+                    
+                    alert(`✅ Successfully staked ${stakedCount} NFTs!\n\nYour NFTs are now earning $FISH rewards.`);
+                    document.body.removeChild(modal);
+                    updateWalletProfile();
+                    
+                } catch (error) {
+                    console.error('❌ Error staking selected NFTs:', error);
+                    alert(`❌ Error staking NFTs: ${error.message}`);
+                }
+            });
+            
+            // Handle cancel button
+            modalContent.querySelector('#cancelSelectionBtn').addEventListener('click', () => {
+                document.body.removeChild(modal);
+            });
         }
 
         // Function to scan specific range
