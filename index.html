@@ -3898,8 +3898,13 @@
                 try {
                     console.log(`📁 Loading local metadata for token #${tokenId}...`);
                     
-                    // Try multiple possible paths for local metadata (removed - using remote only)
-                    const possiblePaths = [];
+                    // Try multiple possible paths for local metadata
+                    const possiblePaths = [
+                        `./metadata/${tokenId}.json`,
+                        `./public/metadata/${tokenId}.json`,
+                        `/metadata/${tokenId}.json`,
+                        `/public/metadata/${tokenId}.json`
+                    ];
                     
                     for (const path of possiblePaths) {
                         try {
@@ -4503,8 +4508,12 @@
                 try {
                     console.log(`📁 Loading metadata for token ${tokenId}...`);
                     
-                    // First try to load from local files (removed - using remote only)
-                    const metadataUrls = [];
+                    // First try to load from local files
+                    const metadataUrls = [
+                        `./metadata/${tokenId}.json`,
+                        `/metadata/${tokenId}.json`,
+                        `metadata/${tokenId}.json`
+                    ];
                     
                     for (const metadataUrl of metadataUrls) {
                         try {
@@ -18451,9 +18460,13 @@
         async function testLocalMetadata() {
             console.log('🧪 Testing local metadata system...');
             
-            // Test if metadata files are accessible at all (removed - using remote only)
+            // Test if metadata files are accessible at all
             console.log('🔍 Testing metadata file accessibility...');
-            const testUrls = [];
+            const testUrls = [
+                './metadata/1499.json',
+                '/metadata/1499.json',
+                'metadata/1499.json'
+            ];
             
             for (const url of testUrls) {
                 try {
