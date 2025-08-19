@@ -2791,6 +2791,7 @@
                             <button onclick="checkSpecificToken()" style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔍 Check Token</button>
                             <button onclick="loadMultipleTokens()" style="background: linear-gradient(135deg, #9C27B0, #7B1FA2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">📦 Load Multiple</button>
                             <button onclick="clearInvalidNFTs()" style="background: linear-gradient(135deg, #FF5722, #E64A19); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🧹 Clear Invalid</button>
+                            <button onclick="resetNFTGallery()" style="background: linear-gradient(135deg, #795548, #5D4037); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔄 Reset Gallery</button>
                             <button onclick="stakeAllNFTs()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔒 Stake All</button>
                             <button onclick="unstakeAllNFTs()" style="background: linear-gradient(135deg, #F44336, #D32F2F); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔓 Unstake All</button>
                             <button onclick="claimAllRewards()" style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">💰 Claim Rewards</button>
@@ -18727,6 +18728,7 @@
 
         function loadSpecificToken(tokenId) {
             console.log(`🦦 Loading specific token #${tokenId}...`);
+            console.log(`📋 Current NFTs before loading:`, otterWallet.userNFTs.map(n => n.tokenId));
             
             // Check if token is already loaded
             const existingIndex = otterWallet.userNFTs.findIndex(nft => nft.tokenId === tokenId);
@@ -18753,6 +18755,7 @@
             
             console.log(`✅ Added token #${tokenId} to wallet:`, nft);
             console.log(`📊 Total NFTs in gallery: ${otterWallet.userNFTs.length}`);
+            console.log(`📋 All NFTs after adding:`, otterWallet.userNFTs.map(n => n.tokenId));
             otterWallet.showMessage(`Added Token #${tokenId} to gallery! (Total: ${otterWallet.userNFTs.length})`, 'success');
             
             // Update the UI
@@ -18956,6 +18959,12 @@
                     return false;
                 }
                 
+                // SPECIFICALLY REMOVE TOKEN #102 (the problematic one)
+                if (nft.tokenId === 102) {
+                    console.log(`❌ Removing suspicious token #102:`, nft);
+                    return false;
+                }
+                
                 return true;
             });
             
@@ -18966,6 +18975,36 @@
             console.log(`🧹 Removed ${removedCount} invalid NFTs`);
             
             otterWallet.showMessage(`Cleared ${removedCount} invalid NFTs! (${validNFTs.length} valid NFTs remaining)`, 'success');
+            
+            // Update the UI
+            updateWalletProfile();
+        }
+
+        function resetNFTGallery() {
+            console.log('🔄 RESETTING NFT GALLERY - Starting...');
+            
+            if (!otterWallet || !otterWallet.isConnected) {
+                console.log('⚠️ Wallet not connected');
+                return;
+            }
+            
+            const confirmed = confirm('🔄 RESET NFT GALLERY?\n\nThis will completely clear all NFTs from your gallery.\n\nYou can then reload only the NFTs you actually own.\n\nAre you sure you want to continue?');
+            
+            if (!confirmed) {
+                console.log('❌ Reset cancelled by user');
+                return;
+            }
+            
+            console.log('📋 Current NFTs before reset:', otterWallet.userNFTs);
+            const previousCount = otterWallet.userNFTs.length;
+            
+            // Completely reset the NFT array
+            otterWallet.userNFTs = [];
+            
+            console.log('✅ NFT gallery reset complete');
+            console.log(`🧹 Removed ${previousCount} NFTs from gallery`);
+            
+            otterWallet.showMessage(`Gallery reset! Removed ${previousCount} NFTs. Use "Check Token" to load your real NFTs.`, 'success');
             
             // Update the UI
             updateWalletProfile();
