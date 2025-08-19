@@ -22391,7 +22391,6 @@
             }
         `;
         document.head.appendChild(style);
-        }); // Close DOMContentLoaded event listener
 
         function testMetadataFetching() {
             console.log('🌐 Testing metadata fetching for your wallet...');
@@ -22443,6 +22442,8 @@
                 console.error('❌ Error testing metadata:', error);
             });
         }
+
+        }); // Close DOMContentLoaded event listener
 
     </script>
 </body>
