@@ -2790,6 +2790,7 @@
                             <button onclick="loadNFTsManually()" style="background: linear-gradient(135deg, #2196F3, #1976D2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease;">🦦 Load NFTs</button>
                             <button onclick="checkSpecificToken()" style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔍 Check Token</button>
                             <button onclick="loadMultipleTokens()" style="background: linear-gradient(135deg, #9C27B0, #7B1FA2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">📦 Load Multiple</button>
+                            <button onclick="clearInvalidNFTs()" style="background: linear-gradient(135deg, #FF5722, #E64A19); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🧹 Clear Invalid</button>
                             <button onclick="stakeAllNFTs()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔒 Stake All</button>
                             <button onclick="unstakeAllNFTs()" style="background: linear-gradient(135deg, #F44336, #D32F2F); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔓 Unstake All</button>
                             <button onclick="claimAllRewards()" style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">💰 Claim Rewards</button>
@@ -18451,6 +18452,9 @@
                 return;
             }
             
+            console.log('📋 Current userNFTs:', otterWallet.userNFTs);
+            console.log('📊 Total NFTs in wallet:', otterWallet.userNFTs.length);
+            
             if (otterWallet.userNFTs.length === 0) {
                 alert('No NFTs available to stake!');
                 return;
@@ -18505,6 +18509,8 @@
             const selectedNFTs = new Set();
             
             otterWallet.userNFTs.forEach(nft => {
+                console.log(`🎨 Creating card for NFT:`, nft);
+                
                 const nftCard = document.createElement('div');
                 nftCard.style.cssText = `
                     background: linear-gradient(135deg, #2a2a4e, #1a1a3e);
@@ -18902,6 +18908,51 @@
                 console.error('❌ Multiple token loading failed:', error);
                 otterWallet.showMessage(`Error loading tokens: ${error.message}`, 'error');
             });
+        }
+
+        function clearInvalidNFTs() {
+            console.log('🧹 CLEARING INVALID NFTS - Starting...');
+            
+            if (!otterWallet || !otterWallet.isConnected) {
+                console.log('⚠️ Wallet not connected');
+                return;
+            }
+            
+            console.log('📋 Current NFTs before clearing:', otterWallet.userNFTs);
+            
+            // Filter out invalid NFTs (those without proper tokenId or with placeholder data)
+            const validNFTs = otterWallet.userNFTs.filter(nft => {
+                // Check if NFT has valid tokenId
+                if (!nft.tokenId || isNaN(nft.tokenId)) {
+                    console.log(`❌ Removing invalid NFT (no tokenId):`, nft);
+                    return false;
+                }
+                
+                // Check if NFT has valid name
+                if (!nft.name || nft.name.includes('placeholder') || nft.name.includes('test')) {
+                    console.log(`❌ Removing invalid NFT (bad name):`, nft);
+                    return false;
+                }
+                
+                // Check if tokenId is reasonable (1-2222 for Otterful Otters)
+                if (nft.tokenId < 1 || nft.tokenId > 2222) {
+                    console.log(`❌ Removing invalid NFT (tokenId out of range):`, nft);
+                    return false;
+                }
+                
+                return true;
+            });
+            
+            const removedCount = otterWallet.userNFTs.length - validNFTs.length;
+            otterWallet.userNFTs = validNFTs;
+            
+            console.log('✅ Valid NFTs after clearing:', otterWallet.userNFTs);
+            console.log(`🧹 Removed ${removedCount} invalid NFTs`);
+            
+            otterWallet.showMessage(`Cleared ${removedCount} invalid NFTs! (${validNFTs.length} valid NFTs remaining)`, 'success');
+            
+            // Update the UI
+            updateWalletProfile();
         }
 
         function refreshWalletData() {
