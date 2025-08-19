@@ -3136,10 +3136,12 @@
                 if (window.ethereum) {
                     window.ethereum.on('accountsChanged', (accounts) => {
                         if (accounts.length === 0) {
-                            this.disconnect();
+                            this.disconnect(true); // Clear NFTs when fully disconnecting
                         } else {
+                            // Switching accounts - preserve NFTs
                             this.account = accounts[0];
                             this.updateUI();
+                            console.log('🔄 Account switched - NFTs preserved');
                             // Removed automatic NFT loading - user must load manually
                         }
                     });
@@ -4874,15 +4876,20 @@
                 }
             }
 
-            disconnect() {
+            disconnect(clearNFTs = true) {
                 this.provider = null;
                 this.account = null;
                 this.isConnected = false;
                 this.isLoadingNFTs = false; // Reset loading state
-                this.userNFTs = [];
-                this.stakedNFTs = [];
-                this.fishCoins = 0;
-                this.stakingStartTimes = {};
+                
+                // Only clear NFTs if explicitly requested (for full disconnect)
+                if (clearNFTs) {
+                    this.userNFTs = [];
+                    this.stakedNFTs = [];
+                    this.fishCoins = 0;
+                    this.stakingStartTimes = {};
+                }
+                
                 this.updateUI();
                 this.showMessage('Wallet disconnected', 'success');
             }
