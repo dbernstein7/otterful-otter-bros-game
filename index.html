@@ -4286,51 +4286,85 @@
 
             // Add this function to update NFT grid display
             updateNFTGrid() {
-                // Look for NFT container elements
+                console.log('🖼️ Updating NFT grid display...');
+                
+                // Look for NFT container elements - ADD THE CORRECT CONTAINER ID
                 const nftContainers = [
+                    document.getElementById('profileNFTGallery'), // ✅ MAIN NFT GALLERY CONTAINER
                     document.getElementById('nftCollection'),
                     document.getElementById('userNfts'),
                     document.querySelector('.nft-grid'),
                     document.querySelector('.nft-container')
                 ];
                 
+                let containerUpdated = false;
+                
                 nftContainers.forEach(container => {
                     if (container) {
-                        console.log('🖼️ Updating NFT grid container');
+                        console.log(`🖼️ Found NFT container: ${container.id || container.className}`);
                         
                         // Clear existing content
                         container.innerHTML = '';
                         
-                        // Add NFTs to container
-                        this.userNFTs.forEach(nft => {
-                            const nftElement = this.createNFTElement(nft);
-                            container.appendChild(nftElement);
-                        });
+                        // Check if we have NFTs to display
+                        if (this.userNFTs.length === 0) {
+                            console.log('📭 No NFTs to display');
+                            container.innerHTML = '<div style="text-align: center; color: #FFD700; padding: 20px;">NO NFTS FOUND IN WALLET</div>';
+                        } else {
+                            console.log(`🖼️ Adding ${this.userNFTs.length} NFTs to container`);
+                            
+                            // Add NFTs to container
+                            this.userNFTs.forEach(nft => {
+                                const nftElement = this.createNFTElement(nft);
+                                container.appendChild(nftElement);
+                                console.log(`✅ Added NFT ${nft.tokenId} to gallery`);
+                            });
+                        }
+                        
+                        containerUpdated = true;
                     }
                 });
+                
+                if (!containerUpdated) {
+                    console.error('❌ No NFT containers found!');
+                }
             }
 
             // Add this function to create individual NFT elements for display
             createNFTElement(nft) {
+                console.log(`🎨 Creating NFT element for ${nft.name} (Token #${nft.tokenId})`);
+                
                 const nftDiv = document.createElement('div');
-                nftDiv.className = `nft-card ${nft.rarity}`;
+                nftDiv.className = 'nft-card';
+                nftDiv.style.cssText = `
+                    background: rgba(255, 215, 0, 0.1);
+                    border: 2px solid #FFD700;
+                    border-radius: 15px;
+                    padding: 15px;
+                    text-align: center;
+                    color: #FFD700;
+                    transition: all 0.3s ease;
+                    cursor: pointer;
+                `;
+                
                 nftDiv.innerHTML = `
-                    <div class="nft-header">
-                        <h3>${nft.name}</h3>
-                        <span class="rarity ${nft.rarity}">${nft.rarity.toUpperCase()}</span>
+                    <div style="margin-bottom: 10px;">
+                        <h4 style="margin: 0; color: #FFD700; font-size: 16px;">${nft.name}</h4>
+                        <span style="background: #FFD700; color: #000; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: bold;">${nft.rarity.toUpperCase()}</span>
                     </div>
-                    <div class="nft-image">
-                        <img src="${nft.image}" alt="${nft.name}" onerror="this.src='./images/default_otter.png'">
+                    <div style="margin-bottom: 10px;">
+                        <img src="${nft.image}" alt="${nft.name}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 10px;" onerror="this.src='./images/default_otter.png'">
                     </div>
-                    <div class="nft-stats">
-                        <div class="multiplier">Multiplier: ${nft.multiplier}x</div>
-                        <div class="traits">${nft.traits.join(', ')}</div>
+                    <div style="margin-bottom: 10px; font-size: 12px;">
+                        <div style="margin-bottom: 5px;"><strong>Multiplier:</strong> ${nft.multiplier}x</div>
+                        <div style="font-size: 10px; color: #FFA500;">${nft.traits.slice(0, 3).join(', ')}${nft.traits.length > 3 ? '...' : ''}</div>
                     </div>
-                    <div class="nft-actions">
-                        <button onclick="otterWallet.simulateStakeNFT(${nft.tokenId})">Stake NFT</button>
+                    <div>
+                        <button onclick="otterWallet.simulateStakeNFT(${nft.tokenId})" style="background: linear-gradient(135deg, #00FF00, #008000); color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold;">Stake NFT</button>
                     </div>
                 `;
                 
+                console.log(`✅ NFT element created for ${nft.name}`);
                 return nftDiv;
             }
 
