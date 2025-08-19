@@ -5308,26 +5308,7 @@
         
         // Resize on window resize
         window.addEventListener('resize', resizeCanvas);
-            lavaSinkDuration: 1500, // 1.5 seconds to sink and die
-            lavaBouncePower: 8, // Bounce up when touching lava
-            lavaDamageInvulnerability: 2000, // 2 seconds of invulnerability after lava damage
-            // Extra abilities
-
-
-            // Story system
-            storyMode: false,
-            cutsceneActive: false,
-            cutsceneText: '',
-            cutsceneIndex: 0,
-            typewriterInterval: null,
-            
-            // Real-time collectibles tracking
-            collectiblesCount: {
-                coinsCollected: 0,
-                chestsCollected: 0,
-                goldenChestsCollected: 0
-            }
-        };
+        }); // Close DOMContentLoaded event listener
         
         // 🔫 FORCE LASER ARRAY INITIALIZATION
         let laserPowerups = [];
