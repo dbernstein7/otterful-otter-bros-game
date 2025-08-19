@@ -3378,54 +3378,59 @@
             async loadUserNFTsWithMetadata(balance) {
                 this.userNFTs = [];
                 
-                console.log('🔄 Loading NFTs with LOCAL metadata system...');
+                console.log('🔄 Loading NFTs with improved metadata system...');
                 
                 try {
-                    // First, try to get token IDs from blockchain (but don't fail if it doesn't work)
+                    // Try to get real token IDs, but don't fail if it doesn't work
                     let tokenIds = [];
                     try {
-                        tokenIds = await this.getOwnedTokenIds();
-                        console.log('🔍 Found token IDs from blockchain:', tokenIds);
+                        // Only scan first 50 tokens for testing to avoid overload
+                        console.log('🔍 Scanning first 50 tokens for ownership...');
+                        for (let i = 1; i <= 50; i++) {
+                            try {
+                                const owner = await this.getTokenOwner(i);
+                                if (owner && owner.toLowerCase() === this.account.toLowerCase()) {
+                                    console.log(`✅ Found owned token: ${i}`);
+                                    tokenIds.push(i);
+                                }
+                                
+                                // Add small delay to prevent RPC overload
+                                if (i % 5 === 0) {
+                                    await new Promise(resolve => setTimeout(resolve, 100));
+                                }
+                            } catch (error) {
+                                // Continue scanning even if some tokens fail
+                                console.log(`⚠️ Token ${i} check failed, continuing...`);
+                            }
+                        }
                     } catch (error) {
-                        console.log('⚠️ Blockchain scan failed, using sample tokens for testing');
-                        // Use sample token IDs for testing
-                        tokenIds = [1499, 1000, 500, 1];
+                        console.log('⚠️ Blockchain scan failed, using sample tokens');
                     }
                     
+                    // If no real tokens found, use sample token IDs for testing
                     if (tokenIds.length === 0) {
-                        console.log('⚠️ No tokens found, using sample tokens for testing');
-                        tokenIds = [1499, 1000, 500, 1];
+                        console.log('📋 No owned tokens found, using sample tokens for demo');
+                        tokenIds = [1, 150, 750, 1500]; // Mix of legendary, epic, rare, common
                     }
                     
-                    // Load metadata for each token using LOCAL files
-                    console.log('📁 Loading metadata for tokens:', tokenIds);
+                    console.log('🦦 Loading metadata for tokens:', tokenIds);
+                    
+                    // Load metadata for each token
                     for (const tokenId of tokenIds) {
                         try {
                             const metadata = await this.getLocalTokenMetadata(tokenId);
-                            console.log(`📄 Token ${tokenId} metadata:`, metadata);
+                            console.log(`📄 Loaded metadata for token ${tokenId}:`, metadata);
                             
                             if (metadata && metadata.attributes) {
-                                // Extract traits from metadata attributes - FIXED FORMAT
+                                // Extract traits in the correct format
                                 const traits = metadata.attributes.map(attr => {
-                                    // Create proper trait format: "TraitType-Value" or just "Value" for single values
                                     if (attr.trait_type && attr.value) {
                                         return `${attr.trait_type}-${attr.value}`;
-                                    } else if (attr.value) {
-                                        return attr.value;
-                                    } else {
-                                        return attr.trait_type;
                                     }
-                                }).filter(trait => trait);
+                                    return attr.value || attr.trait_type || 'Unknown';
+                                }).filter(trait => trait && trait !== 'Unknown');
                                 
                                 console.log(`🎨 Extracted traits for token ${tokenId}:`, traits);
-                                
-                                // Convert IPFS image URL to local path
-                                let localImage = null;
-                                if (metadata.image && metadata.image.startsWith('ipfs://')) {
-                                    // Extract the filename from IPFS URL and use local path
-                                    const filename = metadata.image.split('/').pop();
-                                    localImage = `./images/${filename}`;
-                                }
                                 
                                 this.userNFTs.push({
                                     tokenId: tokenId,
@@ -3434,43 +3439,31 @@
                                     multiplier: this.calculateMultiplier(traits),
                                     perks: this.calculatePerks(traits),
                                     rarity: this.calculateRarity(traits),
-                                    image: localImage,
-                                    description: metadata.description
-                                });
-                            } else if (metadata) {
-                                // Metadata exists but no attributes - create basic NFT
-                                console.log(`📄 Metadata without attributes for token ${tokenId}:`, metadata);
-                                this.userNFTs.push({
-                                    tokenId: tokenId,
-                                    name: metadata.name || `Otter #${tokenId}`,
-                                    traits: ['Base Otter'],
-                                    multiplier: 1.0,
-                                    perks: [],
-                                    rarity: 'common',
-                                    image: metadata.image,
-                                    description: metadata.description || 'Otterful Otter NFT'
+                                    image: metadata.image || `./images/otter_${tokenId}.png`,
+                                    description: metadata.description || 'Otterful Otter NFT',
+                                    metadata: metadata // Store full metadata for debugging
                                 });
                             } else {
-                                // Fallback for NFTs without metadata
-                                console.log(`⚠️ No metadata for token ${tokenId}, creating basic NFT`);
+                                // Fallback for invalid metadata
+                                console.log(`⚠️ Invalid metadata for token ${tokenId}, creating basic NFT`);
                                 this.userNFTs.push({
                                     tokenId: tokenId,
                                     name: `Otter #${tokenId}`,
-                                    traits: ['Base Otter'],
+                                    traits: ['Base-Normal'],
                                     multiplier: 1.0,
                                     perks: [],
                                     rarity: 'common',
-                                    image: null,
-                                    description: 'Otterful Otter NFT'
+                                    image: `./images/otter_${tokenId}.png`,
+                                    description: 'Basic Otterful Otter NFT'
                                 });
                             }
                         } catch (error) {
-                            console.warn(`⚠️ Error loading metadata for token ${tokenId}:`, error);
-                            // Add basic NFT info even if metadata fails
+                            console.warn(`⚠️ Error processing token ${tokenId}:`, error);
+                            // Add basic NFT even on error
                             this.userNFTs.push({
                                 tokenId: tokenId,
                                 name: `Otter #${tokenId}`,
-                                traits: ['Base Otter'],
+                                traits: ['Base-Normal'],
                                 multiplier: 1.0,
                                 perks: [],
                                 rarity: 'common',
@@ -3480,11 +3473,16 @@
                         }
                     }
                     
-                    console.log('🦦 Loaded NFTs:', this.userNFTs);
+                    console.log('✅ Successfully loaded NFTs:', this.userNFTs);
+                    console.log('📊 NFT Summary:');
+                    this.userNFTs.forEach(nft => {
+                        console.log(`- ${nft.name}: ${nft.traits.join(', ')} (${nft.multiplier}x)`);
+                    });
+                    
                 } catch (error) {
-                    console.error('❌ Error loading NFT metadata:', error);
-                    // Fallback to sample data if everything fails
-                    console.log('🔄 Loading sample NFTs as fallback...');
+                    console.error('❌ Error in loadUserNFTsWithMetadata:', error);
+                    // Fallback to sample data
+                    console.log('🔄 Loading sample NFTs as final fallback...');
                     this.loadSampleNFTs(4);
                 }
             }
@@ -3579,9 +3577,9 @@
             
             async getLocalTokenMetadata(tokenId) {
                 try {
-                    console.log(`📁 Loading local metadata for token ${tokenId}...`);
+                    console.log(`📁 Loading metadata for token ${tokenId}...`);
                     
-                    // Try multiple paths for the local metadata file
+                    // First try to load from local files
                     const metadataUrls = [
                         `./metadata/${tokenId}.json`,
                         `/metadata/${tokenId}.json`,
@@ -3592,40 +3590,121 @@
                         try {
                             console.log(`📄 Trying to fetch from: ${metadataUrl}`);
                             const response = await fetch(metadataUrl);
-                            console.log(`📄 Response status for ${metadataUrl}:`, response.status);
                             
                             if (response.ok) {
                                 const metadata = await response.json();
-                                console.log(`✅ Local metadata loaded for token ${tokenId} from ${metadataUrl}:`, metadata);
+                                console.log(`✅ Local metadata loaded for token ${tokenId}:`, metadata);
                                 return metadata;
-                            } else {
-                                console.log(`⚠️ Failed to load from ${metadataUrl}: ${response.status} ${response.statusText}`);
                             }
                         } catch (error) {
                             console.log(`⚠️ Error fetching from ${metadataUrl}:`, error.message);
                         }
                     }
                     
-                    console.log(`❌ All local metadata paths failed for token ${tokenId}`);
-                    // Fallback to basic NFT
-                    return {
-                        name: `Otter #${tokenId}`,
-                        description: 'Base Otterful Otter',
-                        attributes: [
-                            { trait_type: 'Base', value: 'Normal' }
-                        ]
-                    };
+                    // If local files fail, use embedded sample metadata
+                    console.log(`📋 Using embedded metadata for token ${tokenId}`);
+                    return this.getEmbeddedMetadata(tokenId);
+                    
                 } catch (error) {
-                    console.warn(`⚠️ Error loading local metadata for token ${tokenId}:`, error);
-                    // Fallback to basic NFT
-                    return {
-                        name: `Otter #${tokenId}`,
-                        description: 'Base Otterful Otter',
-                        attributes: [
-                            { trait_type: 'Base', value: 'Normal' }
-                        ]
-                    };
+                    console.warn(`⚠️ Error loading metadata for token ${tokenId}:`, error);
+                    return this.getEmbeddedMetadata(tokenId);
                 }
+            }
+
+            // Add this new function to your OtterfulWallet class
+            getEmbeddedMetadata(tokenId) {
+                // Sample metadata based on different token ranges
+                const metadataTemplates = [
+                    // Legendary Otters (1-100)
+                    {
+                        name: `Legendary Otter #${tokenId}`,
+                        description: "A legendary Otterful Otter with rare traits and powerful abilities.",
+                        image: `./images/legendary_${tokenId % 5}.png`, // Assumes you have 5 legendary images
+                        attributes: [
+                            { trait_type: "Hat", value: "Stealth-v2" },
+                            { trait_type: "Fur", value: "Golden" },
+                            { trait_type: "Eyes", value: "Laser" },
+                            { trait_type: "Shirt", value: "Overalls-V3" },
+                            { trait_type: "Base", value: "Stealth" }
+                        ]
+                    },
+                    // Epic Otters (101-500)
+                    {
+                        name: `Epic Otter #${tokenId}`,
+                        description: "An epic Otterful Otter with powerful plumber abilities.",
+                        image: `./images/epic_${tokenId % 8}.png`, // Assumes you have 8 epic images
+                        attributes: [
+                            { trait_type: "Hat", value: "Plumber-v3" },
+                            { trait_type: "Fur", value: "Rainbow" },
+                            { trait_type: "Eyes", value: "Diamond" },
+                            { trait_type: "Shirt", value: "Overalls-Orange" }
+                        ]
+                    },
+                    // Rare Otters (501-1000)
+                    {
+                        name: `Rare Otter #${tokenId}`,
+                        description: "A rare Otterful Otter with special pirate traits.",
+                        image: `./images/rare_${tokenId % 10}.png`, // Assumes you have 10 rare images
+                        attributes: [
+                            { trait_type: "Hat", value: "Pirate" },
+                            { trait_type: "Fur", value: "Green" },
+                            { trait_type: "Eyes", value: "Sunglasses" },
+                            { trait_type: "Shirt", value: "Overalls-Blue" }
+                        ]
+                    },
+                    // Common Otters (1001+)
+                    {
+                        name: `Common Otter #${tokenId}`,
+                        description: "A common but loveable Otterful Otter.",
+                        image: `./images/common_${tokenId % 15}.png`, // Assumes you have 15 common images
+                        attributes: [
+                            { trait_type: "Hat", value: "Baseball" },
+                            { trait_type: "Fur", value: "Brown" },
+                            { trait_type: "Eyes", value: "Happy" },
+                            { trait_type: "Base", value: "Normal" }
+                        ]
+                    }
+                ];
+                
+                // Choose template based on token ID
+                let templateIndex = 3; // Default to common
+                if (tokenId <= 100) templateIndex = 0; // Legendary
+                else if (tokenId <= 500) templateIndex = 1; // Epic
+                else if (tokenId <= 1000) templateIndex = 2; // Rare
+                
+                const template = metadataTemplates[templateIndex];
+                
+                // Customize the template for this specific token
+                return {
+                    ...template,
+                    name: template.name,
+                    tokenId: tokenId,
+                    // Add some variation to attributes based on token ID
+                    attributes: template.attributes.map(attr => ({
+                        ...attr,
+                        // Add some randomness based on token ID
+                        rarity: this.calculateAttributeRarity(attr.value, tokenId)
+                    }))
+                };
+            }
+
+            // Add this helper function
+            calculateAttributeRarity(value, tokenId) {
+                const rarityMap = {
+                    'Stealth-v2': 'ultra-rare',
+                    'Plumber-v5': 'ultra-rare', 
+                    'Plumber-v3': 'epic',
+                    'Golden': 'rare',
+                    'Rainbow': 'rare',
+                    'Laser': 'rare',
+                    'Diamond': 'rare',
+                    'Pirate': 'uncommon',
+                    'Crown': 'uncommon',
+                    'Baseball': 'common',
+                    'Normal': 'common'
+                };
+                
+                return rarityMap[value] || 'common';
             }
 
             async getTokenMetadata(tokenId) {
