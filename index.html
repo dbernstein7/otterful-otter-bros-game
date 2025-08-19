@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ollie the Otter - 2D Platformer</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <style>
             @keyframes levelUpPulse {
                 0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
@@ -2793,6 +2797,7 @@
                             <button onclick="unstakeAllNFTs()" style="background: linear-gradient(135deg, #F44336, #D32F2F); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🔓 Unstake All</button>
                             <button onclick="claimAllRewards()" style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">💰 Claim Rewards</button>
                             <button onclick="selectNFTsToStake()" style="background: linear-gradient(135deg, #9C27B0, #7B1FA2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🎯 Select NFTs</button>
+                            <button onclick="showLeaderboard()" style="background: linear-gradient(135deg, #FFD700, #FFA500); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🏆 Leaderboard</button>
                         </div>
                     </div>
                     <div id="walletDisconnectedStatus">
@@ -5325,6 +5330,91 @@
             return canvas && ctx && canvas.width > 0 && canvas.height > 0;
         }
         
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            authDomain: "otterful-otter-bros.firebaseapp.com",
+            projectId: "otterful-otter-bros",
+            storageBucket: "otterful-otter-bros.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdefghijklmnop"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Leaderboard System
+        const leaderboardSystem = {
+            // Update player stats in database
+            async updatePlayerStats(walletAddress, stakingData) {
+                try {
+                    const playerData = {
+                        walletAddress: walletAddress,
+                        totalStaked: stakingData.stakedNFTs.length,
+                        totalEarned: stakingData.fishCoins,
+                        stakingStartTime: stakingData.stakingStartTimes,
+                        stakedNFTs: stakingData.stakedNFTs,
+                        lastUpdated: new Date(),
+                        totalMultiplier: stakingData.stakedNFTs.reduce((sum, nft) => sum + nft.multiplier, 0)
+                    };
+
+                    await db.collection('players').doc(walletAddress).set(playerData, { merge: true });
+                    console.log('📊 Updated player stats in database');
+                } catch (error) {
+                    console.error('❌ Error updating player stats:', error);
+                }
+            },
+
+            // Get leaderboard data
+            async getLeaderboard(limit = 10, sortBy = 'totalEarned') {
+                try {
+                    const snapshot = await db.collection('players')
+                        .orderBy(sortBy, 'desc')
+                        .limit(limit)
+                        .get();
+
+                    const leaderboard = [];
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        leaderboard.push({
+                            walletAddress: data.walletAddress,
+                            totalStaked: data.totalStaked || 0,
+                            totalEarned: data.totalEarned || 0,
+                            totalMultiplier: data.totalMultiplier || 0,
+                            lastUpdated: data.lastUpdated
+                        });
+                    });
+
+                    return leaderboard;
+                } catch (error) {
+                    console.error('❌ Error fetching leaderboard:', error);
+                    return [];
+                }
+            },
+
+            // Get global stats
+            async getGlobalStats() {
+                try {
+                    const snapshot = await db.collection('players').get();
+                    const players = [];
+                    snapshot.forEach(doc => players.push(doc.data()));
+
+                    const globalStats = {
+                        totalPlayers: players.length,
+                        totalNFTsStaked: players.reduce((sum, p) => sum + (p.totalStaked || 0), 0),
+                        totalFishEarned: players.reduce((sum, p) => sum + (p.totalEarned || 0), 0),
+                        averageStakingTime: 72 // Placeholder - would calculate from stakingStartTime
+                    };
+
+                    return globalStats;
+                } catch (error) {
+                    console.error('❌ Error fetching global stats:', error);
+                    return { totalPlayers: 0, totalNFTsStaked: 0, totalFishEarned: 0, averageStakingTime: 0 };
+                }
+            }
+        };
+
         // Game state - Define this BEFORE any functions that use it
         const game = {
             score: 0,
@@ -18352,6 +18442,137 @@
             }
         }
 
+        // Leaderboard Functions
+        async function showLeaderboard() {
+            console.log('🏆 Opening leaderboard...');
+            
+            // Create leaderboard modal
+            const modal = document.createElement('div');
+            modal.id = 'leaderboardModal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+            `;
+
+            modal.innerHTML = `
+                <div style="background: linear-gradient(135deg, #1a1a2e, #16213e); border: 3px solid #FFD700; border-radius: 20px; padding: 30px; max-width: 800px; max-height: 80vh; overflow-y: auto; color: white;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h2 style="color: #FFD700; margin: 0; font-size: 28px;">🏆 Staking Leaderboard</h2>
+                        <div id="globalStats" style="margin: 20px 0; padding: 15px; background: rgba(255,215,0,0.1); border-radius: 10px;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                                <div>
+                                    <div style="font-size: 12px; color: #FFD700;">TOTAL PLAYERS</div>
+                                    <div id="totalPlayers" style="font-size: 20px; font-weight: bold; color: #00FFFF;">Loading...</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 12px; color: #FFD700;">TOTAL NFTS STAKED</div>
+                                    <div id="totalNFTsStaked" style="font-size: 20px; font-weight: bold; color: #00FFFF;">Loading...</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 12px; color: #FFD700;">TOTAL $FISH EARNED</div>
+                                    <div id="totalFishEarned" style="font-size: 20px; font-weight: bold; color: #00FFFF;">Loading...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <button onclick="loadLeaderboard('totalEarned')" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px;">💰 Top Earners</button>
+                            <button onclick="loadLeaderboard('totalStaked')" style="background: linear-gradient(135deg, #2196F3, #1976D2); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px;">🦦 Most Staked</button>
+                            <button onclick="loadLeaderboard('totalMultiplier')" style="background: linear-gradient(135deg, #9C27B0, #7B1FA2); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px;">⚡ Best Multipliers</button>
+                        </div>
+                    </div>
+                    
+                    <div id="leaderboardContent" style="min-height: 300px;">
+                        <div style="text-align: center; color: #888; padding: 40px;">Loading leaderboard...</div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button onclick="closeLeaderboard()" style="background: linear-gradient(135deg, #F44336, #D32F2F); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold;">❌ Close</button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+            
+            // Load initial data
+            await loadGlobalStats();
+            await loadLeaderboard('totalEarned');
+        }
+
+        async function loadGlobalStats() {
+            try {
+                const stats = await leaderboardSystem.getGlobalStats();
+                
+                document.getElementById('totalPlayers').textContent = stats.totalPlayers;
+                document.getElementById('totalNFTsStaked').textContent = stats.totalNFTsStaked;
+                document.getElementById('totalFishEarned').textContent = stats.totalFishEarned.toLocaleString();
+            } catch (error) {
+                console.error('❌ Error loading global stats:', error);
+            }
+        }
+
+        async function loadLeaderboard(sortBy = 'totalEarned') {
+            try {
+                const leaderboard = await leaderboardSystem.getLeaderboard(10, sortBy);
+                
+                let content = '<div style="background: rgba(255,215,0,0.1); border-radius: 10px; padding: 20px;">';
+                
+                if (leaderboard.length === 0) {
+                    content += '<div style="text-align: center; color: #888; padding: 40px;">No staking data available yet</div>';
+                } else {
+                    content += '<div style="display: grid; gap: 10px;">';
+                    
+                    leaderboard.forEach((player, index) => {
+                        const rank = index + 1;
+                        const rankIcon = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
+                        const shortAddress = player.walletAddress.slice(0, 6) + '...' + player.walletAddress.slice(-4);
+                        
+                        content += `
+                            <div style="background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,215,0,0.05)); padding: 15px; border-radius: 10px; border: 1px solid rgba(255,215,0,0.3); display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    <div style="font-size: 20px; font-weight: bold; color: #FFD700;">${rankIcon}</div>
+                                    <div>
+                                        <div style="font-weight: bold; color: #00FFFF;">${shortAddress}</div>
+                                        <div style="font-size: 12px; color: #888;">${player.totalStaked} NFTs staked</div>
+                                    </div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-weight: bold; color: #FFD700;">${player.totalEarned.toLocaleString()} $FISH</div>
+                                    <div style="font-size: 12px; color: #888;">${player.totalMultiplier.toFixed(2)}x multiplier</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    content += '</div>';
+                }
+                
+                content += '</div>';
+                document.getElementById('leaderboardContent').innerHTML = content;
+                
+            } catch (error) {
+                console.error('❌ Error loading leaderboard:', error);
+                document.getElementById('leaderboardContent').innerHTML = '<div style="text-align: center; color: #F44336; padding: 40px;">Error loading leaderboard</div>';
+            }
+        }
+
+        function closeLeaderboard() {
+            const modal = document.getElementById('leaderboardModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
         function refreshMetadata() {
             console.log('🌐 Refreshing metadata...');
             if (otterWallet && otterWallet.isConnected) {
@@ -18803,6 +19024,16 @@
                 const tokenIds = otterWallet.userNFTs.map(nft => nft.tokenId);
                 const stakedCount = otterWallet.simulateStakeMultiple(tokenIds);
                 
+                // Update database with new staking data
+                if (otterWallet.account) {
+                    const stakingData = {
+                        stakedNFTs: otterWallet.stakedNFTs,
+                        fishCoins: otterWallet.fishCoins || 0,
+                        stakingStartTimes: otterWallet.stakingStartTimes
+                    };
+                    await leaderboardSystem.updatePlayerStats(otterWallet.account, stakingData);
+                }
+                
                 console.log('✅ All NFTs staked successfully!');
                 alert(`✅ Successfully staked ${stakedCount} NFTs!\n\nYour NFTs are now earning $FISH rewards.`);
                 updateWalletProfile();
@@ -18840,6 +19071,17 @@
             try {
                 await otterWallet.claimRewards();
                 console.log('✅ Rewards claimed successfully!');
+                
+                // Update database with claimed rewards
+                if (otterWallet.account) {
+                    const stakingData = {
+                        stakedNFTs: otterWallet.stakedNFTs,
+                        fishCoins: 0, // Reset after claiming
+                        stakingStartTimes: otterWallet.stakingStartTimes
+                    };
+                    await leaderboardSystem.updatePlayerStats(otterWallet.account, stakingData);
+                }
+                
                 alert('✅ Rewards claimed successfully!\n\nCheck your wallet for transaction confirmation.');
                 updateWalletProfile();
                 
