@@ -15679,7 +15679,7 @@
                     return;
                 }
                 
-                console.log('🔫 Drawing laser powerups, count:', laserPowerups.filter(l => !l.collected).length);
+                // Removed console.log to prevent spam
                 
                 laserPowerups.forEach((l, index) => {
                     if (!l.collected) {
@@ -15785,7 +15785,7 @@
             
             // Draw enemies
             if (enemies.length > 0) {
-                console.log('🎨 DRAW LOOP: Processing', enemies.length, 'enemies');
+                // Removed console.log to prevent spam
             }
             enemies.forEach(enemy => {
                 if (enemy.type === 'wizgator') {
@@ -17175,18 +17175,35 @@
         // Game loop
         function gameLoop() {
             game.frameCount = (game.frameCount || 0) + 1;
-            update();
-            updateTimeStats();
             
-            // Check achievements every 60 frames (1 second at 60fps) for real-time tracking
-            if (game.frameCount % 60 === 0) {
-                checkAllAchievements();
-                checkSecretChestConditions(); // Check for secret chest conditions
-                updateAbilitiesDisplay(); // Update abilities display
+            // Only run game logic when actually playing
+            if (game.gameState === 'playing') {
+                update();
+                updateTimeStats();
+                
+                // Check achievements every 60 frames (1 second at 60fps) for real-time tracking
+                if (game.frameCount % 60 === 0) {
+                    checkAllAchievements();
+                    checkSecretChestConditions(); // Check for secret chest conditions
+                    updateAbilitiesDisplay(); // Update abilities display
+                }
+                
+                draw();
+            } else {
+                // When not playing, just draw the menu/background
+                drawMenu();
             }
             
-            draw();
             requestAnimationFrame(gameLoop);
+        }
+
+        // Simple menu drawing function
+        function drawMenu() {
+            // Clear canvas
+            ctx.clearRect(0, 0, game.canvasWidth, game.canvasHeight);
+            
+            // Draw a simple background or just leave it clear
+            // This prevents the game from drawing enemies and other game elements when in menu
         }
         
         function updateTimeStats() {
