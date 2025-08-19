@@ -4187,9 +4187,9 @@
                     return `./images/${tokenId}.webp`;
                 }
                 
-                // Fallback to default image
-                console.log(`🖼️ No token ID provided, using default image`);
-                return './images/default_otter.png';
+                // Fallback to a generic otter image
+                console.log(`🖼️ No token ID provided, using generic otter image`);
+                return './images/1.webp'; // Use token #1 as default
             }
 
             // ❌ REMOVED: No more basic NFTs - only show real metadata
@@ -4354,7 +4354,7 @@
                         <span style="background: #FFD700; color: #000; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: bold;">${nft.rarity.toUpperCase()}</span>
                     </div>
                     <div style="margin-bottom: 10px;">
-                        <img src="${nft.image}" alt="${nft.name}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 10px;" onerror="this.src='./images/default_otter.png'">
+                        <img src="${nft.image}" alt="${nft.name}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 10px;" onerror="this.src='./images/1.webp'">
                     </div>
                     <div style="margin-bottom: 10px; font-size: 12px;">
                         <div style="margin-bottom: 5px;"><strong>Multiplier:</strong> ${nft.multiplier}x</div>
