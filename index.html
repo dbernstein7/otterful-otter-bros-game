@@ -3271,6 +3271,48 @@
                 }
             }
 
+            async loadNFTsManuallyOnly() {
+                console.log('🚀 loadNFTsManuallyOnly() called - manual loading without clearing existing NFTs');
+                
+                if (!this.isConnected || !this.provider) {
+                    console.log('❌ Not connected or no provider, returning');
+                    return;
+                }
+
+                try {
+                    console.log('🔗 Requesting chain ID...');
+                    const chainId = await window.ethereum.request({
+                        method: 'eth_chainId'
+                    });
+
+                    console.log('🔗 Current chain ID:', chainId);
+                    console.log('🎯 Expected chain ID:', this.apeChainId);
+
+                    if (chainId !== this.apeChainId) {
+                        console.log('⚠️ Wrong chain, switching to ApeChain...');
+                        await this.switchToApeChain();
+                        return;
+                    }
+
+                    console.log('✅ On correct chain, checking balance...');
+                    const balance = await this.getTokenBalance();
+                    console.log('💰 Token balance:', balance);
+                    
+                    if (balance > 0) {
+                        console.log('🦦 Loading NFT metadata (manual mode)...');
+                        await this.loadUserNFTsWithMetadata(balance, false); // Don't clear existing NFTs
+                    } else {
+                        console.log('⚠️ No tokens found in manual mode');
+                    }
+
+                    this.updateUI();
+
+                } catch (error) {
+                    console.error('❌ Error in manual NFT loading:', error);
+                    this.showMessage(`Error loading NFTs: ${error.message}`, 'error');
+                }
+            }
+
             async loadNFTs() {
                 // Prevent multiple simultaneous calls
                 if (this.isLoadingNFTs) {
@@ -3319,7 +3361,7 @@
                     
                     if (balance > 0) {
                         console.log('🦦 Loading NFT metadata...');
-                        await this.loadUserNFTsWithMetadata(balance);
+                        await this.loadUserNFTsWithMetadata(balance); // Clear existing NFTs for automatic loading
                     } else {
                         console.log('⚠️ No tokens found, loading sample data for testing...');
                         // Load sample data for testing
@@ -3364,8 +3406,13 @@
 
             // PRODUCTION-READY NFT LOADING SYSTEM
             // This will work for any user on any computer
-            async loadUserNFTsWithMetadata(balance) {
-                this.userNFTs = [];
+            async loadUserNFTsWithMetadata(balance, clearExisting = true) {
+                if (clearExisting) {
+                    this.userNFTs = [];
+                    console.log('🧹 Cleared existing NFTs for fresh load');
+                } else {
+                    console.log('📋 Keeping existing NFTs, adding to them');
+                }
                 console.log('🚀 PRODUCTION NFT LOADING - Finding real NFTs for any user...');
                 
                 try {
@@ -18975,12 +19022,11 @@
             console.log('🔍 Starting manual NFT loading...');
             otterWallet.showMessage('Scanning blockchain for your NFTs...', 'info');
             
-            // Clear existing NFTs to prevent duplicates
-            console.log('🧹 Clearing existing NFTs to prevent duplicates...');
-            otterWallet.userNFTs = [];
+            // Don't clear existing NFTs - just add to them
+            console.log('📋 Current NFTs before loading:', otterWallet.userNFTs.length);
             
-            // Use the same function as automatic loading
-            otterWallet.loadNFTs().then(() => {
+            // Use manual loading that doesn't clear existing NFTs
+            otterWallet.loadNFTsManuallyOnly().then(() => {
                 console.log('✅ Manual NFT loading completed');
                 console.log('📊 NFTs found:', otterWallet.userNFTs.length);
                 console.log('📋 NFT details:', otterWallet.userNFTs);
