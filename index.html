@@ -12902,7 +12902,7 @@
                             if (game.sessionStats.currentSessionCrabs > game.sessionStats.highestCrabs) {
                                 game.sessionStats.highestCrabs = game.sessionStats.currentSessionCrabs;
                             }
-                            saveStats();
+                            
                             
                             // Check for enemy-related achievements
                             if (game.sessionStats.crabsDefeated === 1) {
@@ -13014,7 +13014,7 @@
                             if (game.sessionStats.currentSessionTreasures > game.sessionStats.highestTreasures) {
                                 game.sessionStats.highestTreasures = game.sessionStats.currentSessionTreasures;
                             }
-                        saveStats();
+                        
                             
                             if (treasure.type === 'rareTreasure') {
                                 game.coins += 25; // Extra bonus coins for rare treasures
@@ -13073,7 +13073,7 @@
                         game.sessionStats.currentSessionBosses++;
                         game.sessionStats.totalScore += 1000;
                         game.sessionStats.currentSessionScore += 1000;
-                        saveStats();
+                        
                         addScreenShake(5);
                         console.log('🔫 Boss defeated by laser! Lava remains until level change.');
                     }
@@ -13354,7 +13354,7 @@
                             if (game.sessionStats.currentSessionCrabs > game.sessionStats.highestCrabs) {
                                 game.sessionStats.highestCrabs = game.sessionStats.currentSessionCrabs;
                             }
-                            saveStats();
+                            
                             
                             // Check for enemy-related achievements
                             if (game.sessionStats.crabsDefeated === 1) {
@@ -13383,7 +13383,7 @@
                         game.sessionStats.currentSessionBosses++;
                         game.sessionStats.totalScore += 1000;
                         game.sessionStats.currentSessionScore += 1000;
-                        saveStats();
+                        
                         addScreenShake(5);
                         console.log('🔥 Boss defeated by fireball!');
                     }
@@ -13895,7 +13895,7 @@
                     if (game.sessionStats.currentSessionFish > game.sessionStats.highestFish) {
                         game.sessionStats.highestFish = game.sessionStats.currentSessionFish;
                     }
-                    saveStats();
+                    
                 }
             });
             
@@ -13934,7 +13934,7 @@
                     if (game.sessionStats.currentSessionCoins > game.sessionStats.highestCoins) {
                         game.sessionStats.highestCoins = game.sessionStats.currentSessionCoins;
                     }
-                    saveStats();
+                    
                     saveMarketplaceData(); // Save marketplace data when coins are collected
                     
                     // Check for coin-related achievements
@@ -13974,7 +13974,7 @@
                     if (game.sessionStats.currentSessionHealth > game.sessionStats.highestHealth) {
                         game.sessionStats.highestHealth = game.sessionStats.currentSessionHealth;
                     }
-                    saveStats();
+                    
                     
                     // Heal player and 60% chance to get a life
                     healPlayer(25); // Heal 25 health points
@@ -13994,7 +13994,7 @@
                     game.score += 100; // Heart gives 100 points
                     game.sessionStats.totalScore += 100;
                     game.sessionStats.currentSessionScore += 100;
-                    saveStats();
+                    
                     
                     // Give player an extra life
                     game.lives = Math.min(game.lives + 1, game.maxLives);
@@ -14045,7 +14045,7 @@
                     game.score += points;
                     game.sessionStats.totalScore += points;
                     game.sessionStats.currentSessionScore += points;
-                    saveStats();
+                    
                     
                     // Add armor to player
                     addArmor(armorAmount);
@@ -14097,7 +14097,7 @@
                                     if (game.sessionStats.currentSessionTreasures > game.sessionStats.highestTreasures) {
                                         game.sessionStats.highestTreasures = game.sessionStats.currentSessionTreasures;
                                     }
-                                    saveStats();
+                                    
                                     
                                     // Golden chest rewards
                                     game.coins += 50; // Extra bonus coins for golden chests
@@ -14130,7 +14130,7 @@
                     if (game.sessionStats.currentSessionTreasures > game.sessionStats.highestTreasures) {
                         game.sessionStats.highestTreasures = game.sessionStats.currentSessionTreasures;
                     }
-                    saveStats();
+                    
                     if (t.type === 'rareTreasure') {
                         game.coins += 25; // Extra bonus coins for rare treasures
                         game.lives = Math.min(game.lives + 1, game.maxLives); // Bonus life for rare treasure
@@ -14153,7 +14153,7 @@
                     game.score += 100;
                     game.sessionStats.totalScore += 100;
                     game.sessionStats.currentSessionScore += 100;
-                    saveStats();
+                    
                     
                     // Give player jetpack ability
                                                                     player.hasJetpack = true;
@@ -14179,7 +14179,7 @@
                     if (game.sessionStats.currentSessionMushrooms > game.sessionStats.highestMushrooms) {
                         game.sessionStats.highestMushrooms = game.sessionStats.currentSessionMushrooms;
                     }
-                    saveStats();
+                    
                     
                     // Activate giant mode
                     player.isGiant = true;
@@ -14248,7 +14248,7 @@
                     game.sessionStats.keysCollected++;
                     game.sessionStats.totalScore += 200;
                     game.sessionStats.currentSessionScore += 200;
-                    saveStats();
+                    
                     
                     // Update collectibles counter
                     updateCollectiblesCounter();
@@ -14290,7 +14290,7 @@
                             game.score += 200;
                             game.sessionStats.totalScore += 200;
                             game.sessionStats.currentSessionScore += 200;
-                        saveStats();
+                        
                         
                         // Give player laser ability
                         player.hasLaser = true;
@@ -14340,7 +14340,7 @@
                             game.score += 300;
                             game.sessionStats.totalScore += 300;
                             game.sessionStats.currentSessionScore += 300;
-                            saveStats();
+                            
                             
                             // Give player fireball ability
                                                                             player.hasFireball = true;
@@ -14437,7 +14437,7 @@
                     time: formatTime(levelTime)
                 });
                 game.sessionStats.levelsCompleted++;
-                saveStats(true); // Save coins only on level completion
+                saveStats(true); // Save all stats only on level completion
                 
                 // Check for level-related achievements
                 if (game.sessionStats.levelsCompleted === 1) {
@@ -15210,7 +15210,7 @@
                         if (game.sessionStats.currentSessionCrabs > game.sessionStats.highestCrabs) {
                             game.sessionStats.highestCrabs = game.sessionStats.currentSessionCrabs;
                         }
-                        saveStats();
+                        
                         player.velY = -player.jumpPower * 0.4; // Slightly stronger bounce
                         addScreenShake(8);
                         addFreezeFrame(80);
@@ -15254,7 +15254,7 @@
                             if (game.sessionStats.currentSessionCrabs > game.sessionStats.highestCrabs) {
                                 game.sessionStats.highestCrabs = game.sessionStats.currentSessionCrabs;
                             }
-                            saveStats();
+                            
                             console.log('Mushroom power-up! Enemy knocked over!');
                         }
                     }
@@ -15475,7 +15475,7 @@
                             game.sessionStats.currentSessionBosses++;
                             game.sessionStats.totalScore += 1000;
                             game.sessionStats.currentSessionScore += 1000;
-                            saveStats();
+                            
                             console.log('Boss defeated by stomp! Lava remains until level change.');
                         }
                                             } else if (!player.damageInvulnerable) {
@@ -16981,7 +16981,7 @@
             game.coins = 0;
             game.marketplace.coins = 0; // Set marketplace coins to 0
             console.log('🆕 Starting fresh with 0 coins');
-            saveStats(); // Save to localStorage
+             // Save to localStorage
             saveMarketplaceData(); // Save marketplace data
             updateLeaderboard(); // Update the leaderboard display
             updateMarketplace(); // Update marketplace display
@@ -21093,17 +21093,12 @@
             }
         }
         
-        function saveStats(saveCoins = false) {
-            // Update all-time stats with current session stats
-            if (game.sessionStats) {
+        function saveStats(saveAllStats = false) {
+            // Only save stats if explicitly requested (level completion)
+            if (saveAllStats && game.sessionStats) {
                 game.sessionStats.allTimeScore += game.sessionStats.totalScore;
                 game.sessionStats.allTimeLevels += game.sessionStats.levelsCompleted;
-                
-                // Only save coins if explicitly requested (level completion)
-                if (saveCoins) {
-                    game.sessionStats.allTimeCoins += game.sessionStats.totalCoins;
-                }
-                
+                game.sessionStats.allTimeCoins += game.sessionStats.totalCoins;
                 game.sessionStats.allTimeEnemies += (game.sessionStats.crabsDefeated + game.sessionStats.eaglesDefeated + game.sessionStats.gatorsDefeated + game.sessionStats.sharksDefeated);
                 game.sessionStats.allTimeBosses += game.sessionStats.bossesDefeated;
                 game.sessionStats.allTimeFish += game.sessionStats.fishCollected;
@@ -21124,9 +21119,9 @@
                 game.sessionStats.allTimeNoJumps += game.sessionStats.noJumpLevels;
                 game.sessionStats.allTimeNoPowerups += game.sessionStats.noPowerupLevels;
                 game.sessionStats.allTimeKeys += game.sessionStats.keysCollected;
+                
+                localStorage.setItem('otterBrosStats', JSON.stringify(game.sessionStats));
             }
-            
-            localStorage.setItem('otterBrosStats', JSON.stringify(game.sessionStats));
         }
         
         function loadStats() {
@@ -22810,5 +22805,6 @@
     </script>
 </body>
 </html>
+
 
 
