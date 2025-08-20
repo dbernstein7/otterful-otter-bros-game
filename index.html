@@ -13923,7 +13923,7 @@
                     }
                     
                     game.coins += coinMultiplier + bonusCoins;
-                    game.marketplace.coins += coinMultiplier + bonusCoins; // Add coins to marketplace
+                    // Don't add to marketplace coins yet - only on level completion
                     game.sessionStats.totalCoins += coinMultiplier + bonusCoins;
                     game.sessionStats.currentSessionCoins += coinMultiplier + bonusCoins;
                     
@@ -13935,7 +13935,7 @@
                         game.sessionStats.highestCoins = game.sessionStats.currentSessionCoins;
                     }
                     
-                    saveMarketplaceData(); // Save marketplace data when coins are collected
+                    // Don't save marketplace data when coins are collected - only on level completion
                     
                     // Check for coin-related achievements
                     if (game.sessionStats.totalCoins === 1) {
@@ -21119,7 +21119,11 @@
                 game.sessionStats.allTimeNoPowerups += game.sessionStats.noPowerupLevels;
                 game.sessionStats.allTimeKeys += game.sessionStats.keysCollected;
                 
+                // Add session coins to marketplace coins only on level completion
+                game.marketplace.coins += game.sessionStats.currentSessionCoins;
+                
                 localStorage.setItem('otterBrosStats', JSON.stringify(game.sessionStats));
+                saveMarketplaceData(); // Save marketplace data with new coins
             }
         }
         
