@@ -8635,13 +8635,7 @@
         loadProfileData();
         
         // Check for saved game and show continue button if available
-        if (hasSavedGame()) {
-            document.getElementById('continueGameBtn').style.display = 'inline-block';
-            console.log('🎮 Saved game found - showing continue button');
-        } else {
-            document.getElementById('continueGameBtn').style.display = 'none';
-            console.log('🆕 No saved game found - hiding continue button');
-        }
+        updateContinueButtonVisibility();
         
         // Initialize home screen particle effects
         initHomeScreenParticles();
@@ -17001,6 +16995,9 @@
             localStorage.removeItem('otterBrosGameState');
             console.log('🗑️ Cleared saved game state for new game');
             
+            // Update continue button visibility after clearing
+            updateContinueButtonVisibility();
+            
             // Save to localStorage
             saveMarketplaceData(); // Save marketplace data
             updateLeaderboard(); // Update the leaderboard display
@@ -17186,13 +17183,7 @@
             document.getElementById('startGameBtn').style.display = 'inline-block';
             
             // Check for saved game and show continue button if available
-            if (hasSavedGame()) {
-                document.getElementById('continueGameBtn').style.display = 'inline-block';
-                console.log('🎮 Saved game found - showing continue button');
-            } else {
-                document.getElementById('continueGameBtn').style.display = 'none';
-                console.log('🆕 No saved game found - hiding continue button');
-            }
+            updateContinueButtonVisibility();
             
             // Reset UI displays
             document.getElementById('score').textContent = '0';
@@ -17987,6 +17978,9 @@
                 };
                 localStorage.setItem('otterBrosGameState', JSON.stringify(gameState));
                 console.log('💾 Saved game state to local storage - Level:', game.level, 'Health:', player.health);
+                
+                // Update continue button visibility after saving
+                updateContinueButtonVisibility();
             } catch (error) {
                 console.error('❌ Error saving game state:', error);
             }
@@ -18038,6 +18032,19 @@
                 return false;
             } catch (error) {
                 return false;
+            }
+        }
+        
+        function updateContinueButtonVisibility() {
+            const continueBtn = document.getElementById('continueGameBtn');
+            if (continueBtn) {
+                if (hasSavedGame()) {
+                    continueBtn.style.display = 'inline-block';
+                    console.log('🎮 Saved game found - showing continue button');
+                } else {
+                    continueBtn.style.display = 'none';
+                    console.log('🆕 No saved game found - hiding continue button');
+                }
             }
         }
         
