@@ -16995,6 +16995,13 @@
             localStorage.removeItem('otterBrosGameState');
             console.log('🗑️ Cleared saved game state for new game');
             
+            // Reset game level to 1 for fresh start
+            game.level = 1;
+            game.score = 0;
+            game.lives = 3;
+            game.gameState = 'menu';
+            console.log('🔄 Reset game to level 1 for fresh start');
+            
             // Update continue button visibility after clearing
             updateContinueButtonVisibility();
             
