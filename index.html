@@ -20291,6 +20291,66 @@
                     `;
                     
                     hatsContainer.appendChild(hatDiv);
+                } else {
+                    // Locked hat styling
+                    const hatDiv = document.createElement('div');
+                    hatDiv.style.cssText = `
+                        background: rgba(0,0,0,0.3);
+                        border: 2px solid #666666;
+                        border-radius: 15px;
+                        padding: 15px;
+                        text-align: center;
+                        transition: all 0.3s ease;
+                        position: relative;
+                        opacity: 0.6;
+                    `;
+                    
+                    // Add dark overlay for locked hats
+                    const darkOverlay = document.createElement('div');
+                    darkOverlay.style.cssText = `
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0,0,0,0.5);
+                        border-radius: 13px;
+                        pointer-events: none;
+                        z-index: 1;
+                    `;
+                    hatDiv.appendChild(darkOverlay);
+                    
+                    const contentDiv = document.createElement('div');
+                    contentDiv.style.cssText = `
+                        position: relative;
+                        z-index: 2;
+                    `;
+                    
+                    const hatImage = hat.id === 'none' ? `<img src="public/owl.png" alt="${hat.name}" style="width: 32px; height: 32px; border-radius: 6px; object-fit: contain; background: rgba(0,0,0,0.1); filter: brightness(0.4) grayscale(0.3);">` : `<img src="${hat.image}" alt="${hat.name}" style="width: 32px; height: 32px; border-radius: 6px; object-fit: contain; background: rgba(0,0,0,0.1); filter: brightness(0.4) grayscale(0.3);">`;
+                    
+                    let unlockText = '';
+                    if (hat.unlockType === 'achievement') {
+                        unlockText = '🔒 ACHIEVEMENT';
+                    } else if (hat.unlockType === 'purchase') {
+                        unlockText = `${hat.price} 🪙`;
+                    }
+                    
+                    contentDiv.innerHTML = `
+                        <div style="width: 32px; height: 32px; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center;">${hatImage}</div>
+                        <div style="font-size: 12px; font-weight: bold; color: #666666; margin-bottom: 3px;">${hat.name}</div>
+                        <div style="font-size: 10px; color: #888888; margin-bottom: 6px;">${hat.description}</div>
+                        <div style="font-size: 9px; color: #FFD700; margin-bottom: 8px;">${unlockText}</div>
+                        <div style="font-size: 9px; color: #FF4444; font-weight: bold;">🔒 LOCKED</div>
+                        ${hat.unlockType === 'purchase' ? 
+                            `<button onclick="event.stopPropagation(); openMarketplaceForHat('${hat.id}')" style="background: #666666; color: white; border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 9px; min-width: 50px; margin-top: 8px;">
+                                BUY
+                            </button>` : 
+                            `<div style="font-size: 9px; color: #888888; margin-top: 8px;">Complete achievement to unlock</div>`
+                        }
+                    `;
+                    
+                    hatDiv.appendChild(contentDiv);
+                    hatsContainer.appendChild(hatDiv);
                 }
             });
             
@@ -20576,6 +20636,19 @@
             switchMarketplaceTab('skins');
             
             console.log(`🛒 Opening marketplace for skin: ${skinId}`);
+        }
+        
+        function openMarketplaceForHat(hatId) {
+            // Close profile panel
+            document.getElementById('profilePanel').style.display = 'none';
+            
+            // Open marketplace panel
+            document.getElementById('marketplacePanel').style.display = 'block';
+            
+            // Switch to hats tab
+            switchMarketplaceTab('hats');
+            
+            console.log(`🛒 Opening marketplace for hat: ${hatId}`);
         }
         
         function updateAchievementsList() {
