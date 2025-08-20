@@ -100,119 +100,6 @@
                 gap: 4px;
             }
             
-            /* Mobile touch controls */
-            .mobile-controls {
-                display: flex !important;
-                position: fixed;
-                bottom: 20px;
-                left: 20px;
-                right: 20px;
-                z-index: 1000;
-                gap: 10px;
-                justify-content: space-between;
-            }
-            
-            .mobile-joystick {
-                width: 120px;
-                height: 120px;
-                background: rgba(0,0,0,0.5);
-                border-radius: 50%;
-                border: 3px solid #00FFFF;
-                position: relative;
-                touch-action: none;
-            }
-            
-            .mobile-joystick-knob {
-                width: 40px;
-                height: 40px;
-                background: #00FFFF;
-                border-radius: 50%;
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                box-shadow: 0 0 10px rgba(0,255,255,0.5);
-            }
-            
-            .mobile-action-buttons {
-                display: flex;
-                gap: 15px;
-                align-items: center;
-            }
-            
-            .mobile-button {
-                width: 60px;
-                height: 60px;
-                background: linear-gradient(135deg, #FF6B35, #F7931E);
-                border: 3px solid #FFD700;
-                border-radius: 50%;
-                color: white;
-                font-size: 20px;
-                font-weight: bold;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                cursor: pointer;
-                touch-action: none;
-                user-select: none;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            }
-            
-            .mobile-button:active {
-                transform: scale(0.95);
-                box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            }
-            
-            .mobile-button.jump {
-                background: linear-gradient(135deg, #4CAF50, #45a049);
-                border-color: #4CAF50;
-            }
-            
-            .mobile-button.attack {
-                background: linear-gradient(135deg, #FF4444, #CC0000);
-                border-color: #FF4444;
-            }
-            
-            .mobile-button.ability {
-                background: linear-gradient(135deg, #9C27B0, #7B1FA2);
-                border-color: #9C27B0;
-            }
-            
-            /* Hide mobile controls on desktop */
-            .mobile-controls {
-                display: none;
-            }
-            
-            /* Mobile UI scaling */
-            #gameContainer {
-                min-width: auto;
-                min-height: auto;
-                border-width: 3px;
-                padding: 5px;
-            }
-            
-            /* Larger touch targets for mobile */
-            button {
-                min-height: 44px;
-                min-width: 44px;
-            }
-            
-            /* Mobile-friendly text sizes */
-            .score-row div {
-                font-size: 14px !important;
-            }
-            
-            /* Mobile pause button positioning */
-            #pauseBtn {
-                position: fixed !important;
-                top: 20px !important;
-                right: 20px !important;
-                z-index: 1001;
-            }
-        }
-        
-        
-            
             .score-item {
                 font-size: 12px;
                 padding: 6px 10px;
@@ -1573,6 +1460,161 @@
                 padding: 15px 25px !important;
                 font-size: clamp(16px, 4vw, 20px) !important;
             }
+            
+            /* Mobile Marketplace Panel */
+            #marketplacePanel {
+                padding: 10px !important;
+                overflow-y: auto !important;
+            }
+            
+            #marketplacePanel > div {
+                max-width: 100% !important;
+                padding: 10px !important;
+            }
+            
+            .marketplace-grid {
+                grid-template-columns: 1fr !important;
+                gap: 15px !important;
+                padding: 10px !important;
+            }
+            
+            .marketplace-item {
+                min-height: auto !important;
+                padding: 15px !important;
+            }
+            
+            .marketplace-tab-btn {
+                padding: 8px 12px !important;
+                font-size: 12px !important;
+                min-width: 80px !important;
+            }
+            
+            /* Mobile Profile Panel */
+            #profilePanel {
+                top: 0 !important;
+                left: 0 !important;
+                transform: none !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                max-width: 100vw !important;
+                max-height: 100vh !important;
+                border-radius: 0 !important;
+                padding: 10px !important;
+                overflow-y: auto !important;
+            }
+            
+            #profilePanel > div {
+                max-width: 100% !important;
+                padding: 10px !important;
+            }
+            
+            .profile-tab-btn {
+                padding: 8px 12px !important;
+                font-size: 12px !important;
+                min-width: 80px !important;
+            }
+            
+            /* Mobile Grid Layouts */
+            .profile-grid, .stats-grid {
+                grid-template-columns: 1fr !important;
+                gap: 10px !important;
+            }
+            
+            /* Mobile Text Sizes */
+            h1, h2, h3 {
+                font-size: clamp(18px, 5vw, 24px) !important;
+            }
+            
+            .profile-stats-card {
+                padding: 15px !important;
+                margin-bottom: 10px !important;
+            }
+            
+            /* Mobile Achievement Cards */
+            #profileAchievementsList {
+                grid-template-columns: 1fr !important;
+                gap: 10px !important;
+            }
+            
+            /* Mobile Inventory Grids */
+            #profileSkinsInventory, #profileHatsInventory, #profileAbilitiesInventory {
+                grid-template-columns: 1fr !important;
+                gap: 10px !important;
+            }
+            
+            /* Mobile Leaderboard */
+            #leaderboardPanel {
+                top: 0 !important;
+                left: 0 !important;
+                transform: none !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                max-width: 100vw !important;
+                max-height: 100vh !important;
+                border-radius: 0 !important;
+                padding: 10px !important;
+            }
+            
+            /* Mobile Pause Menu */
+            #pauseMenu {
+                top: 0 !important;
+                left: 0 !important;
+                transform: none !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                max-width: 100vw !important;
+                max-height: 100vh !important;
+                border-radius: 0 !important;
+                padding: 10px !important;
+            }
+            
+            /* Mobile Buttons */
+            button {
+                min-height: 44px !important;
+                min-width: 44px !important;
+                font-size: 14px !important;
+            }
+            
+            /* Mobile Close Buttons */
+            .close-btn {
+                position: fixed !important;
+                top: 10px !important;
+                right: 10px !important;
+                z-index: 1001 !important;
+                background: #FF4444 !important;
+                color: white !important;
+                border: none !important;
+                padding: 10px 15px !important;
+                border-radius: 50% !important;
+                font-size: 18px !important;
+                font-weight: bold !important;
+            }
+            
+            /* Mobile Scrollbars */
+            ::-webkit-scrollbar {
+                width: 8px !important;
+            }
+            
+            ::-webkit-scrollbar-track {
+                background: rgba(0,0,0,0.1) !important;
+            }
+            
+            ::-webkit-scrollbar-thumb {
+                background: rgba(0,255,255,0.5) !important;
+                border-radius: 4px !important;
+            }
+            
+            /* Mobile Touch Targets */
+            .marketplace-item, .profile-stats-card, .achievement-card {
+                min-height: 60px !important;
+                touch-action: manipulation !important;
+            }
+            
+            /* Mobile Spacing */
+            .mobile-spacing {
+                margin: 10px 0 !important;
+                padding: 10px !important;
+            }
         }
         
         /* Marketplace Item Darkening Effects */
@@ -1932,12 +1974,6 @@
                     <span style="position: relative; z-index: 2;">👤 Profile</span>
                     <div class="button-shine" style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent); transform: rotate(45deg); animation: buttonShine 3s ease-in-out infinite 1s;"></div>
                 </button>
-                
-                <!-- Mobile Version Button -->
-                <button id="mobileVersionBtn" class="home-button mobile-btn" onclick="goToMobileVersion()" style="background: linear-gradient(135deg, #FF6B35, #F7931E, #FF6B35); background-size: 200% 200%; color: #FFFFFF; border: 3px solid #FF6B35; padding: 18px 35px; border-radius: 30px; font-size: clamp(18px, 3vw, 24px); font-weight: bold; cursor: pointer; box-shadow: 0 0 40px rgba(255,107,53,0.6), 0 8px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.3); transition: all 0.3s ease; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); position: relative; overflow: hidden; animation: buttonGlow 2s ease-in-out infinite 1.2s; font-family: 'SuperMario', 'Orbitron', 'Arial Black', sans-serif;">
-                    <span style="position: relative; z-index: 2;">📱 Mobile Version</span>
-                    <div class="button-shine" style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent); transform: rotate(45deg); animation: buttonShine 3s ease-in-out infinite 1.2s;"></div>
-                </button>
                 </div>
             
             <!-- Footer Info -->
@@ -1974,18 +2010,6 @@
         <button id="settingsBtn" onclick="togglePauseMenu()" style="position: fixed; bottom: 20px; left: 20px; background: linear-gradient(135deg, rgba(0,255,255,0.9), rgba(0,255,255,0.8)); color: #000; padding: clamp(12px, 2.5vw, 18px) clamp(18px, 3.5vw, 28px); border-radius: 25px; font-size: clamp(14px, 2.2vw, 18px); font-weight: bold; border: 3px solid #00FFFF; box-shadow: 0 0 20px #00FFFF, 0 5px 15px rgba(0,0,0,0.3); backdrop-filter: blur(5px); cursor: pointer; z-index: 1000; display: none; transition: all 0.3s ease; font-family: 'SuperMario', 'Orbitron', 'Arial Black', sans-serif;">
             ⚙️ Settings
         </button>
-    </div>
-    
-    <!-- Mobile Touch Controls -->
-    <div class="mobile-controls" style="display: none;">
-        <div class="mobile-joystick" id="mobileJoystick">
-            <div class="mobile-joystick-knob" id="mobileJoystickKnob"></div>
-        </div>
-        <div class="mobile-action-buttons">
-            <div class="mobile-button jump" id="mobileJumpBtn">⬆️</div>
-            <div class="mobile-button attack" id="mobileAttackBtn">⚔️</div>
-            <div class="mobile-button ability" id="mobileAbilityBtn">🔫</div>
-        </div>
     </div>
     
     <!-- Leaderboard Panel -->
@@ -17126,9 +17150,6 @@
             // Load saved session stats
             loadSessionStats();
             
-            // Initialize mobile controls
-            initMobileControls();
-            
             // Reset only session coins (keep marketplace coins)
             game.sessionStats.currentSessionCoins = 0;
             game.coins = 0;
@@ -22871,155 +22892,6 @@
             }
         });
 
-        // Mobile Touch Controls
-        let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
-        // Redirect mobile users to mobile version
-        if (isMobile) {
-            console.log('📱 Mobile device detected, redirecting to mobile version');
-            window.location.href = 'mobile.html';
-        }
-        let joystickActive = false;
-        let joystickCenter = { x: 0, y: 0 };
-        let joystickCurrent = { x: 0, y: 0 };
-
-        function initMobileControls() {
-            if (!isMobile) return;
-            
-            console.log('📱 Initializing mobile controls');
-            
-            // Show mobile controls
-            const mobileControls = document.querySelector('.mobile-controls');
-            if (mobileControls) {
-                mobileControls.style.display = 'flex';
-            }
-            
-            // Initialize joystick
-            const joystick = document.getElementById('mobileJoystick');
-            const joystickKnob = document.getElementById('mobileJoystickKnob');
-            
-            if (joystick && joystickKnob) {
-                joystick.addEventListener('touchstart', handleJoystickStart);
-                joystick.addEventListener('touchmove', handleJoystickMove);
-                joystick.addEventListener('touchend', handleJoystickEnd);
-                joystick.addEventListener('mousedown', handleJoystickStart);
-                joystick.addEventListener('mousemove', handleJoystickMove);
-                joystick.addEventListener('mouseup', handleJoystickEnd);
-            }
-            
-            // Initialize action buttons
-            const jumpBtn = document.getElementById('mobileJumpBtn');
-            const attackBtn = document.getElementById('mobileAttackBtn');
-            const abilityBtn = document.getElementById('mobileAbilityBtn');
-            
-            if (jumpBtn) {
-                jumpBtn.addEventListener('touchstart', () => handleMobileButton('jump', true));
-                jumpBtn.addEventListener('touchend', () => handleMobileButton('jump', false));
-                jumpBtn.addEventListener('mousedown', () => handleMobileButton('jump', true));
-                jumpBtn.addEventListener('mouseup', () => handleMobileButton('jump', false));
-            }
-            
-            if (attackBtn) {
-                attackBtn.addEventListener('touchstart', () => handleMobileButton('attack', true));
-                attackBtn.addEventListener('touchend', () => handleMobileButton('attack', false));
-                attackBtn.addEventListener('mousedown', () => handleMobileButton('attack', true));
-                attackBtn.addEventListener('mouseup', () => handleMobileButton('attack', false));
-            }
-            
-            if (abilityBtn) {
-                abilityBtn.addEventListener('touchstart', () => handleMobileButton('ability', true));
-                abilityBtn.addEventListener('touchend', () => handleMobileButton('ability', false));
-                abilityBtn.addEventListener('mousedown', () => handleMobileButton('ability', true));
-                abilityBtn.addEventListener('mouseup', () => handleMobileButton('ability', false));
-            }
-        }
-
-        function handleJoystickStart(e) {
-            e.preventDefault();
-            joystickActive = true;
-            const joystick = document.getElementById('mobileJoystick');
-            const rect = joystick.getBoundingClientRect();
-            joystickCenter = { x: rect.width / 2, y: rect.height / 2 };
-            joystickCurrent = { x: joystickCenter.x, y: joystickCenter.y };
-        }
-
-        function handleJoystickMove(e) {
-            if (!joystickActive) return;
-            e.preventDefault();
-            
-            const joystick = document.getElementById('mobileJoystick');
-            const joystickKnob = document.getElementById('mobileJoystickKnob');
-            const rect = joystick.getBoundingClientRect();
-            
-            const touch = e.touches ? e.touches[0] : e;
-            const x = touch.clientX - rect.left;
-            const y = touch.clientY - rect.top;
-            
-            const deltaX = x - joystickCenter.x;
-            const deltaY = y - joystickCenter.y;
-            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-            const maxDistance = joystickCenter.x - 20;
-            
-            if (distance > maxDistance) {
-                const angle = Math.atan2(deltaY, deltaX);
-                joystickCurrent.x = joystickCenter.x + Math.cos(angle) * maxDistance;
-                joystickCurrent.y = joystickCenter.y + Math.sin(angle) * maxDistance;
-            } else {
-                joystickCurrent.x = x;
-                joystickCurrent.y = y;
-            }
-            
-            joystickKnob.style.left = joystickCurrent.x + 'px';
-            joystickKnob.style.top = joystickCurrent.y + 'px';
-            
-            // Update player movement
-            const normalizedX = (joystickCurrent.x - joystickCenter.x) / maxDistance;
-            if (Math.abs(normalizedX) > 0.1) {
-                player.direction = normalizedX > 0 ? 1 : -1;
-                player.velX = normalizedX * player.speed;
-            } else {
-                player.velX = 0;
-            }
-        }
-
-        function handleJoystickEnd(e) {
-            e.preventDefault();
-            joystickActive = false;
-            
-            const joystickKnob = document.getElementById('mobileJoystickKnob');
-            joystickKnob.style.left = '50%';
-            joystickKnob.style.top = '50%';
-            joystickKnob.style.transform = 'translate(-50%, -50%)';
-            
-            player.velX = 0;
-        }
-
-        function handleMobileButton(action, pressed) {
-            if (!player) return;
-            
-            switch (action) {
-                case 'jump':
-                    if (pressed && player.onGround) {
-                        player.velY = -player.jumpPower;
-                        player.onGround = false;
-                        player.canDoubleJump = true;
-                    }
-                    break;
-                case 'attack':
-                    if (pressed && player.hasLaser) {
-                        // Trigger laser attack
-                        console.log('🔫 Mobile laser attack');
-                    }
-                    break;
-                case 'ability':
-                    if (pressed) {
-                        // Trigger special ability
-                        console.log('⚡ Mobile ability activated');
-                    }
-                    break;
-            }
-        }
-
         // Asset Importer Functions
         let importedAssets = {
             otter: null,
@@ -23764,11 +23636,6 @@
             }).catch(error => {
                 console.error('❌ Error testing metadata:', error);
             });
-        }
-        
-        // Mobile version function
-        function goToMobileVersion() {
-            window.location.href = 'mobile.html';
         }
 
     </script>
