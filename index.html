@@ -6119,9 +6119,9 @@
         
         function drawSpeechBubble(botX, botY) {
             const bubbleX = botX + game.aiBot.width + 10;
-            const bubbleY = botY - 80; // Moved higher from -40 to -80
-            const bubbleWidth = 220; // Made wider from 200 to 220
-            const bubbleHeight = 70; // Made taller from 60 to 70
+            const bubbleY = botY - 120; // Moved much higher to avoid covering otter's face
+            const bubbleWidth = 280; // Made much wider to accommodate longer text
+            const bubbleHeight = 100; // Made much taller to fit more lines
             
             ctx.save();
             
@@ -6156,29 +6156,29 @@
             
             // Draw tip text
             ctx.fillStyle = '#000000';
-            ctx.font = 'bold 14px Arial'; // Made larger from 12px to 14px
+            ctx.font = 'bold 13px Arial'; // Slightly smaller font for better fit
             ctx.textAlign = 'left';
             ctx.textBaseline = 'middle';
             
             // Wrap text if needed
             const words = game.aiBot.currentTip.split(' ');
             let line = '';
-            let lineHeight = 18; // Increased from 15 to 18
-            let currentY = bubbleY + 20; // Increased from 15 to 20
+            let lineHeight = 16; // Adjusted line height for better spacing
+            let currentY = bubbleY + 25; // Better starting position for larger bubble
             
             for (let word of words) {
                 const testLine = line + word + ' ';
                 const testWidth = ctx.measureText(testLine).width;
                 
-                if (testWidth > bubbleWidth - 20 && line !== '') {
-                    ctx.fillText(line, bubbleX + 10, currentY);
+                if (testWidth > bubbleWidth - 30 && line !== '') {
+                    ctx.fillText(line, bubbleX + 15, currentY);
                     line = word + ' ';
                     currentY += lineHeight;
                 } else {
                     line = testLine;
                 }
             }
-            ctx.fillText(line, bubbleX + 10, currentY);
+            ctx.fillText(line, bubbleX + 15, currentY);
             
             ctx.restore();
         }
