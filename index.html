@@ -5945,86 +5945,10 @@
                 game.aiBot.lookDelay = 10; // 10 frames delay
             }
             
-            // Check if it's time for a new tip (less frequent checks)
-            const now = Date.now();
-            if (now - game.aiBot.lastTipTime > game.aiBot.tipCooldown) {
-                selectAndShowTip();
-                game.aiBot.lastTipTime = now;
-            }
-            
-            // Update tip timer (simplified)
-            if (game.aiBot.currentTip) {
-                game.aiBot.tipTimer += 16;
-                if (game.aiBot.tipTimer > game.aiBot.tipDuration) {
-                    game.aiBot.currentTip = '';
-                    game.aiBot.tipTimer = 0;
-                }
-            }
+
         }
         
-        function selectAndShowTip() {
-            // Simplified tip selection (less processing)
-            const tipCategories = [];
-            
-            // Add level-specific tips (simplified check)
-            if (game.level <= 5) {
-                tipCategories.push(`level${game.level}`);
-            }
-            
-            // Add situation-specific tips (simplified checks)
-            if (player.health < 50) {
-                tipCategories.push('lowHealth');
-                // Show owl low health warning
-                showSituationalOwlMessage('lowHealth');
-            }
-            
-            if (player.armor === 0) {
-                tipCategories.push('noArmor');
-            }
-            
-            if (enemies.length > 8) {
-                tipCategories.push('manyEnemies');
-                // Show owl many enemies warning
-                showSituationalOwlMessage('manyEnemies');
-            }
-            
-            if (game.bossActive) {
-                tipCategories.push('bossLevel');
-            }
-            
-            if (player.inWater) {
-                tipCategories.push('underwater');
-            }
-            
-            // Simplified high platform check (less frequent)
-            if (Math.random() < 0.3) { // Only 30% chance to check
-                const nearbyHighPlatforms = platforms.filter(p => 
-                    Math.abs(p.x - player.x) < 300 && p.y < 800
-                );
-                if (nearbyHighPlatforms.length > 0) {
-                    tipCategories.push('highPlatforms');
-                }
-            }
-            
-            // Always include general tips
-            tipCategories.push('general');
-            
-            // Add encouragement tips occasionally (20% chance)
-            if (Math.random() < 0.2) {
-                tipCategories.push('encouragement');
-            }
-            
-            // Select a random category
-            const selectedCategory = tipCategories[Math.floor(Math.random() * tipCategories.length)];
-            const tips = aiBotTips[selectedCategory];
-            
-            if (tips && tips.length > 0) {
-                const randomTip = tips[Math.floor(Math.random() * tips.length)];
-                game.aiBot.currentTip = randomTip;
-                game.aiBot.tipTimer = 0;
-                // Removed console.log to reduce performance impact
-            }
-        }
+
         
         function drawAiBot() {
             if (!game.aiBot.isVisible || !aiOwlBotEnabled) return;
@@ -6186,6 +6110,11 @@
             }
             
             ctx.restore();
+            
+            // Draw speech bubble if there's a message
+            if (game.aiBot.currentTip) {
+                drawSpeechBubble(botX, botY);
+            }
         }
         
         function drawSpeechBubble(botX, botY) {
@@ -23053,42 +22982,16 @@
         function showAIOwlBotMessage(message) {
             if (!aiOwlBotEnabled) return;
             
-            const notification = document.createElement('div');
-            notification.style.cssText = `
-                position: fixed;
-                bottom: 120px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: linear-gradient(135deg, rgba(0,255,255,0.9), rgba(0,255,255,0.8));
-                color: #000;
-                padding: 12px 20px;
-                border-radius: 20px;
-                font-size: 14px;
-                font-weight: bold;
-                text-align: center;
-                z-index: 10000;
-                box-shadow: 0 5px 20px rgba(0,255,255,0.4);
-                animation: owlMessageSlideIn 0.5s ease-out;
-                max-width: 400px;
-                font-family: 'SuperMario', 'Orbitron', 'Arial Black', sans-serif;
-                border: 2px solid #00FFFF;
-            `;
+            // Set the message to display in the owl's speech bubble
+            game.aiBot.currentTip = message;
+            game.aiBot.tipTimer = 0;
+            game.aiBot.lastTipTime = Date.now();
             
-            notification.innerHTML = `
-                <div style="font-size: 16px; margin-bottom: 5px;">🦉 AI Owl Bot</div>
-                <div style="font-size: 12px;">${message}</div>
-            `;
-            
-            document.body.appendChild(notification);
-            
+            // Clear the message after 6 seconds
             setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.style.animation = 'owlMessageSlideOut 0.5s ease-in';
-                    setTimeout(() => {
-                        if (notification.parentNode) {
-                            notification.parentNode.removeChild(notification);
-                        }
-                    }, 500);
+                if (game.aiBot.currentTip === message) {
+                    game.aiBot.currentTip = '';
+                    game.aiBot.tipTimer = 0;
                 }
             }, 6000);
         }
