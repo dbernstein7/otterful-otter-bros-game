@@ -696,6 +696,11 @@
             }
         }
         
+        @keyframes profileXpShine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
         /* Override score-item styling for XP bar */
         .score-item .xp-bar-container {
             background: none !important;
@@ -2101,7 +2106,6 @@
                 <h3 style="color: #00FFFF; margin-top: 0;">📈 XP & Progression System</h3>
                 <ul style="color: #FFD700; line-height: 1.6;">
                     <li><strong>XP Progression:</strong> Level 1-10: 500 XP increase per level, Level 10+: 1000 XP per level</li>
-                    <li><strong>XP Multipliers:</strong> Score-to-XP: 25%, Level Completion: 75 × level, Achievement Bonuses: 50% for 3+ achievements, 25% for perfect runs</li>
                     <li><strong>Laser Charge Unlocks:</strong> Every 10 levels (10, 20, 30, 40, 50, 60)</li>
                     <li><strong>Laser Charge Upgrades:</strong> Each unlock increases max charge level</li>
                     <li><strong>Level Rewards:</strong> Unlock new abilities and cosmetics as you progress</li>
@@ -2317,7 +2321,6 @@
                     <div style="background: rgba(0,255,255,0.1); padding: 20px; border-radius: 15px; border: 1px solid rgba(0,255,255,0.2);">
                         <ul style="color: #FFD700; line-height: 1.6; margin: 0; padding-left: 20px;">
                             <li><strong>XP Progression:</strong> Level 1-10: 500 XP increase per level, Level 10+: 1000 XP per level</li>
-                            <li><strong>XP Multipliers:</strong> Score-to-XP: 25%, Level Completion: 75 × level, Achievement Bonuses: 50% for 3+ achievements, 25% for perfect runs</li>
                             <li><strong>Laser Charge Unlocks:</strong> Every 10 levels (10, 20, 30, 40, 50, 60)</li>
                             <li><strong>Laser Charge Upgrades:</strong> Each unlock increases max charge level</li>
                             <li><strong>Level Rewards:</strong> Unlock new abilities and cosmetics as you progress</li>
@@ -2586,6 +2589,43 @@
                         <div style="font-size: 24px; margin-bottom: 8px;">👑</div>
                         <div style="font-size: 12px; color: #FF6B35; margin-bottom: 5px; font-weight: bold;">BOSSES DEFEATED</div>
                         <div id="profileBossesDefeated" style="font-size: 20px; font-weight: bold; color: #FFD700; text-shadow: 0 0 8px rgba(255,215,0,0.5);">0</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- XP Progress Section -->
+            <div style="background: rgba(0,255,255,0.05); padding: 20px; border-radius: 20px; border: 2px solid #00FFFF; margin-bottom: 25px;">
+                <h3 style="margin: 0 0 20px 0; color: #00FFFF; text-align: center; font-size: 22px; text-shadow: 0 0 10px rgba(0,255,255,0.5);">📈 Experience Progress</h3>
+                <div style="background: linear-gradient(135deg, rgba(0,255,255,0.15), rgba(0,255,255,0.05)); padding: 20px; border-radius: 12px; border: 1px solid rgba(0,255,255,0.3); text-align: center;">
+                    <div style="font-size: 24px; margin-bottom: 8px;">⭐</div>
+                    <div style="font-size: 14px; color: #00FFFF; margin-bottom: 10px; font-weight: bold;">CURRENT LEVEL</div>
+                    <div id="profilePlayerLevel" style="font-size: 28px; font-weight: bold; color: #FFD700; text-shadow: 0 0 8px rgba(255,215,0,0.5); margin-bottom: 15px;">1</div>
+                    
+                    <!-- XP Bar Container -->
+                    <div style="margin-bottom: 15px;">
+                        <div style="font-size: 12px; color: #00FFFF; margin-bottom: 8px; font-weight: bold;">EXPERIENCE PROGRESS</div>
+                        <div class="profile-xp-bar-container" style="width: 100%; height: 25px; background: rgba(0,0,0,0.3); border-radius: 15px; border: 2px solid rgba(0,255,255,0.5); overflow: hidden; position: relative; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);">
+                            <div class="profile-xp-bar-fill" id="profileXpBarFill" style="height: 100%; background: linear-gradient(90deg, #00FFFF, #0080FF, #00FFFF); border-radius: 13px; transition: width 0.5s ease-in-out; position: relative; min-width: 0%;">
+                                <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); animation: profileXpShine 2s ease-in-out infinite;"></div>
+                            </div>
+                        </div>
+                        <div id="profileXpText" style="font-size: 14px; color: #00FFFF; margin-top: 8px; font-weight: bold;">0 / 1,000 XP</div>
+                    </div>
+                    
+                    <!-- XP Stats -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 20px;">
+                        <div style="background: rgba(0,255,255,0.1); padding: 12px; border-radius: 8px; border: 1px solid rgba(0,255,255,0.2);">
+                            <div style="font-size: 12px; color: #00FFFF; margin-bottom: 5px; font-weight: bold;">TOTAL XP</div>
+                            <div id="profileTotalXP" style="font-size: 18px; font-weight: bold; color: #FFD700; text-shadow: 0 0 8px rgba(255,215,0,0.5);">0</div>
+                        </div>
+                        <div style="background: rgba(0,255,255,0.1); padding: 12px; border-radius: 8px; border: 1px solid rgba(0,255,255,0.2);">
+                            <div style="font-size: 12px; color: #00FFFF; margin-bottom: 5px; font-weight: bold;">XP TO NEXT</div>
+                            <div id="profileXpToNext" style="font-size: 18px; font-weight: bold; color: #FFD700; text-shadow: 0 0 8px rgba(255,215,0,0.5);">1,000</div>
+                        </div>
+                        <div style="background: rgba(0,255,255,0.1); padding: 12px; border-radius: 8px; border: 1px solid rgba(0,255,255,0.2);">
+                            <div style="font-size: 12px; color: #00FFFF; margin-bottom: 5px; font-weight: bold;">PROGRESS %</div>
+                            <div id="profileXpProgress" style="font-size: 18px; font-weight: bold; color: #FFD700; text-shadow: 0 0 8px rgba(255,215,0,0.5);">0%</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -5434,10 +5474,7 @@
                 coinsCollected: 0,
                 chestsCollected: 0,
                 goldenChestsCollected: 0
-            },
-            // Daily/Weekly bonus tracking
-            lastPlayedDate: null,
-            consecutiveDaysPlayed: 0
+            }
         };
         
         // Single initialization function to prevent multiple executions
@@ -5541,102 +5578,102 @@
         
         // Achievements System
         const achievements = [
-            // Basic Achievements (Easy) - 75 XP each (increased from 50)
-            { id: 'first_game', name: 'First Steps', description: 'Play your first game', icon: '🎮', unlocked: false, xpReward: 75 },
-            { id: 'first_coin', name: 'Coin Collector', description: 'Collect your first coin', icon: '🪙', unlocked: false, xpReward: 75 },
-            { id: 'first_level', name: 'Level Up!', description: 'Complete your first level', icon: '⭐', unlocked: false, xpReward: 75 },
-            { id: 'first_enemy', name: 'Combat Ready', description: 'Defeat your first enemy', icon: '⚔️', unlocked: false, xpReward: 75 },
-            { id: 'ten_coins', name: 'Rich Otter', description: 'Collect 10 coins in one game', icon: '💰', unlocked: false, xpReward: 75 },
-            { id: 'five_levels', name: 'Adventure Seeker', description: 'Complete 5 levels', icon: '🗺️', unlocked: false, xpReward: 75 },
-            { id: 'hundred_score', name: 'Score Master', description: 'Score 100 points in one game', icon: '🏆', unlocked: false, xpReward: 75 },
-            { id: 'jetpack_user', name: 'Jetpack Jockey', description: 'Use a jetpack for the first time', icon: '🚁', unlocked: false, xpReward: 75 },
-            { id: 'laser_user', name: 'Laser Expert', description: 'Use a laser for the first time', icon: '🔫', unlocked: false, xpReward: 75 },
-            { id: 'mushroom_user', name: 'Giant Mode', description: 'Use a mushroom for the first time', icon: '🍄', unlocked: false, xpReward: 75 },
-            { id: 'underwater_explorer', name: 'Deep Diver', description: 'Explore underwater areas', icon: '🌊', unlocked: false, xpReward: 75 },
-            { id: 'boss_defeater', name: 'Boss Slayer', description: 'Defeat your first boss', icon: '👑', unlocked: false, xpReward: 75 },
-            { id: 'marketplace_shopper', name: 'Fashion Forward', description: 'Buy your first item from the marketplace', icon: '🛒', unlocked: false, xpReward: 75 },
-            { id: 'hat_collector', name: 'Hat Enthusiast', description: 'Own 3 different owl hats', icon: '🦉', unlocked: false, xpReward: 75 },
-            { id: 'skin_collector', name: 'Style Master', description: 'Own 3 different otter skins', icon: '🦦', unlocked: false, xpReward: 75 },
+            // Basic Achievements (Easy) - 50 XP each
+            { id: 'first_game', name: 'First Steps', description: 'Play your first game', icon: '🎮', unlocked: false, xpReward: 50 },
+            { id: 'first_coin', name: 'Coin Collector', description: 'Collect your first coin', icon: '🪙', unlocked: false, xpReward: 50 },
+            { id: 'first_level', name: 'Level Up!', description: 'Complete your first level', icon: '⭐', unlocked: false, xpReward: 50 },
+            { id: 'first_enemy', name: 'Combat Ready', description: 'Defeat your first enemy', icon: '⚔️', unlocked: false, xpReward: 50 },
+            { id: 'ten_coins', name: 'Rich Otter', description: 'Collect 10 coins in one game', icon: '💰', unlocked: false, xpReward: 50 },
+            { id: 'five_levels', name: 'Adventure Seeker', description: 'Complete 5 levels', icon: '🗺️', unlocked: false, xpReward: 50 },
+            { id: 'hundred_score', name: 'Score Master', description: 'Score 100 points in one game', icon: '🏆', unlocked: false, xpReward: 50 },
+            { id: 'jetpack_user', name: 'Jetpack Jockey', description: 'Use a jetpack for the first time', icon: '🚁', unlocked: false, xpReward: 50 },
+            { id: 'laser_user', name: 'Laser Expert', description: 'Use a laser for the first time', icon: '🔫', unlocked: false, xpReward: 50 },
+            { id: 'mushroom_user', name: 'Giant Mode', description: 'Use a mushroom for the first time', icon: '🍄', unlocked: false, xpReward: 50 },
+            { id: 'underwater_explorer', name: 'Deep Diver', description: 'Explore underwater areas', icon: '🌊', unlocked: false, xpReward: 50 },
+            { id: 'boss_defeater', name: 'Boss Slayer', description: 'Defeat your first boss', icon: '👑', unlocked: false, xpReward: 50 },
+            { id: 'marketplace_shopper', name: 'Fashion Forward', description: 'Buy your first item from the marketplace', icon: '🛒', unlocked: false, xpReward: 50 },
+            { id: 'hat_collector', name: 'Hat Enthusiast', description: 'Own 3 different owl hats', icon: '🦉', unlocked: false, xpReward: 50 },
+            { id: 'skin_collector', name: 'Style Master', description: 'Own 3 different otter skins', icon: '🦦', unlocked: false, xpReward: 50 },
             
-            // Intermediate Achievements (Medium) - 150 XP each (increased from 100)
-            { id: 'fifty_coins', name: 'Coin Hoarder', description: 'Collect 50 coins in one game', icon: '💎', unlocked: false, xpReward: 150 },
-            { id: 'ten_levels', name: 'Level Master', description: 'Complete 10 levels', icon: '🏔️', unlocked: false, xpReward: 150 },
-            { id: 'complete_10_levels', name: 'Level Master', description: 'Complete 10 levels', icon: '🏔️', unlocked: false, xpReward: 150 },
-            { id: 'thousand_score', name: 'High Scorer', description: 'Score 1,000 points in one game', icon: '🎯', unlocked: false, xpReward: 150 },
-            { id: 'twenty_enemies', name: 'Enemy Hunter', description: 'Defeat 20 enemies in one game', icon: '🗡️', unlocked: false, xpReward: 150 },
-            { id: 'five_bosses', name: 'Boss Hunter', description: 'Defeat 5 bosses', icon: '👑', unlocked: false, xpReward: 150 },
-            { id: 'defeat_5_bosses', name: 'Boss Hunter', description: 'Defeat 5 bosses', icon: '👑', unlocked: false, xpReward: 150 },
-            { id: 'all_hats', name: 'Hat Master', description: 'Own all owl hats', icon: '🎩', unlocked: false, xpReward: 150 },
-            { id: 'all_skins', name: 'Skin Master', description: 'Own all otter skins', icon: '🎨', unlocked: false, xpReward: 150 },
-            { id: 'speed_runner', name: 'Speed Runner', description: 'Complete a level in under 30 seconds', icon: '⚡', unlocked: false, xpReward: 150 },
-            { id: 'no_damage', name: 'Untouchable', description: 'Complete a level without taking damage', icon: '🛡️', unlocked: false, xpReward: 150 },
-            { id: 'collector', name: 'Collector', description: 'Collect 100 items in one game', icon: '📦', unlocked: false, xpReward: 150 },
+            // Intermediate Achievements (Medium) - 100 XP each
+            { id: 'fifty_coins', name: 'Coin Hoarder', description: 'Collect 50 coins in one game', icon: '💎', unlocked: false, xpReward: 100 },
+            { id: 'ten_levels', name: 'Level Master', description: 'Complete 10 levels', icon: '🏔️', unlocked: false, xpReward: 100 },
+            { id: 'complete_10_levels', name: 'Level Master', description: 'Complete 10 levels', icon: '🏔️', unlocked: false, xpReward: 100 },
+            { id: 'thousand_score', name: 'High Scorer', description: 'Score 1,000 points in one game', icon: '🎯', unlocked: false, xpReward: 100 },
+            { id: 'twenty_enemies', name: 'Enemy Hunter', description: 'Defeat 20 enemies in one game', icon: '🗡️', unlocked: false, xpReward: 100 },
+            { id: 'five_bosses', name: 'Boss Hunter', description: 'Defeat 5 bosses', icon: '👑', unlocked: false, xpReward: 100 },
+            { id: 'defeat_5_bosses', name: 'Boss Hunter', description: 'Defeat 5 bosses', icon: '👑', unlocked: false, xpReward: 100 },
+            { id: 'all_hats', name: 'Hat Master', description: 'Own all owl hats', icon: '🎩', unlocked: false, xpReward: 100 },
+            { id: 'all_skins', name: 'Skin Master', description: 'Own all otter skins', icon: '🎨', unlocked: false, xpReward: 100 },
+            { id: 'speed_runner', name: 'Speed Runner', description: 'Complete a level in under 30 seconds', icon: '⚡', unlocked: false, xpReward: 100 },
+            { id: 'no_damage', name: 'Untouchable', description: 'Complete a level without taking damage', icon: '🛡️', unlocked: false, xpReward: 100 },
+            { id: 'collector', name: 'Collector', description: 'Collect 100 items in one game', icon: '📦', unlocked: false, xpReward: 100 },
             
-            // Advanced Achievements (Hard) - 300 XP each (increased from 200)
-            { id: 'hundred_coins', name: 'Coin Millionaire', description: 'Collect 100 coins in one game', icon: '💎', unlocked: false, xpReward: 300 },
-            { id: 'collect_100_coins', name: 'Coin Collector Master', description: 'Collect 100 coins total', icon: '💎', unlocked: false, xpReward: 300 },
-            { id: 'twenty_levels', name: 'Level Legend', description: 'Complete 20 levels', icon: '🏆', unlocked: false, xpReward: 300 },
-            { id: 'reach_level_20', name: 'Level 20 Master', description: 'Reach player level 20', icon: '🏆', unlocked: false, xpReward: 300 },
-            { id: 'ten_thousand_score', name: 'Score Legend', description: 'Score 10,000 points in one game', icon: '🌟', unlocked: false, xpReward: 300 },
-            { id: 'fifty_enemies', name: 'Enemy Slayer', description: 'Defeat 50 enemies in one game', icon: '⚔️', unlocked: false, xpReward: 300 },
-            { id: 'defeat_50_enemies', name: 'Enemy Slayer', description: 'Defeat 50 enemies total', icon: '⚔️', unlocked: false, xpReward: 300 },
-            { id: 'ten_bosses', name: 'Boss Legend', description: 'Defeat 10 bosses', icon: '👑', unlocked: false, xpReward: 300 },
-            { id: 'perfect_run', name: 'Perfect Run', description: 'Complete a level with 100% items collected', icon: '💯', unlocked: false, xpReward: 300 },
-            { id: 'no_jump', name: 'Ground Walker', description: 'Complete a level without jumping', icon: '🚶', unlocked: false, xpReward: 300 },
-            { id: 'underwater_master', name: 'Underwater Master', description: 'Spend 5 minutes underwater in one game', icon: '🐠', unlocked: false, xpReward: 300 },
-            { id: 'jetpack_master', name: 'Jetpack Master', description: 'Use jetpack for 3 minutes in one game', icon: '🚁', unlocked: false, xpReward: 300 },
-            { id: 'laser_master', name: 'Laser Master', description: 'Defeat 10 enemies with laser in one game', icon: '🔫', unlocked: false, xpReward: 300 },
+            // Advanced Achievements (Hard) - 200 XP each
+            { id: 'hundred_coins', name: 'Coin Millionaire', description: 'Collect 100 coins in one game', icon: '💎', unlocked: false, xpReward: 200 },
+            { id: 'collect_100_coins', name: 'Coin Collector Master', description: 'Collect 100 coins total', icon: '💎', unlocked: false, xpReward: 200 },
+            { id: 'twenty_levels', name: 'Level Legend', description: 'Complete 20 levels', icon: '🏆', unlocked: false, xpReward: 200 },
+            { id: 'reach_level_20', name: 'Level 20 Master', description: 'Reach player level 20', icon: '🏆', unlocked: false, xpReward: 200 },
+            { id: 'ten_thousand_score', name: 'Score Legend', description: 'Score 10,000 points in one game', icon: '🌟', unlocked: false, xpReward: 200 },
+            { id: 'fifty_enemies', name: 'Enemy Slayer', description: 'Defeat 50 enemies in one game', icon: '⚔️', unlocked: false, xpReward: 200 },
+            { id: 'defeat_50_enemies', name: 'Enemy Slayer', description: 'Defeat 50 enemies total', icon: '⚔️', unlocked: false, xpReward: 200 },
+            { id: 'ten_bosses', name: 'Boss Legend', description: 'Defeat 10 bosses', icon: '👑', unlocked: false, xpReward: 200 },
+            { id: 'perfect_run', name: 'Perfect Run', description: 'Complete a level with 100% items collected', icon: '💯', unlocked: false, xpReward: 200 },
+            { id: 'no_jump', name: 'Ground Walker', description: 'Complete a level without jumping', icon: '🚶', unlocked: false, xpReward: 200 },
+            { id: 'underwater_master', name: 'Underwater Master', description: 'Spend 5 minutes underwater in one game', icon: '🐠', unlocked: false, xpReward: 200 },
+            { id: 'jetpack_master', name: 'Jetpack Master', description: 'Use jetpack for 3 minutes in one game', icon: '🚁', unlocked: false, xpReward: 200 },
+            { id: 'laser_master', name: 'Laser Master', description: 'Defeat 10 enemies with laser in one game', icon: '🔫', unlocked: false, xpReward: 200 },
             
-            // Expert Achievements (Very Hard) - 750 XP each (increased from 500)
-            { id: 'two_hundred_coins', name: 'Coin Billionaire', description: 'Collect 200 coins in one game', icon: '💎', unlocked: false, xpReward: 750 },
-            { id: 'fifty_levels', name: 'Level God', description: 'Complete 50 levels', icon: '🏆', unlocked: false, xpReward: 750 },
-            { id: 'hundred_thousand_score', name: 'Score God', description: 'Score 100,000 points in one game', icon: '🌟', unlocked: false, xpReward: 750 },
-            { id: 'hundred_enemies', name: 'Enemy God', description: 'Defeat 100 enemies in one game', icon: '⚔️', unlocked: false, xpReward: 750 },
-            { id: 'twenty_bosses', name: 'Boss God', description: 'Defeat 20 bosses', icon: '👑', unlocked: false, xpReward: 750 },
-            { id: 'no_powerups', name: 'Pure Skill', description: 'Complete 5 levels without using any powerups', icon: '🎯', unlocked: false, xpReward: 750 },
-            { id: 'speed_god', name: 'Speed God', description: 'Complete a level in under 15 seconds', icon: '⚡', unlocked: false, xpReward: 750 },
-            { id: 'invincible', name: 'Invincible', description: 'Complete 3 levels without taking damage', icon: '🛡️', unlocked: false, xpReward: 750 },
-            { id: 'master_collector', name: 'Master Collector', description: 'Collect 500 items in one game', icon: '📦', unlocked: false, xpReward: 750 },
+            // Expert Achievements (Very Hard) - 500 XP each
+            { id: 'two_hundred_coins', name: 'Coin Billionaire', description: 'Collect 200 coins in one game', icon: '💎', unlocked: false, xpReward: 500 },
+            { id: 'fifty_levels', name: 'Level God', description: 'Complete 50 levels', icon: '🏆', unlocked: false, xpReward: 500 },
+            { id: 'hundred_thousand_score', name: 'Score God', description: 'Score 100,000 points in one game', icon: '🌟', unlocked: false, xpReward: 500 },
+            { id: 'hundred_enemies', name: 'Enemy God', description: 'Defeat 100 enemies in one game', icon: '⚔️', unlocked: false, xpReward: 500 },
+            { id: 'twenty_bosses', name: 'Boss God', description: 'Defeat 20 bosses', icon: '👑', unlocked: false, xpReward: 500 },
+            { id: 'no_powerups', name: 'Pure Skill', description: 'Complete 5 levels without using any powerups', icon: '🎯', unlocked: false, xpReward: 500 },
+            { id: 'speed_god', name: 'Speed God', description: 'Complete a level in under 15 seconds', icon: '⚡', unlocked: false, xpReward: 500 },
+            { id: 'invincible', name: 'Invincible', description: 'Complete 3 levels without taking damage', icon: '🛡️', unlocked: false, xpReward: 500 },
+            { id: 'master_collector', name: 'Master Collector', description: 'Collect 500 items in one game', icon: '📦', unlocked: false, xpReward: 500 },
             
-            // New Gameplay Achievements - 200 XP each (increased from 150)
-            { id: 'fireball_master', name: 'Fireball Master', description: 'Hit 10 enemies with fireballs in one game', icon: '🔥', unlocked: false, xpReward: 200 },
-            { id: 'underwater_explorer_master', name: 'Deep Sea Explorer', description: 'Spend 10 minutes underwater total', icon: '🌊', unlocked: false, xpReward: 200 },
-            { id: 'jetpack_explorer', name: 'Sky Explorer', description: 'Use jetpack for 5 minutes total', icon: '🚁', unlocked: false, xpReward: 200 },
-            { id: 'laser_expert', name: 'Laser Expert', description: 'Defeat 25 enemies with laser total', icon: '🔫', unlocked: false, xpReward: 200 },
-            { id: 'treasure_hunter', name: 'Treasure Hunter', description: 'Collect 50 treasures total', icon: '💎', unlocked: false, xpReward: 200 },
-            { id: 'health_master', name: 'Health Master', description: 'Collect 100 health pickups total', icon: '❤️', unlocked: false, xpReward: 200 },
-            { id: 'mushroom_master', name: 'Mushroom Master', description: 'Eat 50 mushrooms total', icon: '🍄', unlocked: false, xpReward: 200 },
-            { id: 'key_collector', name: 'Key Master', description: 'Collect 25 keys total', icon: '🗝️', unlocked: false, xpReward: 200 },
-            { id: 'fish_collector', name: 'Fish Collector', description: 'Collect 100 fish total', icon: '🐟', unlocked: false, xpReward: 200 },
-            { id: 'jump_master', name: 'Jump Master', description: 'Make 500 jumps total', icon: '🦘', unlocked: false, xpReward: 200 },
+            // New Gameplay Achievements - 150 XP each
+            { id: 'fireball_master', name: 'Fireball Master', description: 'Hit 10 enemies with fireballs in one game', icon: '🔥', unlocked: false, xpReward: 150 },
+            { id: 'underwater_explorer_master', name: 'Deep Sea Explorer', description: 'Spend 10 minutes underwater total', icon: '🌊', unlocked: false, xpReward: 150 },
+            { id: 'jetpack_explorer', name: 'Sky Explorer', description: 'Use jetpack for 5 minutes total', icon: '🚁', unlocked: false, xpReward: 150 },
+            { id: 'laser_expert', name: 'Laser Expert', description: 'Defeat 25 enemies with laser total', icon: '🔫', unlocked: false, xpReward: 150 },
+            { id: 'treasure_hunter', name: 'Treasure Hunter', description: 'Collect 50 treasures total', icon: '💎', unlocked: false, xpReward: 150 },
+            { id: 'health_master', name: 'Health Master', description: 'Collect 100 health pickups total', icon: '❤️', unlocked: false, xpReward: 150 },
+            { id: 'mushroom_master', name: 'Mushroom Master', description: 'Eat 50 mushrooms total', icon: '🍄', unlocked: false, xpReward: 150 },
+            { id: 'key_collector', name: 'Key Master', description: 'Collect 25 keys total', icon: '🗝️', unlocked: false, xpReward: 150 },
+            { id: 'fish_collector', name: 'Fish Collector', description: 'Collect 100 fish total', icon: '🐟', unlocked: false, xpReward: 150 },
+            { id: 'jump_master', name: 'Jump Master', description: 'Make 500 jumps total', icon: '🦘', unlocked: false, xpReward: 150 },
             
-            // Hidden Achievements (Random/Secret) - 150 XP each (increased from 75)
-            { id: 'lucky_777', name: 'Lucky 777', description: 'Score exactly 777 points', icon: '🍀', unlocked: false, hidden: true, xpReward: 150 },
-            { id: 'collector_13', name: 'Unlucky Collector', description: 'Collect exactly 13 items', icon: '😱', unlocked: false, hidden: true, xpReward: 150 },
-            { id: 'enemy_666', name: 'Devil Hunter', description: 'Defeat exactly 666 enemies', icon: '😈', unlocked: false, hidden: true, xpReward: 150 },
-            { id: 'coin_42', name: 'Answer to Everything', description: 'Collect exactly 42 coins', icon: '🤖', unlocked: false, hidden: true, xpReward: 150 },
-            { id: 'level_69', name: 'Nice Level', description: 'Complete level 69', icon: '😏', unlocked: false, hidden: true, xpReward: 150 },
-            { id: 'random_master', name: 'Random Master', description: 'Unlock 5 hidden achievements', icon: '🎲', unlocked: false, hidden: true, xpReward: 150 },
-            { id: 'midnight_gamer', name: 'Midnight Gamer', description: 'Play at exactly midnight', icon: '🌙', unlocked: false, hidden: true, xpReward: 150 },
-            { id: 'early_bird', name: 'Early Bird', description: 'Play at exactly 6 AM', icon: '🌅', unlocked: false, hidden: true, xpReward: 150 },
-            { id: 'night_owl', name: 'Night Owl', description: 'Play for 2 hours straight', icon: '🦉', unlocked: false, hidden: true, xpReward: 150 },
-            { id: 'weekend_warrior', name: 'Weekend Warrior', description: 'Play on a weekend', icon: '📅', unlocked: false, hidden: true, xpReward: 150 },
+            // Hidden Achievements (Random/Secret) - 75 XP each
+            { id: 'lucky_777', name: 'Lucky 777', description: 'Score exactly 777 points', icon: '🍀', unlocked: false, hidden: true, xpReward: 75 },
+            { id: 'collector_13', name: 'Unlucky Collector', description: 'Collect exactly 13 items', icon: '😱', unlocked: false, hidden: true, xpReward: 75 },
+            { id: 'enemy_666', name: 'Devil Hunter', description: 'Defeat exactly 666 enemies', icon: '😈', unlocked: false, hidden: true, xpReward: 75 },
+            { id: 'coin_42', name: 'Answer to Everything', description: 'Collect exactly 42 coins', icon: '🤖', unlocked: false, hidden: true, xpReward: 75 },
+            { id: 'level_69', name: 'Nice Level', description: 'Complete level 69', icon: '😏', unlocked: false, hidden: true, xpReward: 75 },
+            { id: 'random_master', name: 'Random Master', description: 'Unlock 5 hidden achievements', icon: '🎲', unlocked: false, hidden: true, xpReward: 75 },
+            { id: 'midnight_gamer', name: 'Midnight Gamer', description: 'Play at exactly midnight', icon: '🌙', unlocked: false, hidden: true, xpReward: 75 },
+            { id: 'early_bird', name: 'Early Bird', description: 'Play at exactly 6 AM', icon: '🌅', unlocked: false, hidden: true, xpReward: 75 },
+            { id: 'night_owl', name: 'Night Owl', description: 'Play for 2 hours straight', icon: '🦉', unlocked: false, hidden: true, xpReward: 75 },
+            { id: 'weekend_warrior', name: 'Weekend Warrior', description: 'Play on a weekend', icon: '📅', unlocked: false, hidden: true, xpReward: 75 },
             
-            // Special Event Achievements - 150 XP each (increased from 100)
-            { id: 'christmas_player', name: 'Christmas Player', description: 'Play during December', icon: '🎄', unlocked: false, hidden: true, xpReward: 150 },
-            { id: 'halloween_player', name: 'Halloween Player', description: 'Play during October', icon: '🎃', unlocked: false, hidden: true, xpReward: 150 },
-            { id: 'summer_player', name: 'Summer Player', description: 'Play during June-August', icon: '☀️', unlocked: false, hidden: true, xpReward: 150 },
-            { id: 'spring_player', name: 'Spring Player', description: 'Play during March-May', icon: '🌸', unlocked: false, hidden: true, xpReward: 150 },
+            // Special Event Achievements - 100 XP each
+            { id: 'christmas_player', name: 'Christmas Player', description: 'Play during December', icon: '🎄', unlocked: false, hidden: true, xpReward: 100 },
+            { id: 'halloween_player', name: 'Halloween Player', description: 'Play during October', icon: '🎃', unlocked: false, hidden: true, xpReward: 100 },
+            { id: 'summer_player', name: 'Summer Player', description: 'Play during June-August', icon: '☀️', unlocked: false, hidden: true, xpReward: 100 },
+            { id: 'spring_player', name: 'Spring Player', description: 'Play during March-May', icon: '🌸', unlocked: false, hidden: true, xpReward: 100 },
             
-            // Ultra Rare Achievements (Extremely Hard) - 1500 XP each (increased from 1000)
-            { id: 'million_score', name: 'Millionaire', description: 'Score 1,000,000 points in one game', icon: '💎', unlocked: false, xpReward: 1500 },
-            { id: 'hundred_levels', name: 'Century Master', description: 'Complete 100 levels', icon: '🏆', unlocked: false, xpReward: 1500 },
-            { id: 'thousand_enemies', name: 'Enemy Annihilator', description: 'Defeat 1,000 enemies', icon: '⚔️', unlocked: false, xpReward: 1500 },
-            { id: 'fifty_bosses', name: 'Boss Annihilator', description: 'Defeat 50 bosses', icon: '👑', unlocked: false, xpReward: 1500 },
-            { id: 'perfect_game', name: 'Perfect Game', description: 'Complete a game with 100% completion', icon: '💯', unlocked: false, xpReward: 1500 },
-            { id: 'no_death_master', name: 'No Death Master', description: 'Complete 10 levels without dying', icon: '🛡️', unlocked: false, xpReward: 1500 },
-            { id: 'speed_demon', name: 'Speed Demon', description: 'Complete a level in under 10 seconds', icon: '⚡', unlocked: false, xpReward: 1500 },
-            { id: 'collector_god', name: 'Collector God', description: 'Collect 1,000 items in one game', icon: '📦', unlocked: false, xpReward: 1500 },
+            // Ultra Rare Achievements (Extremely Hard) - 1000 XP each
+            { id: 'million_score', name: 'Millionaire', description: 'Score 1,000,000 points in one game', icon: '💎', unlocked: false, xpReward: 1000 },
+            { id: 'hundred_levels', name: 'Century Master', description: 'Complete 100 levels', icon: '🏆', unlocked: false, xpReward: 1000 },
+            { id: 'thousand_enemies', name: 'Enemy Annihilator', description: 'Defeat 1,000 enemies', icon: '⚔️', unlocked: false, xpReward: 1000 },
+            { id: 'fifty_bosses', name: 'Boss Annihilator', description: 'Defeat 50 bosses', icon: '👑', unlocked: false, xpReward: 1000 },
+            { id: 'perfect_game', name: 'Perfect Game', description: 'Complete a game with 100% completion', icon: '💯', unlocked: false, xpReward: 1000 },
+            { id: 'no_death_master', name: 'No Death Master', description: 'Complete 10 levels without dying', icon: '🛡️', unlocked: false, xpReward: 1000 },
+            { id: 'speed_demon', name: 'Speed Demon', description: 'Complete a level in under 10 seconds', icon: '⚡', unlocked: false, xpReward: 1000 },
+            { id: 'collector_god', name: 'Collector God', description: 'Collect 1,000 items in one game', icon: '📦', unlocked: false, xpReward: 1000 },
             { id: 'underwater_god', name: 'Underwater God', description: 'Spend 10 minutes underwater in one game', icon: '🐠', unlocked: false, xpReward: 1000 },
             { id: 'jetpack_god', name: 'Jetpack God', description: 'Use jetpack for 10 minutes in one game', icon: '🚁', unlocked: false, xpReward: 1000 }
         ];
@@ -6307,7 +6344,7 @@
             height: 93, // Rectangular sprite
             velX: 0,
             velY: 0,
-            speed: 4.69, // 25% faster movement speed (3.75 * 1.25 = 4.69)
+            speed: 7.035, // 50% faster movement speed (4.69 * 1.5 = 7.035)
             jumpPower: 20, // 25% faster jump power (16 * 1.25 = 20)
             onGround: true, // Start on ground to prevent immediate falling
             canDoubleJump: true,
@@ -6387,9 +6424,9 @@
             maxLaserChargingLevel: 6, // Maximum charging level
             unlockedRewards: [], // Track unlocked rewards
             laserChargeLockedMessageShown: false, // Track if laser charge locked message has been shown
-                    rewards: {
-            xpPerScore: 0.25, // Increased XP gained per score point for more satisfying progression
-            levelCompletionBonus: 75, // Increased base XP for completing a level for better rewards
+            rewards: {
+                xpPerScore: 0.1, // Reduced XP gained per score point (was 1)
+                levelCompletionBonus: 50, // Reduced base XP for completing a level (was 100)
 
                 // Laser charge ability unlocks every 10 levels (10, 20, 30, 40, 50, 60)
                 laserChargeUnlockLevels: [10, 20, 30, 40, 50, 60], // Levels where laser charge ability unlocks
@@ -8412,19 +8449,6 @@
             // Reset fireball system for each level
             player.hasFireball = false;
             player.fireballCooldown = 0;
-            
-            // Calculate total items in this level for perfect run tracking
-            const totalCoins = coins.length;
-            const totalTreasures = treasures.length;
-            const totalFish = fish.length;
-            const totalHealth = health.length;
-            const totalMushrooms = mushrooms.length;
-            const totalKeys = keys.length;
-            
-            game.sessionStats.currentSessionTotalItems = totalCoins + totalTreasures + totalFish + totalHealth + totalMushrooms + totalKeys;
-            game.sessionStats.currentSessionItemsCollected = 0;
-            
-            console.log(`📊 Level ${levelNum} has ${game.sessionStats.currentSessionTotalItems} total items to collect`);
               
             // Check for equipped abilities from marketplace
             if (game.marketplace.currentAbilities && game.marketplace.currentAbilities.length > 0) {
@@ -9640,503 +9664,70 @@
               };
               gameAssets.laser7.src = 'public/laser7.png';
         
-        // Enhanced XP and Reward System with Improvements
-
-        // XP Multiplier Chain System
-        class XPMultiplierChain {
-            constructor() {
-                this.multipliers = [];
-                this.baseMultiplier = 1.0;
-            }
-            
-            addMultiplier(type, value, duration = null, description = '') {
-                const multiplier = {
-                    type,
-                    value,
-                    duration,
-                    description,
-                    startTime: Date.now(),
-                    id: Math.random().toString(36).substr(2, 9)
-                };
-                this.multipliers.push(multiplier);
-                return multiplier.id;
-            }
-            
-            removeMultiplier(id) {
-                this.multipliers = this.multipliers.filter(m => m.id !== id);
-            }
-            
-            getActiveMultipliers() {
-                const now = Date.now();
-                return this.multipliers.filter(m => {
-                    if (m.duration && (now - m.startTime) > m.duration) {
-                        return false;
-                    }
-                    return true;
-                });
-            }
-            
-            getTotalMultiplier() {
-                const active = this.getActiveMultipliers();
-                return active.reduce((total, m) => total * m.value, this.baseMultiplier);
-            }
-            
-            cleanup() {
-                this.multipliers = this.getActiveMultipliers();
-            }
-        }
-
-        // Enhanced XP System
-        class EnhancedXPSystem {
-            constructor() {
-                this.multiplierChain = new XPMultiplierChain();
-                this.xpHistory = [];
-                this.streakBonuses = new Map();
-                this.seasonalMultipliers = new Map();
-                this.initializeSeasonalMultipliers();
-            }
-            
-            initializeSeasonalMultipliers() {
-                const now = new Date();
-                const month = now.getMonth();
-                const day = now.getDate();
-                
-                // Seasonal bonuses
-                if (month === 11) { // December - Holiday bonus
-                    this.multiplierChain.addMultiplier('seasonal', 1.25, null, 'Holiday Season Bonus');
-                }
-                if (month === 9 && day === 31) { // Halloween
-                    this.multiplierChain.addMultiplier('seasonal', 2.0, 24 * 60 * 60 * 1000, 'Halloween Special');
-                }
-                if (month === 6 || month === 7 || month === 8) { // Summer months
-                    this.multiplierChain.addMultiplier('seasonal', 1.15, null, 'Summer Bonus');
-                }
-            }
-            
-            // Dynamic XP calculation with combo system
-            addXP(baseAmount, source = 'general', comboMultiplier = 1) {
-                this.multiplierChain.cleanup(); // Remove expired multipliers
-                
-                // Apply combo multiplier for rapid successive actions
-                let finalAmount = baseAmount * comboMultiplier;
-                
-                // Apply all active multipliers
-                const totalMultiplier = this.multiplierChain.getTotalMultiplier();
-                finalAmount *= totalMultiplier;
-                
-                // Apply skill-based bonuses
-                const skillBonus = this.calculateSkillBonus(source);
-                finalAmount *= skillBonus;
-                
-                // Apply streak bonuses
-                const streakBonus = this.calculateStreakBonus(source);
-                finalAmount *= streakBonus;
-                
-                // Round to nearest integer
-                finalAmount = Math.floor(finalAmount);
-                
-                // Add to player XP
-                player.xp += finalAmount;
-                player.totalScore += finalAmount;
-                
-                // Record in history for analytics
-                this.recordXPGain(finalAmount, source, {
-                    baseAmount,
-                    comboMultiplier,
-                    totalMultiplier,
-                    skillBonus,
-                    streakBonus
-                });
-                
-                // Check for level up
-                this.checkLevelUp();
-                
-                // Show XP notification with breakdown
-                this.showXPNotification(finalAmount, source, totalMultiplier > 1.5);
-                
-                console.log(`🎯 XP Gained: ${finalAmount} (${baseAmount} base × ${totalMultiplier.toFixed(2)} total multiplier) from ${source}`);
-                
-                return finalAmount;
-            }
-            
-            calculateSkillBonus(source) {
-                // Reward skill-based performance
-                const skillBonuses = {
-                    'perfect_accuracy': 1.5,
-                    'speed_completion': 1.3,
-                    'no_damage_taken': 1.4,
-                    'combo_chain': 1.2,
-                    'efficient_movement': 1.15,
-                    'perfect_run': 1.25,
-                    'level_completion': 1.1
-                };
-                
-                return skillBonuses[source] || 1.0;
-            }
-            
-            calculateStreakBonus(source) {
-                if (!this.streakBonuses.has(source)) {
-                    this.streakBonuses.set(source, 0);
-                }
-                
-                const streak = this.streakBonuses.get(source);
-                this.streakBonuses.set(source, streak + 1);
-                
-                // Diminishing returns on streak bonuses
-                const maxStreakBonus = 2.0;
-                const streakBonus = 1 + Math.min((streak * 0.1), maxStreakBonus - 1);
-                
-                return streakBonus;
-            }
-            
-            resetStreak(source) {
-                this.streakBonuses.set(source, 0);
-            }
-            
-            recordXPGain(amount, source, breakdown) {
-                this.xpHistory.push({
-                    amount,
-                    source,
-                    timestamp: Date.now(),
-                    breakdown,
-                    playerLevel: player.level
-                });
-                
-                // Keep only last 100 entries
-                if (this.xpHistory.length > 100) {
-                    this.xpHistory = this.xpHistory.slice(-100);
-                }
-            }
-            
-            checkLevelUp() {
-                const newLevel = this.calculateLevel(player.xp);
-                if (newLevel > player.level) {
-                    this.levelUp(newLevel);
-                }
-            }
-            
-            calculateLevel(xp) {
-                // Improved XP curve with smoother progression
-                if (xp < 1000) return 1;
-                if (xp < 2500) return 2;
-                if (xp < 4500) return 3;
-                if (xp < 7000) return 4;
-                if (xp < 10000) return 5;
-                if (xp < 13500) return 6;
-                if (xp < 17500) return 7;
-                if (xp < 22000) return 8;
-                if (xp < 27000) return 9;
-                if (xp < 32500) return 10;
-                
-                // After level 10: Progressive scaling (gets slightly harder each level)
-                const level10Plus = Math.floor((xp - 32500) / 1000) + 10;
-                return Math.min(level10Plus, 100); // Level cap at 100
-            }
-            
-            levelUp(newLevel) {
-                const oldLevel = player.level;
-                player.level = newLevel;
-                
-                // Level up rewards
-                const levelReward = this.calculateLevelReward(newLevel);
-                
-                // Show level up celebration
-                this.showLevelUpCelebration(oldLevel, newLevel, levelReward);
-                
-                // Unlock new abilities/rewards
-                this.checkUnlockRewards(newLevel);
-                
-                // Save progress
-                savePlayerProgress();
-            }
-            
-            calculateLevelReward(level) {
-                // Scaling reward based on level
-                const baseReward = 100;
-                const scalingFactor = Math.pow(1.1, level - 1);
-                return Math.floor(baseReward * scalingFactor);
-            }
-            
-            showXPNotification(amount, source, isBonus = false) {
-                // Show XP reward notification
-                showXPRewardNotification(amount, source);
-            }
-            
-            showLevelUpCelebration(oldLevel, newLevel, reward) {
-                // Trigger celebration effects
-                console.log(`🎉 LEVEL UP! ${oldLevel} → ${newLevel} (+${reward} bonus XP)`);
-                
-                // Add celebration multiplier for next 5 minutes
-                this.multiplierChain.addMultiplier(
-                    'celebration', 
-                    1.5, 
-                    5 * 60 * 1000, 
-                    'Level Up Celebration'
-                );
-                
-                // Show level up notification
-                showLevelUpNotification(newLevel, oldLevel);
-            }
-            
-            checkUnlockRewards(level) {
-                const unlockRewards = player.rewards.unlockRewards;
-                if (unlockRewards[level]) {
-                    const reward = unlockRewards[level];
-                    console.log(`🔓 Unlocked: ${reward.name} - ${reward.description}`);
-                    
-                    // Add temporary XP boost for unlocking
-                    this.multiplierChain.addMultiplier(
-                        'unlock_bonus', 
-                        1.25, 
-                        10 * 60 * 1000, 
-                        `${reward.name} Unlock Bonus`
-                    );
-                }
-            }
-            
-            // Combo system for rapid actions
-            startCombo() {
-                this.comboStart = Date.now();
-                this.comboCount = 0;
-                this.comboMultiplier = 1.0;
-            }
-            
-            addToCombo() {
-                const now = Date.now();
-                const timeSinceStart = now - (this.comboStart || now);
-                
-                if (timeSinceStart > 5000) { // Reset combo after 5 seconds
-                    this.startCombo();
-                }
-                
-                this.comboCount++;
-                this.comboMultiplier = 1 + (this.comboCount * 0.1); // 10% per combo
-                this.comboMultiplier = Math.min(this.comboMultiplier, 3.0); // Cap at 3x
-                
-                return this.comboMultiplier;
-            }
-            
-            endCombo() {
-                this.comboCount = 0;
-                this.comboMultiplier = 1.0;
-                this.comboStart = null;
-            }
-            
-            // Analytics methods
-            getXPAnalytics() {
-                const now = Date.now();
-                const last24h = this.xpHistory.filter(h => (now - h.timestamp) < 24 * 60 * 60 * 1000);
-                
-                return {
-                    totalXP: player.xp,
-                    level: player.level,
-                    xpToday: last24h.reduce((sum, h) => sum + h.amount, 0),
-                    averageXPPerAction: last24h.length ? last24h.reduce((sum, h) => sum + h.amount, 0) / last24h.length : 0,
-                    topSources: this.getTopXPSources(last24h),
-                    activeMultipliers: this.multiplierChain.getActiveMultipliers(),
-                    currentStreaks: Object.fromEntries(this.streakBonuses)
-                };
-            }
-            
-            getTopXPSources(history) {
-                const sources = {};
-                history.forEach(h => {
-                    sources[h.source] = (sources[h.source] || 0) + h.amount;
-                });
-                
-                return Object.entries(sources)
-                    .sort(([,a], [,b]) => b - a)
-                    .slice(0, 5)
-                    .map(([source, amount]) => ({ source, amount }));
-            }
-        }
-
-        // Enhanced Achievement System with Categories and Tiers
-        class EnhancedAchievementSystem {
-            constructor() {
-                this.achievements = new Map();
-                this.categories = ['combat', 'collection', 'exploration', 'skill', 'time', 'special'];
-                this.tiers = ['bronze', 'silver', 'gold', 'platinum', 'diamond'];
-                this.initializeAchievements();
-            }
-            
-            initializeAchievements() {
-                // Tiered achievements for better progression
-                const achievementData = [
-                    // Combat achievements (Bronze to Diamond)
-                    { id: 'combat_bronze', category: 'combat', tier: 'bronze', name: 'First Blood', desc: 'Defeat 10 enemies', target: 10, xp: 100 },
-                    { id: 'combat_silver', category: 'combat', tier: 'silver', name: 'Warrior', desc: 'Defeat 50 enemies', target: 50, xp: 250 },
-                    { id: 'combat_gold', category: 'combat', tier: 'gold', name: 'Champion', desc: 'Defeat 200 enemies', target: 200, xp: 500 },
-                    { id: 'combat_platinum', category: 'combat', tier: 'platinum', name: 'Legend', desc: 'Defeat 500 enemies', target: 500, xp: 1000 },
-                    { id: 'combat_diamond', category: 'combat', tier: 'diamond', name: 'Annihilator', desc: 'Defeat 1000 enemies', target: 1000, xp: 2000 },
-                    
-                    // Collection achievements
-                    { id: 'collect_bronze', category: 'collection', tier: 'bronze', name: 'Gatherer', desc: 'Collect 100 items', target: 100, xp: 75 },
-                    { id: 'collect_silver', category: 'collection', tier: 'silver', name: 'Collector', desc: 'Collect 500 items', target: 500, xp: 200 },
-                    { id: 'collect_gold', category: 'collection', tier: 'gold', name: 'Hoarder', desc: 'Collect 1000 items', target: 1000, xp: 400 },
-                    { id: 'collect_platinum', category: 'collection', tier: 'platinum', name: 'Master Collector', desc: 'Collect 2500 items', target: 2500, xp: 800 },
-                    { id: 'collect_diamond', category: 'collection', tier: 'diamond', name: 'Collection God', desc: 'Collect 5000 items', target: 5000, xp: 1500 },
-                    
-                    // Skill-based achievements
-                    { id: 'perfect_level', category: 'skill', tier: 'gold', name: 'Perfectionist', desc: 'Complete level with 100% items', target: 1, xp: 300 },
-                    { id: 'speed_demon', category: 'skill', tier: 'platinum', name: 'Speed Demon', desc: 'Complete level in under 30s', target: 1, xp: 500 },
-                    { id: 'no_damage', category: 'skill', tier: 'diamond', name: 'Untouchable', desc: 'Complete 3 levels without damage', target: 3, xp: 750 }
-                ];
-                
-                achievementData.forEach(data => {
-                    this.achievements.set(data.id, {
-                        ...data,
-                        unlocked: false,
-                        progress: 0,
-                        dateUnlocked: null
-                    });
-                });
-            }
-            
-            updateProgress(achievementId, progress) {
-                const achievement = this.achievements.get(achievementId);
-                if (!achievement || achievement.unlocked) return;
-                
-                achievement.progress = Math.max(achievement.progress, progress);
-                
-                if (achievement.progress >= achievement.target) {
-                    this.unlockAchievement(achievementId);
-                }
-            }
-            
-            unlockAchievement(achievementId) {
-                const achievement = this.achievements.get(achievementId);
-                if (!achievement || achievement.unlocked) return;
-                
-                achievement.unlocked = true;
-                achievement.dateUnlocked = Date.now();
-                
-                // Award XP
-                xpSystem.addXP(achievement.xp, 'achievement');
-                
-                // Show unlock notification
-                this.showAchievementUnlock(achievement);
-                
-                // Check for tier completion bonuses
-                this.checkTierCompletion(achievement.tier);
-            }
-            
-            checkTierCompletion(tier) {
-                const tierAchievements = Array.from(this.achievements.values())
-                    .filter(a => a.tier === tier);
-                const unlockedCount = tierAchievements.filter(a => a.unlocked).length;
-                
-                if (unlockedCount === tierAchievements.length) {
-                    // All achievements in tier completed - bonus XP!
-                    const bonusXP = this.getTierBonus(tier);
-                    xpSystem.addXP(bonusXP, 'tier_completion');
-                    console.log(`🏆 ${tier.toUpperCase()} Tier Complete! Bonus: +${bonusXP} XP`);
-                }
-            }
-            
-            getTierBonus(tier) {
-                const bonuses = {
-                    'bronze': 500,
-                    'silver': 1000,
-                    'gold': 2000,
-                    'platinum': 4000,
-                    'diamond': 8000
-                };
-                return bonuses[tier] || 0;
-            }
-            
-            showAchievementUnlock(achievement) {
-                console.log(`🏆 Achievement Unlocked: ${achievement.name} (+${achievement.xp} XP)`);
-                
-                // Show achievement notification
-                showXPRewardNotification(achievement.xp, achievement.name);
-            }
-            
-            getAchievementStats() {
-                const all = Array.from(this.achievements.values());
-                const unlocked = all.filter(a => a.unlocked);
-                
-                return {
-                    total: all.length,
-                    unlocked: unlocked.length,
-                    percentage: (unlocked.length / all.length) * 100,
-                    totalXPEarned: unlocked.reduce((sum, a) => sum + a.xp, 0),
-                    byCategory: this.getStatsByCategory(),
-                    byTier: this.getStatsByTier()
-                };
-            }
-            
-            getStatsByCategory() {
-                const stats = {};
-                this.categories.forEach(cat => {
-                    const achievements = Array.from(this.achievements.values()).filter(a => a.category === cat);
-                    const unlocked = achievements.filter(a => a.unlocked);
-                    stats[cat] = {
-                        total: achievements.length,
-                        unlocked: unlocked.length,
-                        percentage: achievements.length ? (unlocked.length / achievements.length) * 100 : 0
-                    };
-                });
-                return stats;
-            }
-            
-            getStatsByTier() {
-                const stats = {};
-                this.tiers.forEach(tier => {
-                    const achievements = Array.from(this.achievements.values()).filter(a => a.tier === tier);
-                    const unlocked = achievements.filter(a => a.unlocked);
-                    stats[tier] = {
-                        total: achievements.length,
-                        unlocked: unlocked.length,
-                        percentage: achievements.length ? (unlocked.length / achievements.length) * 100 : 0
-                    };
-                });
-                return stats;
-            }
-        }
-
-        // Initialize enhanced systems
-        const xpSystem = new EnhancedXPSystem();
-        const achievementSystem = new EnhancedAchievementSystem();
-
-        // Enhanced reward system with dynamic scaling
-        function calculateDynamicRewards(baseScore, playerLevel, difficulty) {
-            // Base XP calculation
-            let xp = Math.floor(baseScore * 0.25);
-            
-            // Level scaling (higher levels get slightly more XP)
-            const levelBonus = 1 + (playerLevel * 0.02);
-            xp *= levelBonus;
-            
-            // Difficulty scaling
-            const difficultyMultiplier = {
-                'easy': 0.8,
-                'normal': 1.0,
-                'hard': 1.3,
-                'expert': 1.6,
-                'nightmare': 2.0
-            };
-            xp *= (difficultyMultiplier[difficulty] || 1.0);
-            
-            return Math.floor(xp);
-        }
-
-        // Enhanced addXP function that uses the new system
+        // XP and Reward System Functions
         function addXP(amount) {
-            return xpSystem.addXP(amount, 'general');
-        }
-
-        // Analytics dashboard function
-        function showXPDashboard() {
-            const xpAnalytics = xpSystem.getXPAnalytics();
-            const achievementStats = achievementSystem.getAchievementStats();
+            player.xp += amount;
+            player.totalScore += amount;
             
-            console.log('=== XP & Achievement Dashboard ===');
-            console.log(`Level: ${xpAnalytics.level} | Total XP: ${xpAnalytics.totalXP}`);
-            console.log(`XP Today: ${xpAnalytics.xpToday} | Avg per Action: ${Math.floor(xpAnalytics.averageXPPerAction)}`);
-            console.log(`Achievements: ${achievementStats.unlocked}/${achievementStats.total} (${Math.floor(achievementStats.percentage)}%)`);
-            console.log('Active Multipliers:', xpAnalytics.activeMultipliers.map(m => `${m.description}: ${m.value}x`));
-            console.log('Top XP Sources:', xpAnalytics.topSources);
+            // Calculate new level based on XP progression system
+            let newLevel = 1;
+            let totalXPNeeded = 0;
+            
+            // Calculate level using the new XP progression system
+            // Level 1: 0-999 XP (1000 total)
+            // Level 2: 1000-2499 XP (1500 total)
+            // Level 3: 2500-4499 XP (2000 total)
+            // ... and so on until level 10
+            // Level 10+: 1000 XP per level
+            
+            if (player.xp < 1000) {
+                newLevel = 1;
+                player.xpToNextLevel = 1000;
+            } else if (player.xp < 2500) {
+                newLevel = 2;
+                player.xpToNextLevel = 2500;
+            } else if (player.xp < 4500) {
+                newLevel = 3;
+                player.xpToNextLevel = 4500;
+            } else if (player.xp < 7000) {
+                newLevel = 4;
+                player.xpToNextLevel = 7000;
+            } else if (player.xp < 10000) {
+                newLevel = 5;
+                player.xpToNextLevel = 10000;
+            } else if (player.xp < 13500) {
+                newLevel = 6;
+                player.xpToNextLevel = 13500;
+            } else if (player.xp < 17500) {
+                newLevel = 7;
+                player.xpToNextLevel = 17500;
+            } else if (player.xp < 22000) {
+                newLevel = 8;
+                player.xpToNextLevel = 22000;
+            } else if (player.xp < 27000) {
+                newLevel = 9;
+                player.xpToNextLevel = 27000;
+            } else if (player.xp < 32500) {
+                newLevel = 10;
+                player.xpToNextLevel = 32500;
+            } else {
+                // Level 10+: 1000 XP per level
+                const level10Plus = Math.floor((player.xp - 32500) / 1000) + 10;
+                newLevel = level10Plus;
+                player.xpToNextLevel = 32500 + (level10Plus - 10) * 1000;
+            }
+            
+            if (newLevel > player.level) {
+                levelUp(newLevel);
+            }
+            
+            // Don't save progress here - only save when level is completed
+            // savePlayerProgress();
+            
+            // Update profile XP bar if profile is open
+            updateProfileXPBar();
+            
+            console.log(`🎯 Gained ${amount} XP! Total: ${player.xp}, Level: ${player.level}, XP to next: ${player.xpToNextLevel - player.xp}`);
         }
         
         function levelUp(newLevel) {
@@ -10171,7 +9762,10 @@
             // Show level up notification
             showLevelUpNotification(newLevel, oldLevel);
             
-                            console.log(`🎉 LEVEL UP! ${oldLevel} → ${newLevel}`);
+            // Update profile XP bar after level up
+            updateProfileXPBar();
+            
+            console.log(`🎉 LEVEL UP! ${oldLevel} → ${newLevel}`);
         }
         
 
@@ -10594,9 +10188,9 @@
             game.sessionStats.totalScore += finalScore;
             game.sessionStats.currentSessionScore += finalScore;
             
-            // Add XP using enhanced system with combo
-            const comboMultiplier = xpSystem.addToCombo();
-            const xpGained = xpSystem.addXP(finalScore * 0.25, source, comboMultiplier);
+            // Add XP (1 XP per score point)
+            const xpGained = Math.floor(finalScore * player.rewards.xpPerScore);
+            addXP(xpGained);
             
             console.log(`🎯 ${source}: Score ${finalScore} (${baseScore} × ${scoreMultiplier}x), +${xpGained} XP`);
             
@@ -14368,7 +13962,6 @@
                     game.sessionStats.totalScore += 100;
                     game.sessionStats.currentSessionFish++;
                     game.sessionStats.currentSessionScore += 100;
-                    game.sessionStats.currentSessionItemsCollected++;
                     
                     // Update highest fish if current session is higher
                     if (game.sessionStats.currentSessionFish > game.sessionStats.highestFish) {
@@ -14431,7 +14024,6 @@
                     
                     // Update collectibles counter
                     game.collectiblesCount.coinsCollected++;
-                    game.sessionStats.currentSessionItemsCollected++;
                     updateCollectiblesCounter();
                     
                     // Check all achievements after coin collection
@@ -14449,7 +14041,6 @@
                     game.sessionStats.totalScore += 25;
                     game.sessionStats.currentSessionHealth++;
                     game.sessionStats.currentSessionScore += 25;
-                    game.sessionStats.currentSessionItemsCollected++;
                     
                     // Update highest health if current session is higher
                     if (game.sessionStats.currentSessionHealth > game.sessionStats.highestHealth) {
@@ -14573,7 +14164,6 @@
                                     game.sessionStats.totalScore += t.value;
                                     game.sessionStats.currentSessionTreasures++;
                                     game.sessionStats.currentSessionScore += t.value;
-                                    game.sessionStats.currentSessionItemsCollected++;
                                     
                                     // Update highest treasures if current session is higher
                                     if (game.sessionStats.currentSessionTreasures > game.sessionStats.highestTreasures) {
@@ -14604,7 +14194,6 @@
                     game.sessionStats.treasuresCollected++;
                     game.sessionStats.treasuresFound++;
                     game.sessionStats.currentSessionTreasures++;
-                    game.sessionStats.currentSessionItemsCollected++;
                     
                     // Add score with XP and multiplier
                     addScoreWithXP(t.value, 'Treasure');
@@ -14657,7 +14246,6 @@
                     game.sessionStats.totalScore += mushroomValue;
                     game.sessionStats.currentSessionMushrooms++;
                     game.sessionStats.currentSessionScore += mushroomValue;
-                    game.sessionStats.currentSessionItemsCollected++;
                     
                     // Update highest mushrooms if current session is higher
                     if (game.sessionStats.currentSessionMushrooms > game.sessionStats.highestMushrooms) {
@@ -14732,7 +14320,6 @@
                     game.sessionStats.keysCollected++;
                     game.sessionStats.totalScore += 200;
                     game.sessionStats.currentSessionScore += 200;
-                    game.sessionStats.currentSessionItemsCollected++;
                     
                     
                     // Update collectibles counter
@@ -17459,10 +17046,7 @@
                     currentSessionFish: 0,
                     currentSessionHealth: 0,
                     currentSessionTreasures: 0,
-                    currentSessionMushrooms: 0,
-                    achievementsUnlockedThisSession: 0,
-                    currentSessionItemsCollected: 0,
-                    currentSessionTotalItems: 0
+                    currentSessionMushrooms: 0
                 };
             }
             
@@ -18716,6 +18300,9 @@
             document.getElementById('profileGatorsDefeated').textContent = game.sessionStats.gatorsDefeated || 0;
             document.getElementById('profileSharksDefeated').textContent = game.sessionStats.sharksDefeated || 0;
             
+            // Update XP Progress Bar
+            updateProfileXPBar();
+            
             // Update recent achievements
             updateRecentAchievements();
             
@@ -18730,6 +18317,77 @@
             if (walletTab && walletTab.style.display !== 'none') {
                 updateWalletProfile();
             }
+        }
+        
+        function updateProfileXPBar() {
+            // Get current XP and level data
+            const currentXP = player.xp || 0;
+            const currentLevel = player.level || 1;
+            
+            // Calculate XP requirements based on level
+            let xpToNextLevel = 0;
+            let currentLevelXP = 0;
+            
+            if (currentLevel === 1) {
+                xpToNextLevel = 1000;
+                currentLevelXP = currentXP;
+            } else if (currentLevel === 2) {
+                xpToNextLevel = 2500;
+                currentLevelXP = currentXP - 1000;
+            } else if (currentLevel === 3) {
+                xpToNextLevel = 4500;
+                currentLevelXP = currentXP - 2500;
+            } else if (currentLevel === 4) {
+                xpToNextLevel = 7000;
+                currentLevelXP = currentXP - 4500;
+            } else if (currentLevel === 5) {
+                xpToNextLevel = 10000;
+                currentLevelXP = currentXP - 7000;
+            } else if (currentLevel === 6) {
+                xpToNextLevel = 13500;
+                currentLevelXP = currentXP - 10000;
+            } else if (currentLevel === 7) {
+                xpToNextLevel = 17500;
+                currentLevelXP = currentXP - 13500;
+            } else if (currentLevel === 8) {
+                xpToNextLevel = 22000;
+                currentLevelXP = currentXP - 17500;
+            } else if (currentLevel === 9) {
+                xpToNextLevel = 27000;
+                currentLevelXP = currentXP - 22000;
+            } else if (currentLevel === 10) {
+                xpToNextLevel = 32500;
+                currentLevelXP = currentXP - 27000;
+            } else {
+                // Level 10+: 1000 XP per level
+                const level10Plus = currentLevel - 10;
+                const baseXP = 32500 + (level10Plus * 1000);
+                xpToNextLevel = baseXP + 1000;
+                currentLevelXP = currentXP - baseXP;
+            }
+            
+            // Calculate XP needed for current level
+            const xpNeededForCurrentLevel = xpToNextLevel - (currentLevel === 1 ? 0 : (currentLevel === 2 ? 1000 : (currentLevel === 3 ? 2500 : (currentLevel === 4 ? 4500 : (currentLevel === 5 ? 7000 : (currentLevel === 6 ? 10000 : (currentLevel === 7 ? 13500 : (currentLevel === 8 ? 17500 : (currentLevel === 9 ? 22000 : (currentLevel === 10 ? 27000 : 32500 + ((currentLevel - 10) * 1000)))))))))));
+            
+            // Calculate progress percentage
+            const progressPercentage = Math.min(100, Math.max(0, (currentLevelXP / (xpToNextLevel - xpNeededForCurrentLevel)) * 100));
+            
+            // Update profile XP elements
+            const profilePlayerLevel = document.getElementById('profilePlayerLevel');
+            const profileXpBarFill = document.getElementById('profileXpBarFill');
+            const profileXpText = document.getElementById('profileXpText');
+            const profileTotalXP = document.getElementById('profileTotalXP');
+            const profileXpToNext = document.getElementById('profileXpToNext');
+            const profileXpProgress = document.getElementById('profileXpProgress');
+            
+            if (profilePlayerLevel) profilePlayerLevel.textContent = currentLevel;
+            if (profileXpBarFill) profileXpBarFill.style.width = `${progressPercentage}%`;
+            if (profileXpText) profileXpText.textContent = `${currentLevelXP.toLocaleString()} / ${(xpToNextLevel - xpNeededForCurrentLevel).toLocaleString()} XP`;
+            if (profileTotalXP) profileTotalXP.textContent = currentXP.toLocaleString();
+            if (profileXpToNext) profileXpToNext.textContent = (xpToNextLevel - xpNeededForCurrentLevel - currentLevelXP).toLocaleString();
+            if (profileXpProgress) profileXpProgress.textContent = `${Math.round(progressPercentage)}%`;
+            
+            console.log(`📊 Profile XP Updated: Level ${currentLevel}, XP: ${currentXP}, Progress: ${progressPercentage.toFixed(1)}%`);
         }
         
         function updateWalletProfile() {
@@ -21075,9 +20733,6 @@
             const achievement = achievements.find(a => a.id === achievementId);
             if (achievement && !achievement.unlocked) {
                 achievement.unlocked = true;
-                
-                // Track achievements unlocked this session
-                game.sessionStats.achievementsUnlockedThisSession++;
                 
                 // Initialize arrays if they don't exist
                 if (!game.profile.achievements) {
