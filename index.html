@@ -20861,6 +20861,12 @@
         }
         
         function checkAllAchievements() {
+            // Prevent multiple achievement checks in quick succession
+            if (game.lastAchievementCheck && Date.now() - game.lastAchievementCheck < 1000) {
+                return; // Skip if checked within last second
+            }
+            game.lastAchievementCheck = Date.now();
+            
             // Basic achievements
             if (!achievements.find(a => a.id === 'first_game').unlocked) {
                 unlockAchievement('first_game');
@@ -21155,8 +21161,50 @@
         }
         
         function loadProfileData() {
-            console.log('👤 Starting fresh profile - no saved data loaded');
+            const savedData = localStorage.getItem('otterBrosProfile');
             
+            if (savedData) {
+                try {
+                    const profile = JSON.parse(savedData);
+                    console.log('👤 Loading saved profile data:', profile);
+                    
+                    // Load profile data
+                    game.profile = {
+                        gamesPlayed: profile.gamesPlayed || 0,
+                        playTime: profile.playTime || 0,
+                        bestScore: profile.bestScore || 0,
+                        achievements: profile.achievements || [],
+                        recentAchievements: profile.recentAchievements || [],
+                        playerName: profile.playerName || 'Otter Player',
+                        profilePicture: profile.profilePicture || null,
+                        level: profile.level || 1,
+                        experience: profile.experience || 0
+                    };
+                    
+                    // Mark achievements as unlocked based on saved data
+                    achievements.forEach(achievement => {
+                        achievement.unlocked = game.profile.achievements.includes(achievement.id);
+                    });
+                    
+                    console.log('🏆 Loaded achievement state:', game.profile.achievements);
+                } catch (error) {
+                    console.error('❌ Error loading profile data:', error);
+                    // Fallback to fresh profile
+                    resetToFreshProfile();
+                }
+            } else {
+                console.log('👤 No saved profile found, starting fresh');
+                resetToFreshProfile();
+            }
+            
+            // Ensure real-time achievement tracking is enabled
+            game.achievementTrackingEnabled = true;
+            
+            // Update profile display
+            updateProfileDisplay();
+        }
+        
+        function resetToFreshProfile() {
             // Reset profile to fresh state
             game.profile = {
                 gamesPlayed: 0,
@@ -21165,19 +21213,15 @@
                 achievements: [],
                 recentAchievements: [],
                 playerName: 'Otter Player',
-                profilePicture: null
+                profilePicture: null,
+                level: 1,
+                experience: 0
             };
             
             // Reset all achievements to locked
-                achievements.forEach(achievement => {
+            achievements.forEach(achievement => {
                 achievement.unlocked = false;
             });
-            
-            // Ensure real-time achievement tracking is enabled
-            game.achievementTrackingEnabled = true;
-            
-            // Update profile display
-            updateProfileDisplay();
         }
         
         // Profile editing functions
