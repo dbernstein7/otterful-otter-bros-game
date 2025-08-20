@@ -5974,6 +5974,8 @@
             // Add situation-specific tips (simplified checks)
             if (player.health < 50) {
                 tipCategories.push('lowHealth');
+                // Show owl low health warning
+                showSituationalOwlMessage('lowHealth');
             }
             
             if (player.armor === 0) {
@@ -5982,6 +5984,8 @@
             
             if (enemies.length > 8) {
                 tipCategories.push('manyEnemies');
+                // Show owl many enemies warning
+                showSituationalOwlMessage('manyEnemies');
             }
             
             if (game.bossActive) {
@@ -12579,6 +12583,8 @@
                 if (!player.inWater) {
                     player.inWater = true;
                     console.log('🌊 Player entered water');
+                    // Show owl underwater message
+                    showSituationalOwlMessage('underwater');
                 }
                 
                 // Check if player is at water surface (within 20px of surface for more reliable detection)
@@ -14500,6 +14506,8 @@
                 // Update highest score if current session is higher
                 if (game.sessionStats.currentSessionScore > game.sessionStats.highestScore) {
                     game.sessionStats.highestScore = game.sessionStats.currentSessionScore;
+                    // Show owl high score celebration
+                    showSituationalOwlMessage('highScore');
                 }
                 
                 // Record level completion time
@@ -14533,6 +14541,9 @@
                 
                 document.getElementById('levelCompleteName').textContent = `${currentLevel.name} Complete!`;
                 document.getElementById('levelComplete').style.display = 'block';
+                
+                // Show owl celebration message
+                showSituationalOwlMessage('levelComplete');
                     }
                 }
             }
@@ -17450,6 +17461,11 @@
                 if (game.frameCount % 60 === 0) {
                     checkSecretChestConditions(); // Check for secret chest conditions
                     updateAbilitiesDisplay(); // Update abilities display
+                }
+                
+                // Show random owl messages periodically (every 600 frames = ~10 seconds at 60fps)
+                if (game.frameCount % 600 === 0 && Math.random() < 0.3) { // 30% chance every 10 seconds
+                    showRandomOwlMessage();
                 }
                 
                 draw();
@@ -20759,6 +20775,9 @@
                 console.log(`🏆 Achievement unlocked: ${achievement.name} (+${achievement.xpReward || 0} XP)`);
                 saveProfileData();
                 
+                // Show owl achievement celebration
+                showSituationalOwlMessage('achievement');
+                
                 // Check for skin unlocks based on this achievement
                 checkSkinUnlocks(achievementId);
             }
@@ -23072,6 +23091,95 @@
                     }, 500);
                 }
             }, 6000);
+        }
+        
+        // AI Owl Bot Message System
+        const owlMessages = {
+            // Funny Jokes
+            jokes: [
+                "🦉 *chuckles* Why did the otter go to the doctor? Because it had a bad case of the 'otter' flu! *hoots with laughter*",
+                "🦉 *winks* What do you call an otter that's good at math? A calcu-otter! *giggles*",
+                "🦉 *whispers* Why don't otters like to play cards? Because they're afraid of getting otter-ly beaten! *hoots*",
+                "🦉 *laughs* What's an otter's favorite type of music? Rock and otter! *bounces excitedly*",
+                "🦉 *chuckles* Why did the otter bring a ladder to the pool? To reach the high dive! *hoots*",
+                "🦉 *giggles* What do you call an otter that's always late? A procrasti-otter! *winks*",
+                "🦉 *laughs* Why did the otter go to art school? To learn how to otter-draw! *bounces*",
+                "🦉 *chuckles* What's an otter's favorite dance? The otter shuffle! *hoots with joy*"
+            ],
+            
+            // Important Tips
+            tips: [
+                "🦉 *wisely* Tip: Hold the laser button to charge for more powerful shots! *nods knowingly*",
+                "🦉 *helpfully* Tip: Use the jetpack underwater for extra speed! *flaps wings*",
+                "🦉 *advises* Tip: Collect coins to earn XP and level up faster! *points to coins*",
+                "🦉 *suggests* Tip: Check underwater areas for hidden treasures! *looks down*",
+                "🦉 *reminds* Tip: Use mushrooms to become giant and break through obstacles! *gestures up*",
+                "🦉 *hints* Tip: Defeat enemies to earn points and unlock achievements! *flexes wings*",
+                "🦉 *advises* Tip: Save your progress by completing levels! *nods seriously*",
+                "🦉 *suggests* Tip: Try different owl hats for unique bonuses! *adjusts own hat*",
+                "🦉 *hints* Tip: Look for secret areas behind waterfalls! *mysterious hoot*",
+                "🦉 *advises* Tip: Use the double jump to reach higher platforms! *demonstrates*"
+            ],
+            
+            // Encouragement
+            encouragement: [
+                "🦉 *cheerfully* You're doing great! Keep up the otter-ific work! *hoots encouragingly*",
+                "🦉 *proudly* Wow! You're really getting the hang of this! *puffs chest*",
+                "🦉 *excitedly* Amazing progress! You're becoming a true otter master! *bounces*",
+                "🦉 *supportively* Don't give up! Every otter was once a beginner! *nods wisely*",
+                "🦉 *enthusiastically* You've got this! Show those enemies who's boss! *flexes wings*"
+            ],
+            
+            // Situational Messages
+            situational: {
+                lowHealth: "🦉 *worried* Oh no! Your health is low! Look for heart pickups! *frantically flaps*",
+                manyEnemies: "🦉 *nervously* Lots of enemies ahead! Use your laser or fireball! *hides behind wing*",
+                underwater: "🦉 *excitedly* Underwater exploration time! Don't forget to breathe! *holds breath*",
+                highScore: "🦉 *impressed* Incredible score! You're on fire! *hoots with amazement*",
+                levelComplete: "🦉 *celebrates* Level complete! You're unstoppable! *dances around*",
+                achievement: "🦉 *proudly* Achievement unlocked! You're earning those feathers! *preens*"
+            }
+        };
+        
+        let lastOwlMessageTime = 0;
+        const owlMessageCooldown = 30000; // 30 seconds between messages
+        
+        function showRandomOwlMessage(type = 'random') {
+            if (!aiOwlBotEnabled) return;
+            
+            const now = Date.now();
+            if (now - lastOwlMessageTime < owlMessageCooldown) return;
+            
+            let message = '';
+            
+            if (type === 'joke') {
+                message = owlMessages.jokes[Math.floor(Math.random() * owlMessages.jokes.length)];
+            } else if (type === 'tip') {
+                message = owlMessages.tips[Math.floor(Math.random() * owlMessages.tips.length)];
+            } else if (type === 'encouragement') {
+                message = owlMessages.encouragement[Math.floor(Math.random() * owlMessages.encouragement.length)];
+            } else {
+                // Random type
+                const types = ['jokes', 'tips', 'encouragement'];
+                const randomType = types[Math.floor(Math.random() * types.length)];
+                message = owlMessages[randomType][Math.floor(Math.random() * owlMessages[randomType].length)];
+            }
+            
+            showAIOwlBotMessage(message);
+            lastOwlMessageTime = now;
+        }
+        
+        function showSituationalOwlMessage(situation) {
+            if (!aiOwlBotEnabled) return;
+            
+            const now = Date.now();
+            if (now - lastOwlMessageTime < owlMessageCooldown) return;
+            
+            const message = owlMessages.situational[situation];
+            if (message) {
+                showAIOwlBotMessage(message);
+                lastOwlMessageTime = now;
+            }
         }
 
         // Add event listeners after all functions are defined
