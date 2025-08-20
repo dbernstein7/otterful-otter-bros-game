@@ -16975,11 +16975,11 @@
                 };
             }
             
-            // Reset only session coins (keep all-time coins)
+            // Reset only session coins (keep marketplace coins)
             game.sessionStats.currentSessionCoins = 0;
             game.coins = 0;
-            game.marketplace.coins = 0; // Set marketplace coins to 0
-            console.log('🆕 Starting fresh with 0 coins');
+            // Don't reset marketplace.coins - preserve coins from completed levels
+            console.log('🆕 Starting fresh session, keeping marketplace coins:', game.marketplace.coins);
              // Save to localStorage
             saveMarketplaceData(); // Save marketplace data
             updateLeaderboard(); // Update the leaderboard display
