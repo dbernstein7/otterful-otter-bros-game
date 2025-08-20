@@ -17184,6 +17184,15 @@
             document.getElementById('marketplaceBtn').style.display = 'inline-block';
             document.getElementById('startGameBtn').style.display = 'inline-block';
             
+            // Check for saved game and show continue button if available
+            if (hasSavedGame()) {
+                document.getElementById('continueGameBtn').style.display = 'inline-block';
+                console.log('🎮 Saved game found - showing continue button');
+            } else {
+                document.getElementById('continueGameBtn').style.display = 'none';
+                console.log('🆕 No saved game found - hiding continue button');
+            }
+            
             // Reset UI displays
             document.getElementById('score').textContent = '0';
             document.getElementById('coins').textContent = '0';
@@ -22416,12 +22425,7 @@
             saveMarketplaceData();
             alert('Progress saved! Returning to main menu.');
             togglePauseMenu();
-            returnToStartScreen();
-            // Show title screen buttons
-            document.getElementById('profileBtn').style.display = 'inline-block';
-            document.getElementById('marketplaceBtn').style.display = 'inline-block';
-            document.getElementById('startGameBtn').style.display = 'inline-block';
-            document.getElementById('settingsBtn').style.display = 'none';
+            returnToStart();
         }
         
         // Add keyboard event listener for pause menu
