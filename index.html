@@ -8634,6 +8634,9 @@
         // Load profile data
         loadProfileData();
         
+        // Load player progress (XP, level, etc.)
+        loadPlayerProgress();
+        
         // Check for saved game and show continue button if available
         updateContinueButtonVisibility();
         
@@ -9676,8 +9679,8 @@
                 levelUp(newLevel);
             }
             
-            // Save progress
-            savePlayerProgress();
+            // Don't save progress here - only save when level is completed
+            // savePlayerProgress();
             
             console.log(`🎯 Gained ${amount} XP! Total: ${player.xp}, Level: ${player.level}, XP to next: ${player.xpToNextLevel - player.xp}`);
         }
@@ -9978,32 +9981,34 @@
         }
         
         function loadPlayerProgress() {
-            // Start fresh - don't load any saved progress
-            player.xp = 0;
-            player.level = 1;
-            player.xpToNextLevel = 1000;
-            player.totalScore = 0;
-
-            player.laserChargingLevel = 0; // Start at 0 - must be unlocked
-            player.maxChargeLevel = 0; // Start at 0 - must be unlocked
-            player.unlockedRewards = [];
-            player.laserChargeLockedMessageShown = false;
-            
-            // Reset armor system
-            player.hasArmorBoost = false;
-            player.armorLevel = 0;
-
-            console.log('🆕 Starting fresh - no saved progress loaded');
+            // Load saved progress from localStorage
+            const savedProgress = localStorage.getItem('otterBrosProgress');
+            if (savedProgress) {
+                try {
+                    const progress = JSON.parse(savedProgress);
+                    player.xp = progress.xp || 0;
+                    player.level = progress.level || 1;
+                    player.xpToNextLevel = progress.xpToNextLevel || 1000;
+                    player.totalScore = progress.totalScore || 0;
+                    player.laserChargingLevel = progress.laserChargingLevel || 0;
+                    player.maxChargeLevel = progress.maxChargeLevel || 0;
+                    player.unlockedRewards = progress.unlockedRewards || [];
+                    player.laserChargeLockedMessageShown = progress.laserChargeLockedMessageShown || false;
+                    player.hasArmorBoost = progress.hasArmorBoost || false;
+                    player.armorLevel = progress.armorLevel || 0;
+                    console.log('📊 Loaded saved player progress - XP:', player.xp, 'Level:', player.level);
+                } catch (error) {
+                    console.error('❌ Error loading player progress:', error);
+                    resetPlayerProgress();
+                }
+            } else {
+                console.log('🆕 No saved progress found - starting fresh');
+                resetPlayerProgress();
+            }
         }
         
-        function resetAllGameData() {
-            // Clear all localStorage data
-            localStorage.removeItem('otterBrosProgress');
-            localStorage.removeItem('otterBrosMarketplace');
-            localStorage.removeItem('otterBrosProfile');
-            localStorage.removeItem('otterBrosSettings');
-            
-            // Reset player data
+        function resetPlayerProgress() {
+            // Reset player progress to fresh state
             player.xp = 0;
             player.level = 1;
             player.xpToNextLevel = 1000;
@@ -10014,6 +10019,18 @@
             player.laserChargeLockedMessageShown = false;
             player.hasArmorBoost = false;
             player.armorLevel = 0;
+            console.log('🆕 Reset player progress to fresh state');
+        }
+        
+        function resetAllGameData() {
+            // Clear all localStorage data
+            localStorage.removeItem('otterBrosProgress');
+            localStorage.removeItem('otterBrosMarketplace');
+            localStorage.removeItem('otterBrosProfile');
+            localStorage.removeItem('otterBrosSettings');
+            
+            // Reset player data
+            resetPlayerProgress();
             
             // Reset marketplace data
             game.marketplace.coins = 0;
@@ -14449,6 +14466,9 @@
                 game.sessionStats.levelsCompleted++;
                 saveStats(true); // Save all stats only on level completion
                 
+                // Save player progress (XP, level, etc.) when level is completed
+                savePlayerProgress();
+                
                 // Check for level-related achievements
                 if (game.sessionStats.levelsCompleted === 1) {
                     unlockAchievement('first_level');
@@ -17023,8 +17043,8 @@
             game.collectiblesCount.goldenChestsCollected = 0;
             updateCollectiblesCounter();
             
-            // Load player progress (XP, level, etc.)
-            loadPlayerProgress();
+            // Reset player progress for new game (don't load saved progress)
+            resetPlayerProgress();
             
             document.getElementById('titleScreen').style.display = 'none';
             document.getElementById('cutscenePanel').style.display = 'flex';
