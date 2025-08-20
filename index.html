@@ -14437,7 +14437,7 @@
                     time: formatTime(levelTime)
                 });
                 game.sessionStats.levelsCompleted++;
-                saveStats();
+                saveStats(true); // Save coins only on level completion
                 
                 // Check for level-related achievements
                 if (game.sessionStats.levelsCompleted === 1) {
@@ -21093,12 +21093,17 @@
             }
         }
         
-        function saveStats() {
+        function saveStats(saveCoins = false) {
             // Update all-time stats with current session stats
             if (game.sessionStats) {
                 game.sessionStats.allTimeScore += game.sessionStats.totalScore;
                 game.sessionStats.allTimeLevels += game.sessionStats.levelsCompleted;
-                game.sessionStats.allTimeCoins += game.sessionStats.totalCoins;
+                
+                // Only save coins if explicitly requested (level completion)
+                if (saveCoins) {
+                    game.sessionStats.allTimeCoins += game.sessionStats.totalCoins;
+                }
+                
                 game.sessionStats.allTimeEnemies += (game.sessionStats.crabsDefeated + game.sessionStats.eaglesDefeated + game.sessionStats.gatorsDefeated + game.sessionStats.sharksDefeated);
                 game.sessionStats.allTimeBosses += game.sessionStats.bossesDefeated;
                 game.sessionStats.allTimeFish += game.sessionStats.fishCollected;
