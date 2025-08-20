@@ -18869,11 +18869,11 @@
                 return;
             }
             
-            // Calculate conversion rate (1 coin = 10 $FISH for demo)
-            const conversionRate = 10;
-            const fishToReceive = currentCoins * conversionRate;
+            // Calculate conversion rate (5 coins = 1 $FISH for demo)
+            const conversionRate = 0.2; // 1/5 = 0.2
+            const fishToReceive = Math.floor(currentCoins * conversionRate);
             
-            const confirmed = confirm(`🪙 CONVERT COINS TO $FISH?\n\nYou have ${currentCoins} coins to convert.\n\nConversion Rate: 1 Coin = ${conversionRate} $FISH\n\nYou will receive: ${fishToReceive} $FISH\n\n⚠️ WARNING: This is simulated - no real blockchain transaction!\n\nAre you sure you want to continue?`);
+            const confirmed = confirm(`🪙 CONVERT COINS TO $FISH?\n\nYou have ${currentCoins} coins to convert.\n\nConversion Rate: 5 Coins = 1 $FISH\n\nYou will receive: ${fishToReceive} $FISH\n\n⚠️ WARNING: This is simulated - no real blockchain transaction!\n\nAre you sure you want to continue?`);
             
             if (!confirmed) {
                 console.log('❌ Conversion cancelled by user');
