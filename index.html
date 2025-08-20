@@ -16975,8 +16975,7 @@
                 };
             }
             
-            // Start with 0 coins (fresh start)
-            game.sessionStats.totalCoins = 0;
+            // Reset only session coins (keep all-time coins)
             game.sessionStats.currentSessionCoins = 0;
             game.coins = 0;
             game.marketplace.coins = 0; // Set marketplace coins to 0
@@ -21125,46 +21124,53 @@
         }
         
         function loadStats() {
-            // Start fresh - don't load any saved stats
-            game.sessionStats = {
-                totalScore: 0,
-                levelsCompleted: 0,
-                totalCoins: 0,
-                crabsDefeated: 0,
-                eaglesDefeated: 0,
-                gatorsDefeated: 0,
-                sharksDefeated: 0,
-                bossesDefeated: 0,
-                treasuresFound: 0,
-                keysCollected: 0,
-                healthPickups: 0,
-                mushroomsEaten: 0,
-                currentSessionScore: 0,
-                levelStartTime: Date.now(),
-                // Additional properties needed by updateLeaderboard
-                fishCollected: 0,
-                healthCollected: 0,
-                treasuresCollected: 0,
-                mushroomsCollected: 0,
-                levelTimes: [],
-                highestScore: 0,
-                highestLevels: 0,
-                highestCoins: 0,
-                highestCrabs: 0,
-                highestFish: 0,
-                highestHealth: 0,
-                highestTreasures: 0,
-                highestMushrooms: 0,
-                currentSessionLevels: 0,
-                currentSessionCoins: 0,
-                currentSessionCrabs: 0,
-                currentSessionBosses: 0,
-                currentSessionFish: 0,
-                currentSessionHealth: 0,
-                currentSessionTreasures: 0,
-                currentSessionMushrooms: 0
-            };
-            console.log('🆕 Starting fresh - no saved stats loaded');
+            // Load saved stats from localStorage
+            const savedStats = localStorage.getItem('otterBrosStats');
+            if (savedStats) {
+                game.sessionStats = JSON.parse(savedStats);
+                console.log('📊 Loaded saved stats from localStorage');
+            } else {
+                // Initialize fresh stats if none exist
+                game.sessionStats = {
+                    totalScore: 0,
+                    levelsCompleted: 0,
+                    totalCoins: 0,
+                    crabsDefeated: 0,
+                    eaglesDefeated: 0,
+                    gatorsDefeated: 0,
+                    sharksDefeated: 0,
+                    bossesDefeated: 0,
+                    treasuresFound: 0,
+                    keysCollected: 0,
+                    healthPickups: 0,
+                    mushroomsEaten: 0,
+                    currentSessionScore: 0,
+                    levelStartTime: Date.now(),
+                    // Additional properties needed by updateLeaderboard
+                    fishCollected: 0,
+                    healthCollected: 0,
+                    treasuresCollected: 0,
+                    mushroomsCollected: 0,
+                    levelTimes: [],
+                    highestScore: 0,
+                    highestLevels: 0,
+                    highestCoins: 0,
+                    highestCrabs: 0,
+                    highestFish: 0,
+                    highestHealth: 0,
+                    highestTreasures: 0,
+                    highestMushrooms: 0,
+                    currentSessionLevels: 0,
+                    currentSessionCoins: 0,
+                    currentSessionCrabs: 0,
+                    currentSessionBosses: 0,
+                    currentSessionFish: 0,
+                    currentSessionHealth: 0,
+                    currentSessionTreasures: 0,
+                    currentSessionMushrooms: 0
+                };
+                console.log('🆕 No saved stats found - starting fresh');
+            }
         }
         
         function resetStats() {
