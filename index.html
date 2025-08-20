@@ -20721,8 +20721,8 @@
                 unlockAchievement('first_game');
             }
             
-            // Coin achievements
-            const totalCoins = game.sessionStats.totalCoins;
+            // Coin achievements (use all-time stats)
+            const totalCoins = game.sessionStats.allTimeCoins || 0;
             if (totalCoins >= 1 && !achievements.find(a => a.id === 'first_coin').unlocked) {
                 unlockAchievement('first_coin');
             }
@@ -20739,8 +20739,8 @@
                 unlockAchievement('two_hundred_coins');
             }
             
-            // Level achievements
-            const levelsCompleted = game.sessionStats.levelsCompleted;
+            // Level achievements (use all-time stats)
+            const levelsCompleted = game.sessionStats.allTimeLevels || 0;
             if (levelsCompleted >= 1 && !achievements.find(a => a.id === 'first_level').unlocked) {
                 unlockAchievement('first_level');
             }
@@ -20760,8 +20760,8 @@
                 unlockAchievement('hundred_levels');
             }
             
-            // Score achievements
-            const currentScore = game.score;
+            // Score achievements (use all-time stats)
+            const currentScore = game.sessionStats.allTimeScore || 0;
             if (currentScore >= 100 && !achievements.find(a => a.id === 'hundred_score').unlocked) {
                 unlockAchievement('hundred_score');
             }
@@ -20778,8 +20778,8 @@
                 unlockAchievement('million_score');
             }
             
-            // Enemy achievements
-            const enemiesDefeated = game.sessionStats.crabsDefeated + game.sessionStats.eaglesDefeated + game.sessionStats.gatorsDefeated + game.sessionStats.sharksDefeated;
+            // Enemy achievements (use all-time stats)
+            const enemiesDefeated = game.sessionStats.allTimeEnemies || 0;
             if (enemiesDefeated >= 1 && !achievements.find(a => a.id === 'first_enemy').unlocked) {
                 unlockAchievement('first_enemy');
             }
@@ -20796,8 +20796,8 @@
                 unlockAchievement('thousand_enemies');
             }
             
-            // Boss achievements
-            const bossesDefeated = game.sessionStats.bossesDefeated;
+            // Boss achievements (use all-time stats)
+            const bossesDefeated = game.sessionStats.allTimeBosses || 0;
             if (bossesDefeated >= 1 && !achievements.find(a => a.id === 'boss_defeater').unlocked) {
                 unlockAchievement('boss_defeater');
             }
@@ -20814,8 +20814,8 @@
                 unlockAchievement('fifty_bosses');
             }
             
-            // Collection achievements
-            const totalItems = game.sessionStats.fishCollected + game.sessionStats.healthCollected + game.sessionStats.treasuresCollected + game.sessionStats.mushroomsCollected;
+            // Collection achievements (use all-time stats)
+            const totalItems = (game.sessionStats.allTimeFish || 0) + (game.sessionStats.allTimeHealth || 0) + (game.sessionStats.allTimeTreasures || 0) + (game.sessionStats.allTimeMushrooms || 0);
             if (totalItems >= 100 && !achievements.find(a => a.id === 'collector').unlocked) {
                 unlockAchievement('collector');
             }
@@ -20854,8 +20854,8 @@
         }
         
         function checkNewGameplayAchievements() {
-            // Fireball achievements
-            if (game.sessionStats.fireballsHit >= 10 && !achievements.find(a => a.id === 'fireball_master').unlocked) {
+            // Fireball achievements (use all-time stats)
+            if ((game.sessionStats.allTimeFireballs || 0) >= 10 && !achievements.find(a => a.id === 'fireball_master').unlocked) {
                 unlockAchievement('fireball_master');
             }
             
@@ -20930,19 +20930,19 @@
             }
             
             // Unlucky 13
-            const totalItems = game.sessionStats.fishCollected + game.sessionStats.healthCollected + game.sessionStats.treasuresCollected + game.sessionStats.mushroomsCollected;
+            const totalItems = (game.sessionStats.allTimeFish || 0) + (game.sessionStats.allTimeHealth || 0) + (game.sessionStats.allTimeTreasures || 0) + (game.sessionStats.allTimeMushrooms || 0);
             if (totalItems === 13 && !achievements.find(a => a.id === 'collector_13').unlocked) {
                 unlockAchievement('collector_13');
             }
             
             // Devil Hunter 666
-            const enemiesDefeated = game.sessionStats.crabsDefeated + game.sessionStats.eaglesDefeated + game.sessionStats.gatorsDefeated + game.sessionStats.sharksDefeated;
+            const enemiesDefeated = game.sessionStats.allTimeEnemies || 0;
             if (enemiesDefeated === 666 && !achievements.find(a => a.id === 'enemy_666').unlocked) {
                 unlockAchievement('enemy_666');
             }
             
             // Answer to Everything 42
-            if (game.sessionStats.totalCoins === 42 && !achievements.find(a => a.id === 'coin_42').unlocked) {
+            if (game.sessionStats.allTimeCoins === 42 && !achievements.find(a => a.id === 'coin_42').unlocked) {
                 unlockAchievement('coin_42');
             }
             
