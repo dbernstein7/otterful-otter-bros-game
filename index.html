@@ -17977,7 +17977,7 @@
                     timestamp: Date.now()
                 };
                 localStorage.setItem('otterBrosGameState', JSON.stringify(gameState));
-                console.log('💾 Saved game state to local storage');
+                console.log('💾 Saved game state to local storage - Level:', game.level, 'Health:', player.health);
             } catch (error) {
                 console.error('❌ Error saving game state:', error);
             }
@@ -17999,11 +17999,11 @@
                         game.lives = gameState.lives || 3;
                         game.coins = gameState.coins || 0;
                         game.gameState = gameState.gameState || 'menu';
-                        player.health = gameState.playerHealth || player.maxHealth;
-                        player.maxHealth = gameState.playerMaxHealth || 100;
+                        game.savedPlayerHealth = gameState.playerHealth || player.maxHealth;
+                        game.savedPlayerMaxHealth = gameState.playerMaxHealth || 100;
                         game.checkpointProgress = gameState.checkpointProgress || {};
                         
-                        console.log('📊 Loaded game state from local storage');
+                        console.log('📊 Loaded game state from local storage - Level:', game.level, 'Health:', game.savedPlayerHealth);
                         return true;
                     } else {
                         console.log('⏰ Saved game state is too old, starting fresh');
@@ -18057,12 +18057,19 @@
                 loadLevel(game.level);
                 document.getElementById('level').textContent = game.level;
                 
+                // Restore player state after level load
+                player.health = game.savedPlayerHealth || player.maxHealth;
+                player.maxHealth = game.savedPlayerMaxHealth || 100;
+                
                 // Update UI displays
                 document.getElementById('score').textContent = game.score;
                 document.getElementById('coins').textContent = game.coins;
                 document.getElementById('lives').textContent = game.lives;
                 
-                console.log('✅ Continued game from level', game.level);
+                // Update health bar
+                updateHealthBar();
+                
+                console.log('✅ Continued game from level', game.level, 'with health:', player.health);
             } else {
                 console.log('❌ No valid saved game found');
                 startGame(); // Fallback to starting new game
