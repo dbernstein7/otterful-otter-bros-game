@@ -12729,6 +12729,7 @@
                 game.lives--;
                 if (game.lives <= 0) {
                     game.gameOver = true;
+                    saveSessionStats(); // Save stats when game ends
                 } else {
                     // Respawn player at last checkpoint or starting position
                     if (game.activeCheckpoint) {
@@ -14447,6 +14448,7 @@
                 });
                 game.sessionStats.levelsCompleted++;
                 saveStats(true); // Save all stats only on level completion
+                saveSessionStats(); // Save session stats
                 
                 // Save player progress (XP, level, etc.) when level is completed
                 savePlayerProgress();
@@ -16990,6 +16992,9 @@
                 };
             }
             
+            // Load saved session stats
+            loadSessionStats();
+            
             // Reset only session coins (keep marketplace coins)
             game.sessionStats.currentSessionCoins = 0;
             game.coins = 0;
@@ -18262,6 +18267,9 @@
             if (walletTab && walletTab.style.display !== 'none') {
                 updateWalletProfile();
             }
+            
+            // Save session stats after updating profile
+            saveSessionStats();
         }
         
         function updateProfileXPBar() {
@@ -21231,6 +21239,27 @@
                 bestScore: game.profile.bestScore,
                 favoriteLevel: game.profile.favoriteLevel
             }));
+        }
+        
+        function saveSessionStats() {
+            localStorage.setItem('otterBrosSessionStats', JSON.stringify(game.sessionStats));
+        }
+        
+        function loadSessionStats() {
+            const savedStats = localStorage.getItem('otterBrosSessionStats');
+            if (savedStats) {
+                try {
+                    const stats = JSON.parse(savedStats);
+                    console.log('📊 Loading saved session stats:', stats);
+                    
+                    // Merge saved stats with current session stats
+                    Object.assign(game.sessionStats, stats);
+                } catch (error) {
+                    console.error('❌ Error loading session stats:', error);
+                }
+            } else {
+                console.log('📊 No saved session stats found, starting fresh');
+            }
         }
         
         function loadProfileData() {
