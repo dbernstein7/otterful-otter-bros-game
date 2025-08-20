@@ -22163,15 +22163,7 @@
                 // Hide pause button and settings button when menu is open
                 document.getElementById('pauseBtn').style.display = 'none';
                 document.getElementById('settingsBtn').style.display = 'none';
-                
-                // Only save game state when pausing if player has made meaningful progress
-                // (past level 1 or has collected coins in current session)
-                if (game.level > 1 || game.coins > 0 || game.score > 0) {
-                    saveGameState(); // Save game state when pausing with progress
-                    console.log('💾 Saved game state on pause - Level:', game.level, 'Coins:', game.coins, 'Score:', game.score);
-                } else {
-                    console.log('⏸️ Paused without meaningful progress - not saving game state');
-                }
+                saveGameState(); // Save game state when pausing
             } else {
                 pauseMenu.style.display = 'none';
                 game.gameState = 'playing';
@@ -22982,9 +22974,10 @@
                     return;
                 }
                 console.log('✅ User confirmed starting new game despite existing save');
-                // Clear the saved game state since user confirmed they want to start fresh
+                
+                // Clear the saved game state after user confirms
                 localStorage.removeItem('otterBrosGameState');
-                console.log('🗑️ Cleared saved game state after user confirmation');
+                console.log('🗑️ Cleared saved game state after user confirmed new game');
             }
             
             console.log('🚀 Start Adventure clicked - starting game immediately!');
