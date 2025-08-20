@@ -23104,7 +23104,10 @@
                 "🦉 *chuckles* Why did the otter bring a ladder to the pool? To reach the high dive! *hoots*",
                 "🦉 *giggles* What do you call an otter that's always late? A procrasti-otter! *winks*",
                 "🦉 *laughs* Why did the otter go to art school? To learn how to otter-draw! *bounces*",
-                "🦉 *chuckles* What's an otter's favorite dance? The otter shuffle! *hoots with joy*"
+                "🦉 *chuckles* What's an otter's favorite dance? The otter shuffle! *hoots with joy*",
+                "🦉 *laughs* That was otterly hilarious! *hoots with amusement*",
+                "🦉 *giggles* Your puns are ottstanding! *bounces around*",
+                "🦉 *chuckles* This game is absolutely otterful! *spins excitedly*"
             ],
             
             // Important Tips
@@ -23118,7 +23121,10 @@
                 "🦉 *advises* Tip: Save your progress by completing levels! *nods seriously*",
                 "🦉 *suggests* Tip: Try different owl hats for unique bonuses! *adjusts own hat*",
                 "🦉 *hints* Tip: Look for secret areas behind waterfalls! *mysterious hoot*",
-                "🦉 *advises* Tip: Use the double jump to reach higher platforms! *demonstrates*"
+                "🦉 *advises* Tip: Use the double jump to reach higher platforms! *demonstrates*",
+                "🦉 *wisely* Tip: Your gameplay is getting otterly impressive! *nods approvingly*",
+                "🦉 *helpfully* Tip: That move was ottstanding! Keep it up! *flaps encouragingly*",
+                "🦉 *advises* Tip: This level is going to be otterful fun! *bounces excitedly*"
             ],
             
             // Encouragement
@@ -23127,7 +23133,12 @@
                 "🦉 *proudly* Wow! You're really getting the hang of this! *puffs chest*",
                 "🦉 *excitedly* Amazing progress! You're becoming a true otter master! *bounces*",
                 "🦉 *supportively* Don't give up! Every otter was once a beginner! *nods wisely*",
-                "🦉 *enthusiastically* You've got this! Show those enemies who's boss! *flexes wings*"
+                "🦉 *enthusiastically* You've got this! Show those enemies who's boss! *flexes wings*",
+                "🦉 *cheerfully* Your skills are otterly amazing! *hoots with pride*",
+                "🦉 *proudly* That was ottstanding gameplay! *puffs chest with pride*",
+                "🦉 *excitedly* You're having an otterful adventure! *bounces with joy*",
+                "🦉 *supportively* Your determination is otterly inspiring! *nods encouragingly*",
+                "🦉 *enthusiastically* You're doing ottstanding work! *flexes wings proudly*"
             ],
             
             // Situational Messages
@@ -23137,7 +23148,13 @@
                 underwater: "🦉 *excitedly* Underwater exploration time! Don't forget to breathe! *holds breath*",
                 highScore: "🦉 *impressed* Incredible score! You're on fire! *hoots with amazement*",
                 levelComplete: "🦉 *celebrates* Level complete! You're unstoppable! *dances around*",
-                achievement: "🦉 *proudly* Achievement unlocked! You're earning those feathers! *preens*"
+                achievement: "🦉 *proudly* Achievement unlocked! You're earning those feathers! *preens*",
+                lowHealthOtterly: "🦉 *worried* Your health is otterly low! Find those hearts quickly! *frantically flaps*",
+                manyEnemiesOtterly: "🦉 *nervously* That's an otterly dangerous situation! Use your weapons! *hides behind wing*",
+                underwaterOtterly: "🦉 *excitedly* Time for some otterly amazing underwater exploration! *holds breath*",
+                highScoreOtterly: "🦉 *impressed* That score is otterly incredible! You're ottstanding! *hoots with amazement*",
+                levelCompleteOtterly: "🦉 *celebrates* Level complete! That was otterful! *dances around*",
+                achievementOtterly: "🦉 *proudly* Achievement unlocked! Your progress is otterly impressive! *preens*"
             }
         };
         
@@ -23175,7 +23192,11 @@
             const now = Date.now();
             if (now - lastOwlMessageTime < owlMessageCooldown) return;
             
-            const message = owlMessages.situational[situation];
+            // Sometimes use the otterly version for extra fun (30% chance)
+            const useOtterly = Math.random() < 0.3;
+            const situationKey = useOtterly ? situation + 'Otterly' : situation;
+            
+            const message = owlMessages.situational[situationKey] || owlMessages.situational[situation];
             if (message) {
                 showAIOwlBotMessage(message);
                 lastOwlMessageTime = now;
