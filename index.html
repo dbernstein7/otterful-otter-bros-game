@@ -2101,6 +2101,7 @@
                 <h3 style="color: #00FFFF; margin-top: 0;">📈 XP & Progression System</h3>
                 <ul style="color: #FFD700; line-height: 1.6;">
                     <li><strong>XP Progression:</strong> Level 1-10: 500 XP increase per level, Level 10+: 1000 XP per level</li>
+                    <li><strong>XP Multipliers:</strong> Score-to-XP: 25%, Level Completion: 75 × level, Achievement Bonuses: 50% for 3+ achievements, 25% for perfect runs</li>
                     <li><strong>Laser Charge Unlocks:</strong> Every 10 levels (10, 20, 30, 40, 50, 60)</li>
                     <li><strong>Laser Charge Upgrades:</strong> Each unlock increases max charge level</li>
                     <li><strong>Level Rewards:</strong> Unlock new abilities and cosmetics as you progress</li>
@@ -2316,6 +2317,7 @@
                     <div style="background: rgba(0,255,255,0.1); padding: 20px; border-radius: 15px; border: 1px solid rgba(0,255,255,0.2);">
                         <ul style="color: #FFD700; line-height: 1.6; margin: 0; padding-left: 20px;">
                             <li><strong>XP Progression:</strong> Level 1-10: 500 XP increase per level, Level 10+: 1000 XP per level</li>
+                            <li><strong>XP Multipliers:</strong> Score-to-XP: 25%, Level Completion: 75 × level, Achievement Bonuses: 50% for 3+ achievements, 25% for perfect runs</li>
                             <li><strong>Laser Charge Unlocks:</strong> Every 10 levels (10, 20, 30, 40, 50, 60)</li>
                             <li><strong>Laser Charge Upgrades:</strong> Each unlock increases max charge level</li>
                             <li><strong>Level Rewards:</strong> Unlock new abilities and cosmetics as you progress</li>
@@ -5432,7 +5434,10 @@
                 coinsCollected: 0,
                 chestsCollected: 0,
                 goldenChestsCollected: 0
-            }
+            },
+            // Daily/Weekly bonus tracking
+            lastPlayedDate: null,
+            consecutiveDaysPlayed: 0
         };
         
         // Single initialization function to prevent multiple executions
@@ -5536,102 +5541,102 @@
         
         // Achievements System
         const achievements = [
-            // Basic Achievements (Easy) - 50 XP each
-            { id: 'first_game', name: 'First Steps', description: 'Play your first game', icon: '🎮', unlocked: false, xpReward: 50 },
-            { id: 'first_coin', name: 'Coin Collector', description: 'Collect your first coin', icon: '🪙', unlocked: false, xpReward: 50 },
-            { id: 'first_level', name: 'Level Up!', description: 'Complete your first level', icon: '⭐', unlocked: false, xpReward: 50 },
-            { id: 'first_enemy', name: 'Combat Ready', description: 'Defeat your first enemy', icon: '⚔️', unlocked: false, xpReward: 50 },
-            { id: 'ten_coins', name: 'Rich Otter', description: 'Collect 10 coins in one game', icon: '💰', unlocked: false, xpReward: 50 },
-            { id: 'five_levels', name: 'Adventure Seeker', description: 'Complete 5 levels', icon: '🗺️', unlocked: false, xpReward: 50 },
-            { id: 'hundred_score', name: 'Score Master', description: 'Score 100 points in one game', icon: '🏆', unlocked: false, xpReward: 50 },
-            { id: 'jetpack_user', name: 'Jetpack Jockey', description: 'Use a jetpack for the first time', icon: '🚁', unlocked: false, xpReward: 50 },
-            { id: 'laser_user', name: 'Laser Expert', description: 'Use a laser for the first time', icon: '🔫', unlocked: false, xpReward: 50 },
-            { id: 'mushroom_user', name: 'Giant Mode', description: 'Use a mushroom for the first time', icon: '🍄', unlocked: false, xpReward: 50 },
-            { id: 'underwater_explorer', name: 'Deep Diver', description: 'Explore underwater areas', icon: '🌊', unlocked: false, xpReward: 50 },
-            { id: 'boss_defeater', name: 'Boss Slayer', description: 'Defeat your first boss', icon: '👑', unlocked: false, xpReward: 50 },
-            { id: 'marketplace_shopper', name: 'Fashion Forward', description: 'Buy your first item from the marketplace', icon: '🛒', unlocked: false, xpReward: 50 },
-            { id: 'hat_collector', name: 'Hat Enthusiast', description: 'Own 3 different owl hats', icon: '🦉', unlocked: false, xpReward: 50 },
-            { id: 'skin_collector', name: 'Style Master', description: 'Own 3 different otter skins', icon: '🦦', unlocked: false, xpReward: 50 },
+            // Basic Achievements (Easy) - 75 XP each (increased from 50)
+            { id: 'first_game', name: 'First Steps', description: 'Play your first game', icon: '🎮', unlocked: false, xpReward: 75 },
+            { id: 'first_coin', name: 'Coin Collector', description: 'Collect your first coin', icon: '🪙', unlocked: false, xpReward: 75 },
+            { id: 'first_level', name: 'Level Up!', description: 'Complete your first level', icon: '⭐', unlocked: false, xpReward: 75 },
+            { id: 'first_enemy', name: 'Combat Ready', description: 'Defeat your first enemy', icon: '⚔️', unlocked: false, xpReward: 75 },
+            { id: 'ten_coins', name: 'Rich Otter', description: 'Collect 10 coins in one game', icon: '💰', unlocked: false, xpReward: 75 },
+            { id: 'five_levels', name: 'Adventure Seeker', description: 'Complete 5 levels', icon: '🗺️', unlocked: false, xpReward: 75 },
+            { id: 'hundred_score', name: 'Score Master', description: 'Score 100 points in one game', icon: '🏆', unlocked: false, xpReward: 75 },
+            { id: 'jetpack_user', name: 'Jetpack Jockey', description: 'Use a jetpack for the first time', icon: '🚁', unlocked: false, xpReward: 75 },
+            { id: 'laser_user', name: 'Laser Expert', description: 'Use a laser for the first time', icon: '🔫', unlocked: false, xpReward: 75 },
+            { id: 'mushroom_user', name: 'Giant Mode', description: 'Use a mushroom for the first time', icon: '🍄', unlocked: false, xpReward: 75 },
+            { id: 'underwater_explorer', name: 'Deep Diver', description: 'Explore underwater areas', icon: '🌊', unlocked: false, xpReward: 75 },
+            { id: 'boss_defeater', name: 'Boss Slayer', description: 'Defeat your first boss', icon: '👑', unlocked: false, xpReward: 75 },
+            { id: 'marketplace_shopper', name: 'Fashion Forward', description: 'Buy your first item from the marketplace', icon: '🛒', unlocked: false, xpReward: 75 },
+            { id: 'hat_collector', name: 'Hat Enthusiast', description: 'Own 3 different owl hats', icon: '🦉', unlocked: false, xpReward: 75 },
+            { id: 'skin_collector', name: 'Style Master', description: 'Own 3 different otter skins', icon: '🦦', unlocked: false, xpReward: 75 },
             
-            // Intermediate Achievements (Medium) - 100 XP each
-            { id: 'fifty_coins', name: 'Coin Hoarder', description: 'Collect 50 coins in one game', icon: '💎', unlocked: false, xpReward: 100 },
-            { id: 'ten_levels', name: 'Level Master', description: 'Complete 10 levels', icon: '🏔️', unlocked: false, xpReward: 100 },
-            { id: 'complete_10_levels', name: 'Level Master', description: 'Complete 10 levels', icon: '🏔️', unlocked: false, xpReward: 100 },
-            { id: 'thousand_score', name: 'High Scorer', description: 'Score 1,000 points in one game', icon: '🎯', unlocked: false, xpReward: 100 },
-            { id: 'twenty_enemies', name: 'Enemy Hunter', description: 'Defeat 20 enemies in one game', icon: '🗡️', unlocked: false, xpReward: 100 },
-            { id: 'five_bosses', name: 'Boss Hunter', description: 'Defeat 5 bosses', icon: '👑', unlocked: false, xpReward: 100 },
-            { id: 'defeat_5_bosses', name: 'Boss Hunter', description: 'Defeat 5 bosses', icon: '👑', unlocked: false, xpReward: 100 },
-            { id: 'all_hats', name: 'Hat Master', description: 'Own all owl hats', icon: '🎩', unlocked: false, xpReward: 100 },
-            { id: 'all_skins', name: 'Skin Master', description: 'Own all otter skins', icon: '🎨', unlocked: false, xpReward: 100 },
-            { id: 'speed_runner', name: 'Speed Runner', description: 'Complete a level in under 30 seconds', icon: '⚡', unlocked: false, xpReward: 100 },
-            { id: 'no_damage', name: 'Untouchable', description: 'Complete a level without taking damage', icon: '🛡️', unlocked: false, xpReward: 100 },
-            { id: 'collector', name: 'Collector', description: 'Collect 100 items in one game', icon: '📦', unlocked: false, xpReward: 100 },
+            // Intermediate Achievements (Medium) - 150 XP each (increased from 100)
+            { id: 'fifty_coins', name: 'Coin Hoarder', description: 'Collect 50 coins in one game', icon: '💎', unlocked: false, xpReward: 150 },
+            { id: 'ten_levels', name: 'Level Master', description: 'Complete 10 levels', icon: '🏔️', unlocked: false, xpReward: 150 },
+            { id: 'complete_10_levels', name: 'Level Master', description: 'Complete 10 levels', icon: '🏔️', unlocked: false, xpReward: 150 },
+            { id: 'thousand_score', name: 'High Scorer', description: 'Score 1,000 points in one game', icon: '🎯', unlocked: false, xpReward: 150 },
+            { id: 'twenty_enemies', name: 'Enemy Hunter', description: 'Defeat 20 enemies in one game', icon: '🗡️', unlocked: false, xpReward: 150 },
+            { id: 'five_bosses', name: 'Boss Hunter', description: 'Defeat 5 bosses', icon: '👑', unlocked: false, xpReward: 150 },
+            { id: 'defeat_5_bosses', name: 'Boss Hunter', description: 'Defeat 5 bosses', icon: '👑', unlocked: false, xpReward: 150 },
+            { id: 'all_hats', name: 'Hat Master', description: 'Own all owl hats', icon: '🎩', unlocked: false, xpReward: 150 },
+            { id: 'all_skins', name: 'Skin Master', description: 'Own all otter skins', icon: '🎨', unlocked: false, xpReward: 150 },
+            { id: 'speed_runner', name: 'Speed Runner', description: 'Complete a level in under 30 seconds', icon: '⚡', unlocked: false, xpReward: 150 },
+            { id: 'no_damage', name: 'Untouchable', description: 'Complete a level without taking damage', icon: '🛡️', unlocked: false, xpReward: 150 },
+            { id: 'collector', name: 'Collector', description: 'Collect 100 items in one game', icon: '📦', unlocked: false, xpReward: 150 },
             
-            // Advanced Achievements (Hard) - 200 XP each
-            { id: 'hundred_coins', name: 'Coin Millionaire', description: 'Collect 100 coins in one game', icon: '💎', unlocked: false, xpReward: 200 },
-            { id: 'collect_100_coins', name: 'Coin Collector Master', description: 'Collect 100 coins total', icon: '💎', unlocked: false, xpReward: 200 },
-            { id: 'twenty_levels', name: 'Level Legend', description: 'Complete 20 levels', icon: '🏆', unlocked: false, xpReward: 200 },
-            { id: 'reach_level_20', name: 'Level 20 Master', description: 'Reach player level 20', icon: '🏆', unlocked: false, xpReward: 200 },
-            { id: 'ten_thousand_score', name: 'Score Legend', description: 'Score 10,000 points in one game', icon: '🌟', unlocked: false, xpReward: 200 },
-            { id: 'fifty_enemies', name: 'Enemy Slayer', description: 'Defeat 50 enemies in one game', icon: '⚔️', unlocked: false, xpReward: 200 },
-            { id: 'defeat_50_enemies', name: 'Enemy Slayer', description: 'Defeat 50 enemies total', icon: '⚔️', unlocked: false, xpReward: 200 },
-            { id: 'ten_bosses', name: 'Boss Legend', description: 'Defeat 10 bosses', icon: '👑', unlocked: false, xpReward: 200 },
-            { id: 'perfect_run', name: 'Perfect Run', description: 'Complete a level with 100% items collected', icon: '💯', unlocked: false, xpReward: 200 },
-            { id: 'no_jump', name: 'Ground Walker', description: 'Complete a level without jumping', icon: '🚶', unlocked: false, xpReward: 200 },
-            { id: 'underwater_master', name: 'Underwater Master', description: 'Spend 5 minutes underwater in one game', icon: '🐠', unlocked: false, xpReward: 200 },
-            { id: 'jetpack_master', name: 'Jetpack Master', description: 'Use jetpack for 3 minutes in one game', icon: '🚁', unlocked: false, xpReward: 200 },
-            { id: 'laser_master', name: 'Laser Master', description: 'Defeat 10 enemies with laser in one game', icon: '🔫', unlocked: false, xpReward: 200 },
+            // Advanced Achievements (Hard) - 300 XP each (increased from 200)
+            { id: 'hundred_coins', name: 'Coin Millionaire', description: 'Collect 100 coins in one game', icon: '💎', unlocked: false, xpReward: 300 },
+            { id: 'collect_100_coins', name: 'Coin Collector Master', description: 'Collect 100 coins total', icon: '💎', unlocked: false, xpReward: 300 },
+            { id: 'twenty_levels', name: 'Level Legend', description: 'Complete 20 levels', icon: '🏆', unlocked: false, xpReward: 300 },
+            { id: 'reach_level_20', name: 'Level 20 Master', description: 'Reach player level 20', icon: '🏆', unlocked: false, xpReward: 300 },
+            { id: 'ten_thousand_score', name: 'Score Legend', description: 'Score 10,000 points in one game', icon: '🌟', unlocked: false, xpReward: 300 },
+            { id: 'fifty_enemies', name: 'Enemy Slayer', description: 'Defeat 50 enemies in one game', icon: '⚔️', unlocked: false, xpReward: 300 },
+            { id: 'defeat_50_enemies', name: 'Enemy Slayer', description: 'Defeat 50 enemies total', icon: '⚔️', unlocked: false, xpReward: 300 },
+            { id: 'ten_bosses', name: 'Boss Legend', description: 'Defeat 10 bosses', icon: '👑', unlocked: false, xpReward: 300 },
+            { id: 'perfect_run', name: 'Perfect Run', description: 'Complete a level with 100% items collected', icon: '💯', unlocked: false, xpReward: 300 },
+            { id: 'no_jump', name: 'Ground Walker', description: 'Complete a level without jumping', icon: '🚶', unlocked: false, xpReward: 300 },
+            { id: 'underwater_master', name: 'Underwater Master', description: 'Spend 5 minutes underwater in one game', icon: '🐠', unlocked: false, xpReward: 300 },
+            { id: 'jetpack_master', name: 'Jetpack Master', description: 'Use jetpack for 3 minutes in one game', icon: '🚁', unlocked: false, xpReward: 300 },
+            { id: 'laser_master', name: 'Laser Master', description: 'Defeat 10 enemies with laser in one game', icon: '🔫', unlocked: false, xpReward: 300 },
             
-            // Expert Achievements (Very Hard) - 500 XP each
-            { id: 'two_hundred_coins', name: 'Coin Billionaire', description: 'Collect 200 coins in one game', icon: '💎', unlocked: false, xpReward: 500 },
-            { id: 'fifty_levels', name: 'Level God', description: 'Complete 50 levels', icon: '🏆', unlocked: false, xpReward: 500 },
-            { id: 'hundred_thousand_score', name: 'Score God', description: 'Score 100,000 points in one game', icon: '🌟', unlocked: false, xpReward: 500 },
-            { id: 'hundred_enemies', name: 'Enemy God', description: 'Defeat 100 enemies in one game', icon: '⚔️', unlocked: false, xpReward: 500 },
-            { id: 'twenty_bosses', name: 'Boss God', description: 'Defeat 20 bosses', icon: '👑', unlocked: false, xpReward: 500 },
-            { id: 'no_powerups', name: 'Pure Skill', description: 'Complete 5 levels without using any powerups', icon: '🎯', unlocked: false, xpReward: 500 },
-            { id: 'speed_god', name: 'Speed God', description: 'Complete a level in under 15 seconds', icon: '⚡', unlocked: false, xpReward: 500 },
-            { id: 'invincible', name: 'Invincible', description: 'Complete 3 levels without taking damage', icon: '🛡️', unlocked: false, xpReward: 500 },
-            { id: 'master_collector', name: 'Master Collector', description: 'Collect 500 items in one game', icon: '📦', unlocked: false, xpReward: 500 },
+            // Expert Achievements (Very Hard) - 750 XP each (increased from 500)
+            { id: 'two_hundred_coins', name: 'Coin Billionaire', description: 'Collect 200 coins in one game', icon: '💎', unlocked: false, xpReward: 750 },
+            { id: 'fifty_levels', name: 'Level God', description: 'Complete 50 levels', icon: '🏆', unlocked: false, xpReward: 750 },
+            { id: 'hundred_thousand_score', name: 'Score God', description: 'Score 100,000 points in one game', icon: '🌟', unlocked: false, xpReward: 750 },
+            { id: 'hundred_enemies', name: 'Enemy God', description: 'Defeat 100 enemies in one game', icon: '⚔️', unlocked: false, xpReward: 750 },
+            { id: 'twenty_bosses', name: 'Boss God', description: 'Defeat 20 bosses', icon: '👑', unlocked: false, xpReward: 750 },
+            { id: 'no_powerups', name: 'Pure Skill', description: 'Complete 5 levels without using any powerups', icon: '🎯', unlocked: false, xpReward: 750 },
+            { id: 'speed_god', name: 'Speed God', description: 'Complete a level in under 15 seconds', icon: '⚡', unlocked: false, xpReward: 750 },
+            { id: 'invincible', name: 'Invincible', description: 'Complete 3 levels without taking damage', icon: '🛡️', unlocked: false, xpReward: 750 },
+            { id: 'master_collector', name: 'Master Collector', description: 'Collect 500 items in one game', icon: '📦', unlocked: false, xpReward: 750 },
             
-            // New Gameplay Achievements - 150 XP each
-            { id: 'fireball_master', name: 'Fireball Master', description: 'Hit 10 enemies with fireballs in one game', icon: '🔥', unlocked: false, xpReward: 150 },
-            { id: 'underwater_explorer_master', name: 'Deep Sea Explorer', description: 'Spend 10 minutes underwater total', icon: '🌊', unlocked: false, xpReward: 150 },
-            { id: 'jetpack_explorer', name: 'Sky Explorer', description: 'Use jetpack for 5 minutes total', icon: '🚁', unlocked: false, xpReward: 150 },
-            { id: 'laser_expert', name: 'Laser Expert', description: 'Defeat 25 enemies with laser total', icon: '🔫', unlocked: false, xpReward: 150 },
-            { id: 'treasure_hunter', name: 'Treasure Hunter', description: 'Collect 50 treasures total', icon: '💎', unlocked: false, xpReward: 150 },
-            { id: 'health_master', name: 'Health Master', description: 'Collect 100 health pickups total', icon: '❤️', unlocked: false, xpReward: 150 },
-            { id: 'mushroom_master', name: 'Mushroom Master', description: 'Eat 50 mushrooms total', icon: '🍄', unlocked: false, xpReward: 150 },
-            { id: 'key_collector', name: 'Key Master', description: 'Collect 25 keys total', icon: '🗝️', unlocked: false, xpReward: 150 },
-            { id: 'fish_collector', name: 'Fish Collector', description: 'Collect 100 fish total', icon: '🐟', unlocked: false, xpReward: 150 },
-            { id: 'jump_master', name: 'Jump Master', description: 'Make 500 jumps total', icon: '🦘', unlocked: false, xpReward: 150 },
+            // New Gameplay Achievements - 200 XP each (increased from 150)
+            { id: 'fireball_master', name: 'Fireball Master', description: 'Hit 10 enemies with fireballs in one game', icon: '🔥', unlocked: false, xpReward: 200 },
+            { id: 'underwater_explorer_master', name: 'Deep Sea Explorer', description: 'Spend 10 minutes underwater total', icon: '🌊', unlocked: false, xpReward: 200 },
+            { id: 'jetpack_explorer', name: 'Sky Explorer', description: 'Use jetpack for 5 minutes total', icon: '🚁', unlocked: false, xpReward: 200 },
+            { id: 'laser_expert', name: 'Laser Expert', description: 'Defeat 25 enemies with laser total', icon: '🔫', unlocked: false, xpReward: 200 },
+            { id: 'treasure_hunter', name: 'Treasure Hunter', description: 'Collect 50 treasures total', icon: '💎', unlocked: false, xpReward: 200 },
+            { id: 'health_master', name: 'Health Master', description: 'Collect 100 health pickups total', icon: '❤️', unlocked: false, xpReward: 200 },
+            { id: 'mushroom_master', name: 'Mushroom Master', description: 'Eat 50 mushrooms total', icon: '🍄', unlocked: false, xpReward: 200 },
+            { id: 'key_collector', name: 'Key Master', description: 'Collect 25 keys total', icon: '🗝️', unlocked: false, xpReward: 200 },
+            { id: 'fish_collector', name: 'Fish Collector', description: 'Collect 100 fish total', icon: '🐟', unlocked: false, xpReward: 200 },
+            { id: 'jump_master', name: 'Jump Master', description: 'Make 500 jumps total', icon: '🦘', unlocked: false, xpReward: 200 },
             
-            // Hidden Achievements (Random/Secret) - 75 XP each
-            { id: 'lucky_777', name: 'Lucky 777', description: 'Score exactly 777 points', icon: '🍀', unlocked: false, hidden: true, xpReward: 75 },
-            { id: 'collector_13', name: 'Unlucky Collector', description: 'Collect exactly 13 items', icon: '😱', unlocked: false, hidden: true, xpReward: 75 },
-            { id: 'enemy_666', name: 'Devil Hunter', description: 'Defeat exactly 666 enemies', icon: '😈', unlocked: false, hidden: true, xpReward: 75 },
-            { id: 'coin_42', name: 'Answer to Everything', description: 'Collect exactly 42 coins', icon: '🤖', unlocked: false, hidden: true, xpReward: 75 },
-            { id: 'level_69', name: 'Nice Level', description: 'Complete level 69', icon: '😏', unlocked: false, hidden: true, xpReward: 75 },
-            { id: 'random_master', name: 'Random Master', description: 'Unlock 5 hidden achievements', icon: '🎲', unlocked: false, hidden: true, xpReward: 75 },
-            { id: 'midnight_gamer', name: 'Midnight Gamer', description: 'Play at exactly midnight', icon: '🌙', unlocked: false, hidden: true, xpReward: 75 },
-            { id: 'early_bird', name: 'Early Bird', description: 'Play at exactly 6 AM', icon: '🌅', unlocked: false, hidden: true, xpReward: 75 },
-            { id: 'night_owl', name: 'Night Owl', description: 'Play for 2 hours straight', icon: '🦉', unlocked: false, hidden: true, xpReward: 75 },
-            { id: 'weekend_warrior', name: 'Weekend Warrior', description: 'Play on a weekend', icon: '📅', unlocked: false, hidden: true, xpReward: 75 },
+            // Hidden Achievements (Random/Secret) - 150 XP each (increased from 75)
+            { id: 'lucky_777', name: 'Lucky 777', description: 'Score exactly 777 points', icon: '🍀', unlocked: false, hidden: true, xpReward: 150 },
+            { id: 'collector_13', name: 'Unlucky Collector', description: 'Collect exactly 13 items', icon: '😱', unlocked: false, hidden: true, xpReward: 150 },
+            { id: 'enemy_666', name: 'Devil Hunter', description: 'Defeat exactly 666 enemies', icon: '😈', unlocked: false, hidden: true, xpReward: 150 },
+            { id: 'coin_42', name: 'Answer to Everything', description: 'Collect exactly 42 coins', icon: '🤖', unlocked: false, hidden: true, xpReward: 150 },
+            { id: 'level_69', name: 'Nice Level', description: 'Complete level 69', icon: '😏', unlocked: false, hidden: true, xpReward: 150 },
+            { id: 'random_master', name: 'Random Master', description: 'Unlock 5 hidden achievements', icon: '🎲', unlocked: false, hidden: true, xpReward: 150 },
+            { id: 'midnight_gamer', name: 'Midnight Gamer', description: 'Play at exactly midnight', icon: '🌙', unlocked: false, hidden: true, xpReward: 150 },
+            { id: 'early_bird', name: 'Early Bird', description: 'Play at exactly 6 AM', icon: '🌅', unlocked: false, hidden: true, xpReward: 150 },
+            { id: 'night_owl', name: 'Night Owl', description: 'Play for 2 hours straight', icon: '🦉', unlocked: false, hidden: true, xpReward: 150 },
+            { id: 'weekend_warrior', name: 'Weekend Warrior', description: 'Play on a weekend', icon: '📅', unlocked: false, hidden: true, xpReward: 150 },
             
-            // Special Event Achievements - 100 XP each
-            { id: 'christmas_player', name: 'Christmas Player', description: 'Play during December', icon: '🎄', unlocked: false, hidden: true, xpReward: 100 },
-            { id: 'halloween_player', name: 'Halloween Player', description: 'Play during October', icon: '🎃', unlocked: false, hidden: true, xpReward: 100 },
-            { id: 'summer_player', name: 'Summer Player', description: 'Play during June-August', icon: '☀️', unlocked: false, hidden: true, xpReward: 100 },
-            { id: 'spring_player', name: 'Spring Player', description: 'Play during March-May', icon: '🌸', unlocked: false, hidden: true, xpReward: 100 },
+            // Special Event Achievements - 150 XP each (increased from 100)
+            { id: 'christmas_player', name: 'Christmas Player', description: 'Play during December', icon: '🎄', unlocked: false, hidden: true, xpReward: 150 },
+            { id: 'halloween_player', name: 'Halloween Player', description: 'Play during October', icon: '🎃', unlocked: false, hidden: true, xpReward: 150 },
+            { id: 'summer_player', name: 'Summer Player', description: 'Play during June-August', icon: '☀️', unlocked: false, hidden: true, xpReward: 150 },
+            { id: 'spring_player', name: 'Spring Player', description: 'Play during March-May', icon: '🌸', unlocked: false, hidden: true, xpReward: 150 },
             
-            // Ultra Rare Achievements (Extremely Hard) - 1000 XP each
-            { id: 'million_score', name: 'Millionaire', description: 'Score 1,000,000 points in one game', icon: '💎', unlocked: false, xpReward: 1000 },
-            { id: 'hundred_levels', name: 'Century Master', description: 'Complete 100 levels', icon: '🏆', unlocked: false, xpReward: 1000 },
-            { id: 'thousand_enemies', name: 'Enemy Annihilator', description: 'Defeat 1,000 enemies', icon: '⚔️', unlocked: false, xpReward: 1000 },
-            { id: 'fifty_bosses', name: 'Boss Annihilator', description: 'Defeat 50 bosses', icon: '👑', unlocked: false, xpReward: 1000 },
-            { id: 'perfect_game', name: 'Perfect Game', description: 'Complete a game with 100% completion', icon: '💯', unlocked: false, xpReward: 1000 },
-            { id: 'no_death_master', name: 'No Death Master', description: 'Complete 10 levels without dying', icon: '🛡️', unlocked: false, xpReward: 1000 },
-            { id: 'speed_demon', name: 'Speed Demon', description: 'Complete a level in under 10 seconds', icon: '⚡', unlocked: false, xpReward: 1000 },
-            { id: 'collector_god', name: 'Collector God', description: 'Collect 1,000 items in one game', icon: '📦', unlocked: false, xpReward: 1000 },
+            // Ultra Rare Achievements (Extremely Hard) - 1500 XP each (increased from 1000)
+            { id: 'million_score', name: 'Millionaire', description: 'Score 1,000,000 points in one game', icon: '💎', unlocked: false, xpReward: 1500 },
+            { id: 'hundred_levels', name: 'Century Master', description: 'Complete 100 levels', icon: '🏆', unlocked: false, xpReward: 1500 },
+            { id: 'thousand_enemies', name: 'Enemy Annihilator', description: 'Defeat 1,000 enemies', icon: '⚔️', unlocked: false, xpReward: 1500 },
+            { id: 'fifty_bosses', name: 'Boss Annihilator', description: 'Defeat 50 bosses', icon: '👑', unlocked: false, xpReward: 1500 },
+            { id: 'perfect_game', name: 'Perfect Game', description: 'Complete a game with 100% completion', icon: '💯', unlocked: false, xpReward: 1500 },
+            { id: 'no_death_master', name: 'No Death Master', description: 'Complete 10 levels without dying', icon: '🛡️', unlocked: false, xpReward: 1500 },
+            { id: 'speed_demon', name: 'Speed Demon', description: 'Complete a level in under 10 seconds', icon: '⚡', unlocked: false, xpReward: 1500 },
+            { id: 'collector_god', name: 'Collector God', description: 'Collect 1,000 items in one game', icon: '📦', unlocked: false, xpReward: 1500 },
             { id: 'underwater_god', name: 'Underwater God', description: 'Spend 10 minutes underwater in one game', icon: '🐠', unlocked: false, xpReward: 1000 },
             { id: 'jetpack_god', name: 'Jetpack God', description: 'Use jetpack for 10 minutes in one game', icon: '🚁', unlocked: false, xpReward: 1000 }
         ];
@@ -6382,9 +6387,9 @@
             maxLaserChargingLevel: 6, // Maximum charging level
             unlockedRewards: [], // Track unlocked rewards
             laserChargeLockedMessageShown: false, // Track if laser charge locked message has been shown
-            rewards: {
-                xpPerScore: 0.1, // Reduced XP gained per score point (was 1)
-                levelCompletionBonus: 50, // Reduced base XP for completing a level (was 100)
+                    rewards: {
+            xpPerScore: 0.25, // Increased XP gained per score point for more satisfying progression
+            levelCompletionBonus: 75, // Increased base XP for completing a level for better rewards
 
                 // Laser charge ability unlocks every 10 levels (10, 20, 30, 40, 50, 60)
                 laserChargeUnlockLevels: [10, 20, 30, 40, 50, 60], // Levels where laser charge ability unlocks
@@ -8407,6 +8412,19 @@
             // Reset fireball system for each level
             player.hasFireball = false;
             player.fireballCooldown = 0;
+            
+            // Calculate total items in this level for perfect run tracking
+            const totalCoins = coins.length;
+            const totalTreasures = treasures.length;
+            const totalFish = fish.length;
+            const totalHealth = health.length;
+            const totalMushrooms = mushrooms.length;
+            const totalKeys = keys.length;
+            
+            game.sessionStats.currentSessionTotalItems = totalCoins + totalTreasures + totalFish + totalHealth + totalMushrooms + totalKeys;
+            game.sessionStats.currentSessionItemsCollected = 0;
+            
+            console.log(`📊 Level ${levelNum} has ${game.sessionStats.currentSessionTotalItems} total items to collect`);
               
             // Check for equipped abilities from marketplace
             if (game.marketplace.currentAbilities && game.marketplace.currentAbilities.length > 0) {
@@ -9624,8 +9642,40 @@
         
         // XP and Reward System Functions
         function addXP(amount) {
-            player.xp += amount;
-            player.totalScore += amount;
+            // Apply bonus multipliers for consecutive achievements
+            let bonusMultiplier = 1;
+            
+            // Check for consecutive achievements bonus (unlock 3+ achievements in one session)
+            if (game.sessionStats.achievementsUnlockedThisSession >= 3) {
+                bonusMultiplier += 0.5; // 50% bonus for 3+ achievements
+            }
+            
+            // Check for perfect run bonus (100% items collected)
+            if (game.sessionStats.currentSessionItemsCollected === game.sessionStats.currentSessionTotalItems && 
+                game.sessionStats.currentSessionTotalItems > 0) {
+                bonusMultiplier += 0.25; // 25% bonus for perfect collection
+            }
+            
+            // Check for daily bonus (first game of the day)
+            const today = new Date().toDateString();
+            if (!game.lastPlayedDate || game.lastPlayedDate !== today) {
+                bonusMultiplier += 0.5; // 50% bonus for first game of the day
+                game.lastPlayedDate = today;
+                console.log('🎉 Daily bonus applied! +50% XP for first game of the day');
+            }
+            
+            // Check for weekly bonus (7+ days of consecutive play)
+            const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toDateString();
+            if (game.consecutiveDaysPlayed >= 7 && game.lastPlayedDate !== weekAgo) {
+                bonusMultiplier += 1.0; // 100% bonus for weekly streak
+                console.log('🎉 Weekly streak bonus applied! +100% XP for 7+ days of play');
+            }
+            
+            // Apply bonus
+            const finalAmount = Math.floor(amount * bonusMultiplier);
+            
+            player.xp += finalAmount;
+            player.totalScore += finalAmount;
             
             // Calculate new level based on XP progression system
             let newLevel = 1;
@@ -13914,6 +13964,7 @@
                     game.sessionStats.totalScore += 100;
                     game.sessionStats.currentSessionFish++;
                     game.sessionStats.currentSessionScore += 100;
+                    game.sessionStats.currentSessionItemsCollected++;
                     
                     // Update highest fish if current session is higher
                     if (game.sessionStats.currentSessionFish > game.sessionStats.highestFish) {
@@ -13976,6 +14027,7 @@
                     
                     // Update collectibles counter
                     game.collectiblesCount.coinsCollected++;
+                    game.sessionStats.currentSessionItemsCollected++;
                     updateCollectiblesCounter();
                     
                     // Check all achievements after coin collection
@@ -13993,6 +14045,7 @@
                     game.sessionStats.totalScore += 25;
                     game.sessionStats.currentSessionHealth++;
                     game.sessionStats.currentSessionScore += 25;
+                    game.sessionStats.currentSessionItemsCollected++;
                     
                     // Update highest health if current session is higher
                     if (game.sessionStats.currentSessionHealth > game.sessionStats.highestHealth) {
@@ -14116,6 +14169,7 @@
                                     game.sessionStats.totalScore += t.value;
                                     game.sessionStats.currentSessionTreasures++;
                                     game.sessionStats.currentSessionScore += t.value;
+                                    game.sessionStats.currentSessionItemsCollected++;
                                     
                                     // Update highest treasures if current session is higher
                                     if (game.sessionStats.currentSessionTreasures > game.sessionStats.highestTreasures) {
@@ -14146,6 +14200,7 @@
                     game.sessionStats.treasuresCollected++;
                     game.sessionStats.treasuresFound++;
                     game.sessionStats.currentSessionTreasures++;
+                    game.sessionStats.currentSessionItemsCollected++;
                     
                     // Add score with XP and multiplier
                     addScoreWithXP(t.value, 'Treasure');
@@ -14198,6 +14253,7 @@
                     game.sessionStats.totalScore += mushroomValue;
                     game.sessionStats.currentSessionMushrooms++;
                     game.sessionStats.currentSessionScore += mushroomValue;
+                    game.sessionStats.currentSessionItemsCollected++;
                     
                     // Update highest mushrooms if current session is higher
                     if (game.sessionStats.currentSessionMushrooms > game.sessionStats.highestMushrooms) {
@@ -14272,6 +14328,7 @@
                     game.sessionStats.keysCollected++;
                     game.sessionStats.totalScore += 200;
                     game.sessionStats.currentSessionScore += 200;
+                    game.sessionStats.currentSessionItemsCollected++;
                     
                     
                     // Update collectibles counter
@@ -16998,7 +17055,10 @@
                     currentSessionFish: 0,
                     currentSessionHealth: 0,
                     currentSessionTreasures: 0,
-                    currentSessionMushrooms: 0
+                    currentSessionMushrooms: 0,
+                    achievementsUnlockedThisSession: 0,
+                    currentSessionItemsCollected: 0,
+                    currentSessionTotalItems: 0
                 };
             }
             
@@ -20611,6 +20671,9 @@
             const achievement = achievements.find(a => a.id === achievementId);
             if (achievement && !achievement.unlocked) {
                 achievement.unlocked = true;
+                
+                // Track achievements unlocked this session
+                game.sessionStats.achievementsUnlockedThisSession++;
                 
                 // Initialize arrays if they don't exist
                 if (!game.profile.achievements) {
