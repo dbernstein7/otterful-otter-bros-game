@@ -1785,6 +1785,12 @@
             <!-- Enhanced Button Container -->
             <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 30px; align-items: center; position: relative;">
                 
+                <!-- Continue Game Button (hidden by default) -->
+                <button id="continueGameBtn" class="home-button continue-btn" style="display: none; background: linear-gradient(135deg, #FF9800, #F57C00, #FF9800); background-size: 200% 200%; color: #FFFFFF; border: 3px solid #FF9800; padding: 18px 35px; border-radius: 30px; font-size: clamp(18px, 3vw, 24px); font-weight: bold; cursor: pointer; box-shadow: 0 0 40px rgba(255,152,0,0.6), 0 8px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.3); transition: all 0.3s ease; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); position: relative; overflow: hidden; animation: buttonGlow 2s ease-in-out infinite; font-family: 'SuperMario', 'Orbitron', 'Arial Black', sans-serif;">
+                    <span style="position: relative; z-index: 2;">🎮 Continue Game</span>
+                    <div class="button-shine" style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent); transform: rotate(45deg); animation: buttonShine 3s ease-in-out infinite;"></div>
+                </button>
+                
                 <!-- Start Adventure Button -->
                 <button id="startGameBtn" class="home-button start-btn" style="background: linear-gradient(135deg, #4CAF50, #45a049, #4CAF50); background-size: 200% 200%; color: #FFFFFF; border: 3px solid #4CAF50; padding: 18px 35px; border-radius: 30px; font-size: clamp(18px, 3vw, 24px); font-weight: bold; cursor: pointer; box-shadow: 0 0 40px rgba(76,175,80,0.6), 0 8px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.3); transition: all 0.3s ease; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); position: relative; overflow: hidden; animation: buttonGlow 2s ease-in-out infinite; font-family: 'SuperMario', 'Orbitron', 'Arial Black', sans-serif;">
                     <span style="position: relative; z-index: 2;">🚀 Start Adventure</span>
@@ -8627,6 +8633,15 @@
         
         // Load profile data
         loadProfileData();
+        
+        // Check for saved game and show continue button if available
+        if (hasSavedGame()) {
+            document.getElementById('continueGameBtn').style.display = 'inline-block';
+            console.log('🎮 Saved game found - showing continue button');
+        } else {
+            document.getElementById('continueGameBtn').style.display = 'none';
+            console.log('🆕 No saved game found - hiding continue button');
+        }
         
         // Initialize home screen particle effects
         initHomeScreenParticles();
@@ -16980,7 +16995,12 @@
             game.coins = 0;
             // Don't reset marketplace.coins - preserve coins from completed levels
             console.log('🆕 Starting fresh session, keeping marketplace coins:', game.marketplace.coins);
-             // Save to localStorage
+            
+            // Clear any existing saved game state when starting new game
+            localStorage.removeItem('otterBrosGameState');
+            console.log('🗑️ Cleared saved game state for new game');
+            
+            // Save to localStorage
             saveMarketplaceData(); // Save marketplace data
             updateLeaderboard(); // Update the leaderboard display
             updateMarketplace(); // Update marketplace display
@@ -17272,6 +17292,7 @@
                 if (game.lives <= 0) {
                     console.log('💔 GAME OVER! No lives remaining.');
                     game.gameOver = true;
+                    saveGameState(); // Save game state when game over
                 }
             }
         }
@@ -17939,6 +17960,112 @@
                 
                 updateMarketplace();
                 saveMarketplaceData();
+            }
+        }
+        
+        function saveGameState() {
+            try {
+                const gameState = {
+                    level: game.level,
+                    score: game.score,
+                    lives: game.lives,
+                    coins: game.coins,
+                    gameState: game.gameState,
+                    playerHealth: player.health,
+                    playerMaxHealth: player.maxHealth,
+                    checkpointProgress: game.checkpointProgress,
+                    timestamp: Date.now()
+                };
+                localStorage.setItem('otterBrosGameState', JSON.stringify(gameState));
+                console.log('💾 Saved game state to local storage');
+            } catch (error) {
+                console.error('❌ Error saving game state:', error);
+            }
+        }
+        
+        function loadGameState() {
+            try {
+                const savedState = localStorage.getItem('otterBrosGameState');
+                if (savedState) {
+                    const gameState = JSON.parse(savedState);
+                    
+                    // Check if saved state is recent (within 24 hours)
+                    const timeDiff = Date.now() - gameState.timestamp;
+                    const maxAge = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+                    
+                    if (timeDiff < maxAge) {
+                        game.level = gameState.level || 1;
+                        game.score = gameState.score || 0;
+                        game.lives = gameState.lives || 3;
+                        game.coins = gameState.coins || 0;
+                        game.gameState = gameState.gameState || 'menu';
+                        player.health = gameState.playerHealth || player.maxHealth;
+                        player.maxHealth = gameState.playerMaxHealth || 100;
+                        game.checkpointProgress = gameState.checkpointProgress || {};
+                        
+                        console.log('📊 Loaded game state from local storage');
+                        return true;
+                    } else {
+                        console.log('⏰ Saved game state is too old, starting fresh');
+                        localStorage.removeItem('otterBrosGameState');
+                        return false;
+                    }
+                }
+                return false;
+            } catch (error) {
+                console.error('❌ Error loading game state:', error);
+                return false;
+            }
+        }
+        
+        function hasSavedGame() {
+            try {
+                const savedState = localStorage.getItem('otterBrosGameState');
+                if (savedState) {
+                    const gameState = JSON.parse(savedState);
+                    const timeDiff = Date.now() - gameState.timestamp;
+                    const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+                    return timeDiff < maxAge;
+                }
+                return false;
+            } catch (error) {
+                return false;
+            }
+        }
+        
+        function continueGame() {
+            console.log('🎮 Continuing saved game...');
+            
+            if (loadGameState()) {
+                // Hide title screen
+                document.getElementById('titleScreen').style.display = 'none';
+                
+                // Hide title screen buttons
+                document.getElementById('profileBtn').style.display = 'none';
+                document.getElementById('marketplaceBtn').style.display = 'none';
+                document.getElementById('startGameBtn').style.display = 'none';
+                document.getElementById('continueGameBtn').style.display = 'none';
+                
+                // Show game UI
+                document.getElementById('pauseBtn').style.display = 'inline-block';
+                document.getElementById('settingsBtn').style.display = 'inline-block';
+                
+                // Set game state to playing
+                game.gameState = 'playing';
+                
+                // Load the saved level
+                loadLevel(game.level);
+                document.getElementById('level').textContent = game.level;
+                
+                // Update UI displays
+                document.getElementById('score').textContent = game.score;
+                document.getElementById('coins').textContent = game.coins;
+                document.getElementById('lives').textContent = game.lives;
+                
+                console.log('✅ Continued game from level', game.level);
+            } else {
+                console.log('❌ No valid saved game found');
+                startGame(); // Fallback to starting new game
             }
         }
         
@@ -21124,6 +21251,7 @@
                 
                 localStorage.setItem('otterBrosStats', JSON.stringify(game.sessionStats));
                 saveMarketplaceData(); // Save marketplace data with new coins
+                saveGameState(); // Save current game state
             }
         }
         
@@ -21982,6 +22110,7 @@
                 // Hide pause button and settings button when menu is open
                 document.getElementById('pauseBtn').style.display = 'none';
                 document.getElementById('settingsBtn').style.display = 'none';
+                saveGameState(); // Save game state when pausing
             } else {
                 pauseMenu.style.display = 'none';
                 game.gameState = 'playing';
@@ -22780,6 +22909,12 @@
         }
 
         // Add event listeners after all functions are defined
+        document.getElementById('continueGameBtn').addEventListener('click', (event) => {
+            addButtonClickEffect(event.target);
+            console.log('🎮 Continue Game clicked!');
+            continueGame();
+        });
+        
         document.getElementById('startGameBtn').addEventListener('click', (event) => {
             addButtonClickEffect(event.target);
             
