@@ -17978,7 +17978,6 @@
                     level: game.level,
                     score: game.score,
                     lives: game.lives,
-                    coins: game.coins,
                     gameState: game.gameState,
                     playerHealth: player.health,
                     playerMaxHealth: player.maxHealth,
@@ -18006,7 +18005,6 @@
                         game.level = gameState.level || 1;
                         game.score = gameState.score || 0;
                         game.lives = gameState.lives || 3;
-                        game.coins = gameState.coins || 0;
                         game.gameState = gameState.gameState || 'menu';
                         game.savedPlayerHealth = gameState.playerHealth || player.maxHealth;
                         game.savedPlayerMaxHealth = gameState.playerMaxHealth || 100;
@@ -18046,6 +18044,10 @@
             console.log('🎮 Continuing saved game...');
             
             if (loadGameState()) {
+                // Reset session-specific stats for continued game
+                loadStats(); // Reset all session stats to 0
+                game.coins = 0; // Reset current session coins to 0
+                
                 // Hide title screen
                 document.getElementById('titleScreen').style.display = 'none';
                 
@@ -18070,15 +18072,15 @@
                 player.health = game.savedPlayerHealth || player.maxHealth;
                 player.maxHealth = game.savedPlayerMaxHealth || 100;
                 
-                // Update UI displays
+                // Update UI displays (show 0 coins for fresh session)
                 document.getElementById('score').textContent = game.score;
-                document.getElementById('coins').textContent = game.coins;
+                document.getElementById('coins').textContent = '0';
                 document.getElementById('lives').textContent = game.lives;
                 
                 // Update health bar
                 updateHealthBar();
                 
-                console.log('✅ Continued game from level', game.level, 'with health:', player.health);
+                console.log('✅ Continued game from level', game.level, 'with health:', player.health, 'and fresh session stats');
             } else {
                 console.log('❌ No valid saved game found');
                 startGame(); // Fallback to starting new game
