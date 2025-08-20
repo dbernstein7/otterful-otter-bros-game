@@ -12414,6 +12414,7 @@
                     loadLevel(game.level);
                     document.getElementById('level').textContent = game.level;
                     document.getElementById('levelComplete').style.display = 'none';
+                    saveGameState(); // Save game state with new level
                 }
                 return;
             }
