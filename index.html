@@ -17036,6 +17036,9 @@
             // Reset player progress for new game (don't load saved progress)
             resetPlayerProgress();
             
+            // Hide game UI elements during cutscene
+            hideGameUI();
+            
             document.getElementById('titleScreen').style.display = 'none';
             document.getElementById('cutscenePanel').style.display = 'flex';
             game.cutsceneActive = true;
@@ -17101,11 +17104,55 @@
             }
         }
         
+        function hideGameUI() {
+            // Hide all game UI elements during cutscene
+            const uiElements = [
+                'scoreDisplay',
+                'levelDisplay', 
+                'collectiblesCounter',
+                'health-bar-container',
+                'abilities-display',
+                'walletInfo',
+                'fishEarnings',
+                'giantIndicator'
+            ];
+            
+            uiElements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.style.display = 'none';
+                }
+            });
+        }
+        
+        function showGameUI() {
+            // Show all game UI elements after cutscene
+            const uiElements = [
+                'scoreDisplay',
+                'levelDisplay', 
+                'collectiblesCounter',
+                'health-bar-container',
+                'abilities-display',
+                'walletInfo',
+                'fishEarnings'
+            ];
+            
+            uiElements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.style.display = 'block';
+                }
+            });
+        }
+        
         function endCutscene() {
             document.getElementById('cutscenePanel').style.display = 'none';
             game.cutsceneActive = false;
             game.storyMode = true;
             game.gameState = 'playing';
+            
+            // Show game UI elements after cutscene
+            showGameUI();
             
             // Load the current level and update UI
             loadLevel(game.level);
