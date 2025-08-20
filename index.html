@@ -1932,6 +1932,12 @@
                     <span style="position: relative; z-index: 2;">👤 Profile</span>
                     <div class="button-shine" style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent); transform: rotate(45deg); animation: buttonShine 3s ease-in-out infinite 1s;"></div>
                 </button>
+                
+                <!-- Mobile Version Button -->
+                <button id="mobileVersionBtn" class="home-button mobile-btn" onclick="goToMobileVersion()" style="background: linear-gradient(135deg, #FF6B35, #F7931E, #FF6B35); background-size: 200% 200%; color: #FFFFFF; border: 3px solid #FF6B35; padding: 18px 35px; border-radius: 30px; font-size: clamp(18px, 3vw, 24px); font-weight: bold; cursor: pointer; box-shadow: 0 0 40px rgba(255,107,53,0.6), 0 8px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.3); transition: all 0.3s ease; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); position: relative; overflow: hidden; animation: buttonGlow 2s ease-in-out infinite 1.2s; font-family: 'SuperMario', 'Orbitron', 'Arial Black', sans-serif;">
+                    <span style="position: relative; z-index: 2;">📱 Mobile Version</span>
+                    <div class="button-shine" style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent); transform: rotate(45deg); animation: buttonShine 3s ease-in-out infinite 1.2s;"></div>
+                </button>
                 </div>
             
             <!-- Footer Info -->
@@ -22869,7 +22875,7 @@
         let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         
         // Redirect mobile users to mobile version
-        if (isMobile && window.location.pathname.includes('index.html')) {
+        if (isMobile) {
             console.log('📱 Mobile device detected, redirecting to mobile version');
             window.location.href = 'mobile.html';
         }
@@ -23758,6 +23764,11 @@
             }).catch(error => {
                 console.error('❌ Error testing metadata:', error);
             });
+        }
+        
+        // Mobile version function
+        function goToMobileVersion() {
+            window.location.href = 'mobile.html';
         }
 
     </script>
