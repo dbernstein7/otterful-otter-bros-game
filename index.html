@@ -9640,99 +9640,503 @@
               };
               gameAssets.laser7.src = 'public/laser7.png';
         
-        // XP and Reward System Functions
+        // Enhanced XP and Reward System with Improvements
+
+        // XP Multiplier Chain System
+        class XPMultiplierChain {
+            constructor() {
+                this.multipliers = [];
+                this.baseMultiplier = 1.0;
+            }
+            
+            addMultiplier(type, value, duration = null, description = '') {
+                const multiplier = {
+                    type,
+                    value,
+                    duration,
+                    description,
+                    startTime: Date.now(),
+                    id: Math.random().toString(36).substr(2, 9)
+                };
+                this.multipliers.push(multiplier);
+                return multiplier.id;
+            }
+            
+            removeMultiplier(id) {
+                this.multipliers = this.multipliers.filter(m => m.id !== id);
+            }
+            
+            getActiveMultipliers() {
+                const now = Date.now();
+                return this.multipliers.filter(m => {
+                    if (m.duration && (now - m.startTime) > m.duration) {
+                        return false;
+                    }
+                    return true;
+                });
+            }
+            
+            getTotalMultiplier() {
+                const active = this.getActiveMultipliers();
+                return active.reduce((total, m) => total * m.value, this.baseMultiplier);
+            }
+            
+            cleanup() {
+                this.multipliers = this.getActiveMultipliers();
+            }
+        }
+
+        // Enhanced XP System
+        class EnhancedXPSystem {
+            constructor() {
+                this.multiplierChain = new XPMultiplierChain();
+                this.xpHistory = [];
+                this.streakBonuses = new Map();
+                this.seasonalMultipliers = new Map();
+                this.initializeSeasonalMultipliers();
+            }
+            
+            initializeSeasonalMultipliers() {
+                const now = new Date();
+                const month = now.getMonth();
+                const day = now.getDate();
+                
+                // Seasonal bonuses
+                if (month === 11) { // December - Holiday bonus
+                    this.multiplierChain.addMultiplier('seasonal', 1.25, null, 'Holiday Season Bonus');
+                }
+                if (month === 9 && day === 31) { // Halloween
+                    this.multiplierChain.addMultiplier('seasonal', 2.0, 24 * 60 * 60 * 1000, 'Halloween Special');
+                }
+                if (month === 6 || month === 7 || month === 8) { // Summer months
+                    this.multiplierChain.addMultiplier('seasonal', 1.15, null, 'Summer Bonus');
+                }
+            }
+            
+            // Dynamic XP calculation with combo system
+            addXP(baseAmount, source = 'general', comboMultiplier = 1) {
+                this.multiplierChain.cleanup(); // Remove expired multipliers
+                
+                // Apply combo multiplier for rapid successive actions
+                let finalAmount = baseAmount * comboMultiplier;
+                
+                // Apply all active multipliers
+                const totalMultiplier = this.multiplierChain.getTotalMultiplier();
+                finalAmount *= totalMultiplier;
+                
+                // Apply skill-based bonuses
+                const skillBonus = this.calculateSkillBonus(source);
+                finalAmount *= skillBonus;
+                
+                // Apply streak bonuses
+                const streakBonus = this.calculateStreakBonus(source);
+                finalAmount *= streakBonus;
+                
+                // Round to nearest integer
+                finalAmount = Math.floor(finalAmount);
+                
+                // Add to player XP
+                player.xp += finalAmount;
+                player.totalScore += finalAmount;
+                
+                // Record in history for analytics
+                this.recordXPGain(finalAmount, source, {
+                    baseAmount,
+                    comboMultiplier,
+                    totalMultiplier,
+                    skillBonus,
+                    streakBonus
+                });
+                
+                // Check for level up
+                this.checkLevelUp();
+                
+                // Show XP notification with breakdown
+                this.showXPNotification(finalAmount, source, totalMultiplier > 1.5);
+                
+                console.log(`🎯 XP Gained: ${finalAmount} (${baseAmount} base × ${totalMultiplier.toFixed(2)} total multiplier) from ${source}`);
+                
+                return finalAmount;
+            }
+            
+            calculateSkillBonus(source) {
+                // Reward skill-based performance
+                const skillBonuses = {
+                    'perfect_accuracy': 1.5,
+                    'speed_completion': 1.3,
+                    'no_damage_taken': 1.4,
+                    'combo_chain': 1.2,
+                    'efficient_movement': 1.15,
+                    'perfect_run': 1.25,
+                    'level_completion': 1.1
+                };
+                
+                return skillBonuses[source] || 1.0;
+            }
+            
+            calculateStreakBonus(source) {
+                if (!this.streakBonuses.has(source)) {
+                    this.streakBonuses.set(source, 0);
+                }
+                
+                const streak = this.streakBonuses.get(source);
+                this.streakBonuses.set(source, streak + 1);
+                
+                // Diminishing returns on streak bonuses
+                const maxStreakBonus = 2.0;
+                const streakBonus = 1 + Math.min((streak * 0.1), maxStreakBonus - 1);
+                
+                return streakBonus;
+            }
+            
+            resetStreak(source) {
+                this.streakBonuses.set(source, 0);
+            }
+            
+            recordXPGain(amount, source, breakdown) {
+                this.xpHistory.push({
+                    amount,
+                    source,
+                    timestamp: Date.now(),
+                    breakdown,
+                    playerLevel: player.level
+                });
+                
+                // Keep only last 100 entries
+                if (this.xpHistory.length > 100) {
+                    this.xpHistory = this.xpHistory.slice(-100);
+                }
+            }
+            
+            checkLevelUp() {
+                const newLevel = this.calculateLevel(player.xp);
+                if (newLevel > player.level) {
+                    this.levelUp(newLevel);
+                }
+            }
+            
+            calculateLevel(xp) {
+                // Improved XP curve with smoother progression
+                if (xp < 1000) return 1;
+                if (xp < 2500) return 2;
+                if (xp < 4500) return 3;
+                if (xp < 7000) return 4;
+                if (xp < 10000) return 5;
+                if (xp < 13500) return 6;
+                if (xp < 17500) return 7;
+                if (xp < 22000) return 8;
+                if (xp < 27000) return 9;
+                if (xp < 32500) return 10;
+                
+                // After level 10: Progressive scaling (gets slightly harder each level)
+                const level10Plus = Math.floor((xp - 32500) / 1000) + 10;
+                return Math.min(level10Plus, 100); // Level cap at 100
+            }
+            
+            levelUp(newLevel) {
+                const oldLevel = player.level;
+                player.level = newLevel;
+                
+                // Level up rewards
+                const levelReward = this.calculateLevelReward(newLevel);
+                
+                // Show level up celebration
+                this.showLevelUpCelebration(oldLevel, newLevel, levelReward);
+                
+                // Unlock new abilities/rewards
+                this.checkUnlockRewards(newLevel);
+                
+                // Save progress
+                savePlayerProgress();
+            }
+            
+            calculateLevelReward(level) {
+                // Scaling reward based on level
+                const baseReward = 100;
+                const scalingFactor = Math.pow(1.1, level - 1);
+                return Math.floor(baseReward * scalingFactor);
+            }
+            
+            showXPNotification(amount, source, isBonus = false) {
+                // Show XP reward notification
+                showXPRewardNotification(amount, source);
+            }
+            
+            showLevelUpCelebration(oldLevel, newLevel, reward) {
+                // Trigger celebration effects
+                console.log(`🎉 LEVEL UP! ${oldLevel} → ${newLevel} (+${reward} bonus XP)`);
+                
+                // Add celebration multiplier for next 5 minutes
+                this.multiplierChain.addMultiplier(
+                    'celebration', 
+                    1.5, 
+                    5 * 60 * 1000, 
+                    'Level Up Celebration'
+                );
+                
+                // Show level up notification
+                showLevelUpNotification(newLevel, oldLevel);
+            }
+            
+            checkUnlockRewards(level) {
+                const unlockRewards = player.rewards.unlockRewards;
+                if (unlockRewards[level]) {
+                    const reward = unlockRewards[level];
+                    console.log(`🔓 Unlocked: ${reward.name} - ${reward.description}`);
+                    
+                    // Add temporary XP boost for unlocking
+                    this.multiplierChain.addMultiplier(
+                        'unlock_bonus', 
+                        1.25, 
+                        10 * 60 * 1000, 
+                        `${reward.name} Unlock Bonus`
+                    );
+                }
+            }
+            
+            // Combo system for rapid actions
+            startCombo() {
+                this.comboStart = Date.now();
+                this.comboCount = 0;
+                this.comboMultiplier = 1.0;
+            }
+            
+            addToCombo() {
+                const now = Date.now();
+                const timeSinceStart = now - (this.comboStart || now);
+                
+                if (timeSinceStart > 5000) { // Reset combo after 5 seconds
+                    this.startCombo();
+                }
+                
+                this.comboCount++;
+                this.comboMultiplier = 1 + (this.comboCount * 0.1); // 10% per combo
+                this.comboMultiplier = Math.min(this.comboMultiplier, 3.0); // Cap at 3x
+                
+                return this.comboMultiplier;
+            }
+            
+            endCombo() {
+                this.comboCount = 0;
+                this.comboMultiplier = 1.0;
+                this.comboStart = null;
+            }
+            
+            // Analytics methods
+            getXPAnalytics() {
+                const now = Date.now();
+                const last24h = this.xpHistory.filter(h => (now - h.timestamp) < 24 * 60 * 60 * 1000);
+                
+                return {
+                    totalXP: player.xp,
+                    level: player.level,
+                    xpToday: last24h.reduce((sum, h) => sum + h.amount, 0),
+                    averageXPPerAction: last24h.length ? last24h.reduce((sum, h) => sum + h.amount, 0) / last24h.length : 0,
+                    topSources: this.getTopXPSources(last24h),
+                    activeMultipliers: this.multiplierChain.getActiveMultipliers(),
+                    currentStreaks: Object.fromEntries(this.streakBonuses)
+                };
+            }
+            
+            getTopXPSources(history) {
+                const sources = {};
+                history.forEach(h => {
+                    sources[h.source] = (sources[h.source] || 0) + h.amount;
+                });
+                
+                return Object.entries(sources)
+                    .sort(([,a], [,b]) => b - a)
+                    .slice(0, 5)
+                    .map(([source, amount]) => ({ source, amount }));
+            }
+        }
+
+        // Enhanced Achievement System with Categories and Tiers
+        class EnhancedAchievementSystem {
+            constructor() {
+                this.achievements = new Map();
+                this.categories = ['combat', 'collection', 'exploration', 'skill', 'time', 'special'];
+                this.tiers = ['bronze', 'silver', 'gold', 'platinum', 'diamond'];
+                this.initializeAchievements();
+            }
+            
+            initializeAchievements() {
+                // Tiered achievements for better progression
+                const achievementData = [
+                    // Combat achievements (Bronze to Diamond)
+                    { id: 'combat_bronze', category: 'combat', tier: 'bronze', name: 'First Blood', desc: 'Defeat 10 enemies', target: 10, xp: 100 },
+                    { id: 'combat_silver', category: 'combat', tier: 'silver', name: 'Warrior', desc: 'Defeat 50 enemies', target: 50, xp: 250 },
+                    { id: 'combat_gold', category: 'combat', tier: 'gold', name: 'Champion', desc: 'Defeat 200 enemies', target: 200, xp: 500 },
+                    { id: 'combat_platinum', category: 'combat', tier: 'platinum', name: 'Legend', desc: 'Defeat 500 enemies', target: 500, xp: 1000 },
+                    { id: 'combat_diamond', category: 'combat', tier: 'diamond', name: 'Annihilator', desc: 'Defeat 1000 enemies', target: 1000, xp: 2000 },
+                    
+                    // Collection achievements
+                    { id: 'collect_bronze', category: 'collection', tier: 'bronze', name: 'Gatherer', desc: 'Collect 100 items', target: 100, xp: 75 },
+                    { id: 'collect_silver', category: 'collection', tier: 'silver', name: 'Collector', desc: 'Collect 500 items', target: 500, xp: 200 },
+                    { id: 'collect_gold', category: 'collection', tier: 'gold', name: 'Hoarder', desc: 'Collect 1000 items', target: 1000, xp: 400 },
+                    { id: 'collect_platinum', category: 'collection', tier: 'platinum', name: 'Master Collector', desc: 'Collect 2500 items', target: 2500, xp: 800 },
+                    { id: 'collect_diamond', category: 'collection', tier: 'diamond', name: 'Collection God', desc: 'Collect 5000 items', target: 5000, xp: 1500 },
+                    
+                    // Skill-based achievements
+                    { id: 'perfect_level', category: 'skill', tier: 'gold', name: 'Perfectionist', desc: 'Complete level with 100% items', target: 1, xp: 300 },
+                    { id: 'speed_demon', category: 'skill', tier: 'platinum', name: 'Speed Demon', desc: 'Complete level in under 30s', target: 1, xp: 500 },
+                    { id: 'no_damage', category: 'skill', tier: 'diamond', name: 'Untouchable', desc: 'Complete 3 levels without damage', target: 3, xp: 750 }
+                ];
+                
+                achievementData.forEach(data => {
+                    this.achievements.set(data.id, {
+                        ...data,
+                        unlocked: false,
+                        progress: 0,
+                        dateUnlocked: null
+                    });
+                });
+            }
+            
+            updateProgress(achievementId, progress) {
+                const achievement = this.achievements.get(achievementId);
+                if (!achievement || achievement.unlocked) return;
+                
+                achievement.progress = Math.max(achievement.progress, progress);
+                
+                if (achievement.progress >= achievement.target) {
+                    this.unlockAchievement(achievementId);
+                }
+            }
+            
+            unlockAchievement(achievementId) {
+                const achievement = this.achievements.get(achievementId);
+                if (!achievement || achievement.unlocked) return;
+                
+                achievement.unlocked = true;
+                achievement.dateUnlocked = Date.now();
+                
+                // Award XP
+                xpSystem.addXP(achievement.xp, 'achievement');
+                
+                // Show unlock notification
+                this.showAchievementUnlock(achievement);
+                
+                // Check for tier completion bonuses
+                this.checkTierCompletion(achievement.tier);
+            }
+            
+            checkTierCompletion(tier) {
+                const tierAchievements = Array.from(this.achievements.values())
+                    .filter(a => a.tier === tier);
+                const unlockedCount = tierAchievements.filter(a => a.unlocked).length;
+                
+                if (unlockedCount === tierAchievements.length) {
+                    // All achievements in tier completed - bonus XP!
+                    const bonusXP = this.getTierBonus(tier);
+                    xpSystem.addXP(bonusXP, 'tier_completion');
+                    console.log(`🏆 ${tier.toUpperCase()} Tier Complete! Bonus: +${bonusXP} XP`);
+                }
+            }
+            
+            getTierBonus(tier) {
+                const bonuses = {
+                    'bronze': 500,
+                    'silver': 1000,
+                    'gold': 2000,
+                    'platinum': 4000,
+                    'diamond': 8000
+                };
+                return bonuses[tier] || 0;
+            }
+            
+            showAchievementUnlock(achievement) {
+                console.log(`🏆 Achievement Unlocked: ${achievement.name} (+${achievement.xp} XP)`);
+                
+                // Show achievement notification
+                showXPRewardNotification(achievement.xp, achievement.name);
+            }
+            
+            getAchievementStats() {
+                const all = Array.from(this.achievements.values());
+                const unlocked = all.filter(a => a.unlocked);
+                
+                return {
+                    total: all.length,
+                    unlocked: unlocked.length,
+                    percentage: (unlocked.length / all.length) * 100,
+                    totalXPEarned: unlocked.reduce((sum, a) => sum + a.xp, 0),
+                    byCategory: this.getStatsByCategory(),
+                    byTier: this.getStatsByTier()
+                };
+            }
+            
+            getStatsByCategory() {
+                const stats = {};
+                this.categories.forEach(cat => {
+                    const achievements = Array.from(this.achievements.values()).filter(a => a.category === cat);
+                    const unlocked = achievements.filter(a => a.unlocked);
+                    stats[cat] = {
+                        total: achievements.length,
+                        unlocked: unlocked.length,
+                        percentage: achievements.length ? (unlocked.length / achievements.length) * 100 : 0
+                    };
+                });
+                return stats;
+            }
+            
+            getStatsByTier() {
+                const stats = {};
+                this.tiers.forEach(tier => {
+                    const achievements = Array.from(this.achievements.values()).filter(a => a.tier === tier);
+                    const unlocked = achievements.filter(a => a.unlocked);
+                    stats[tier] = {
+                        total: achievements.length,
+                        unlocked: unlocked.length,
+                        percentage: achievements.length ? (unlocked.length / achievements.length) * 100 : 0
+                    };
+                });
+                return stats;
+            }
+        }
+
+        // Initialize enhanced systems
+        const xpSystem = new EnhancedXPSystem();
+        const achievementSystem = new EnhancedAchievementSystem();
+
+        // Enhanced reward system with dynamic scaling
+        function calculateDynamicRewards(baseScore, playerLevel, difficulty) {
+            // Base XP calculation
+            let xp = Math.floor(baseScore * 0.25);
+            
+            // Level scaling (higher levels get slightly more XP)
+            const levelBonus = 1 + (playerLevel * 0.02);
+            xp *= levelBonus;
+            
+            // Difficulty scaling
+            const difficultyMultiplier = {
+                'easy': 0.8,
+                'normal': 1.0,
+                'hard': 1.3,
+                'expert': 1.6,
+                'nightmare': 2.0
+            };
+            xp *= (difficultyMultiplier[difficulty] || 1.0);
+            
+            return Math.floor(xp);
+        }
+
+        // Enhanced addXP function that uses the new system
         function addXP(amount) {
-            // Apply bonus multipliers for consecutive achievements
-            let bonusMultiplier = 1;
+            return xpSystem.addXP(amount, 'general');
+        }
+
+        // Analytics dashboard function
+        function showXPDashboard() {
+            const xpAnalytics = xpSystem.getXPAnalytics();
+            const achievementStats = achievementSystem.getAchievementStats();
             
-            // Check for consecutive achievements bonus (unlock 3+ achievements in one session)
-            if (game.sessionStats.achievementsUnlockedThisSession >= 3) {
-                bonusMultiplier += 0.5; // 50% bonus for 3+ achievements
-            }
-            
-            // Check for perfect run bonus (100% items collected)
-            if (game.sessionStats.currentSessionItemsCollected === game.sessionStats.currentSessionTotalItems && 
-                game.sessionStats.currentSessionTotalItems > 0) {
-                bonusMultiplier += 0.25; // 25% bonus for perfect collection
-            }
-            
-            // Check for daily bonus (first game of the day)
-            const today = new Date().toDateString();
-            if (!game.lastPlayedDate || game.lastPlayedDate !== today) {
-                bonusMultiplier += 0.5; // 50% bonus for first game of the day
-                game.lastPlayedDate = today;
-                console.log('🎉 Daily bonus applied! +50% XP for first game of the day');
-            }
-            
-            // Check for weekly bonus (7+ days of consecutive play)
-            const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toDateString();
-            if (game.consecutiveDaysPlayed >= 7 && game.lastPlayedDate !== weekAgo) {
-                bonusMultiplier += 1.0; // 100% bonus for weekly streak
-                console.log('🎉 Weekly streak bonus applied! +100% XP for 7+ days of play');
-            }
-            
-            // Apply bonus
-            const finalAmount = Math.floor(amount * bonusMultiplier);
-            
-            player.xp += finalAmount;
-            player.totalScore += finalAmount;
-            
-            // Calculate new level based on XP progression system
-            let newLevel = 1;
-            let totalXPNeeded = 0;
-            
-            // Calculate level using the new XP progression system
-            // Level 1: 0-999 XP (1000 total)
-            // Level 2: 1000-2499 XP (1500 total)
-            // Level 3: 2500-4499 XP (2000 total)
-            // ... and so on until level 10
-            // Level 10+: 1000 XP per level
-            
-            if (player.xp < 1000) {
-                newLevel = 1;
-                player.xpToNextLevel = 1000;
-            } else if (player.xp < 2500) {
-                newLevel = 2;
-                player.xpToNextLevel = 2500;
-            } else if (player.xp < 4500) {
-                newLevel = 3;
-                player.xpToNextLevel = 4500;
-            } else if (player.xp < 7000) {
-                newLevel = 4;
-                player.xpToNextLevel = 7000;
-            } else if (player.xp < 10000) {
-                newLevel = 5;
-                player.xpToNextLevel = 10000;
-            } else if (player.xp < 13500) {
-                newLevel = 6;
-                player.xpToNextLevel = 13500;
-            } else if (player.xp < 17500) {
-                newLevel = 7;
-                player.xpToNextLevel = 17500;
-            } else if (player.xp < 22000) {
-                newLevel = 8;
-                player.xpToNextLevel = 22000;
-            } else if (player.xp < 27000) {
-                newLevel = 9;
-                player.xpToNextLevel = 27000;
-            } else if (player.xp < 32500) {
-                newLevel = 10;
-                player.xpToNextLevel = 32500;
-            } else {
-                // Level 10+: 1000 XP per level
-                const level10Plus = Math.floor((player.xp - 32500) / 1000) + 10;
-                newLevel = level10Plus;
-                player.xpToNextLevel = 32500 + (level10Plus - 10) * 1000;
-            }
-            
-            if (newLevel > player.level) {
-                levelUp(newLevel);
-            }
-            
-            // Don't save progress here - only save when level is completed
-            // savePlayerProgress();
-            
-            console.log(`🎯 Gained ${amount} XP! Total: ${player.xp}, Level: ${player.level}, XP to next: ${player.xpToNextLevel - player.xp}`);
+            console.log('=== XP & Achievement Dashboard ===');
+            console.log(`Level: ${xpAnalytics.level} | Total XP: ${xpAnalytics.totalXP}`);
+            console.log(`XP Today: ${xpAnalytics.xpToday} | Avg per Action: ${Math.floor(xpAnalytics.averageXPPerAction)}`);
+            console.log(`Achievements: ${achievementStats.unlocked}/${achievementStats.total} (${Math.floor(achievementStats.percentage)}%)`);
+            console.log('Active Multipliers:', xpAnalytics.activeMultipliers.map(m => `${m.description}: ${m.value}x`));
+            console.log('Top XP Sources:', xpAnalytics.topSources);
         }
         
         function levelUp(newLevel) {
@@ -10190,9 +10594,9 @@
             game.sessionStats.totalScore += finalScore;
             game.sessionStats.currentSessionScore += finalScore;
             
-            // Add XP (1 XP per score point)
-            const xpGained = Math.floor(finalScore * player.rewards.xpPerScore);
-            addXP(xpGained);
+            // Add XP using enhanced system with combo
+            const comboMultiplier = xpSystem.addToCombo();
+            const xpGained = xpSystem.addXP(finalScore * 0.25, source, comboMultiplier);
             
             console.log(`🎯 ${source}: Score ${finalScore} (${baseScore} × ${scoreMultiplier}x), +${xpGained} XP`);
             
