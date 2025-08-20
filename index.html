@@ -12412,10 +12412,7 @@
         function update() {
             if (game.gameOver) return;
             
-            // Check achievements periodically (every 60 frames = 1 second at 60fps)
-            if (game.frameCount % 60 === 0) {
-                checkAllAchievements();
-            }
+            // Don't check achievements periodically - only check when making actual progress
             
             if (game.levelComplete) {
                 if (game.keys['Space']) {
@@ -17029,7 +17026,7 @@
             saveMarketplaceData(); // Save marketplace data
             updateLeaderboard(); // Update the leaderboard display
             updateMarketplace(); // Update marketplace display
-            checkAllAchievements(); // Check for achievements
+            // Don't check achievements on game start - only check when making progress
             
             // Initialize collectibles counter
             game.collectiblesCount.coinsCollected = 0;
@@ -17401,9 +17398,8 @@
                 update();
                 updateTimeStats();
                 
-                // Check achievements every 60 frames (1 second at 60fps) for real-time tracking
+                // Check secret chest conditions and update abilities display periodically
                 if (game.frameCount % 60 === 0) {
-                    checkAllAchievements();
                     checkSecretChestConditions(); // Check for secret chest conditions
                     updateAbilitiesDisplay(); // Update abilities display
                 }
@@ -22974,10 +22970,6 @@
                     return;
                 }
                 console.log('✅ User confirmed starting new game despite existing save');
-                
-                // Clear the saved game state after user confirms
-                localStorage.removeItem('otterBrosGameState');
-                console.log('🗑️ Cleared saved game state after user confirmed new game');
             }
             
             console.log('🚀 Start Adventure clicked - starting game immediately!');
