@@ -22939,6 +22939,16 @@
         document.getElementById('startGameBtn').addEventListener('click', (event) => {
             addButtonClickEffect(event.target);
             
+            // Check if there's a saved game that can be continued
+            if (hasSavedGame()) {
+                const confirmed = confirm('⚠️ WARNING: You have a saved game that can be continued!\n\nThis will start a brand new game and overwrite your saved progress.\n\nAre you sure you want to continue?');
+                if (!confirmed) {
+                    console.log('🚫 User cancelled starting new game due to existing save');
+                    return;
+                }
+                console.log('✅ User confirmed starting new game despite existing save');
+            }
+            
             console.log('🚀 Start Adventure clicked - starting game immediately!');
             
             // Start the game immediately
