@@ -18054,7 +18054,7 @@
             // Update main stats
             document.getElementById('profileTotalScore').textContent = game.sessionStats.totalScore || 0;
             document.getElementById('profileLevelsCompleted').textContent = game.sessionStats.levelsCompleted || 0;
-            document.getElementById('profileTotalCoins').textContent = game.sessionStats.totalCoins || 0;
+            document.getElementById('profileTotalCoins').textContent = game.marketplace.coins || 0;
             document.getElementById('profileEnemiesDefeated').textContent = game.sessionStats.crabsDefeated || 0;
             document.getElementById('profileBossesDefeated').textContent = game.sessionStats.bossesDefeated || 0;
             
@@ -21131,11 +21131,47 @@
             // Load saved stats from localStorage
             const savedStats = localStorage.getItem('otterBrosStats');
             if (savedStats) {
-                game.sessionStats = JSON.parse(savedStats);
-                console.log('📊 Loaded saved stats from localStorage');
-            } else {
-                // Initialize fresh stats if none exist
+                const loadedStats = JSON.parse(savedStats);
+                
+                // Reset session-specific fields for new session
                 game.sessionStats = {
+                    // All-time stats (persistent)
+                    allTimeScore: loadedStats.allTimeScore || 0,
+                    allTimeLevels: loadedStats.allTimeLevels || 0,
+                    allTimeCoins: loadedStats.allTimeCoins || 0,
+                    allTimeEnemies: loadedStats.allTimeEnemies || 0,
+                    allTimeBosses: loadedStats.allTimeBosses || 0,
+                    allTimeFish: loadedStats.allTimeFish || 0,
+                    allTimeHealth: loadedStats.allTimeHealth || 0,
+                    allTimeTreasures: loadedStats.allTimeTreasures || 0,
+                    allTimeMushrooms: loadedStats.allTimeMushrooms || 0,
+                    allTimeJetpacks: loadedStats.allTimeJetpacks || 0,
+                    allTimeLasers: loadedStats.allTimeLasers || 0,
+                    allTimeFireballs: loadedStats.allTimeFireballs || 0,
+                    allTimeUnderwater: loadedStats.allTimeUnderwater || 0,
+                    allTimeJetpackTime: loadedStats.allTimeJetpackTime || 0,
+                    allTimeLaserTime: loadedStats.allTimeLaserTime || 0,
+                    allTimeDamage: loadedStats.allTimeDamage || 0,
+                    allTimeJumps: loadedStats.allTimeJumps || 0,
+                    allTimePerfectLevels: loadedStats.allTimePerfectLevels || 0,
+                    allTimeSpeedRuns: loadedStats.allTimeSpeedRuns || 0,
+                    allTimeNoDamage: loadedStats.allTimeNoDamage || 0,
+                    allTimeNoJumps: loadedStats.allTimeNoJumps || 0,
+                    allTimeNoPowerups: loadedStats.allTimeNoPowerups || 0,
+                    allTimeKeys: loadedStats.allTimeKeys || 0,
+                    
+                    // Session records (best single session)
+                    highestScore: loadedStats.highestScore || 0,
+                    highestLevels: loadedStats.highestLevels || 0,
+                    highestCoins: loadedStats.highestCoins || 0,
+                    highestCrabs: loadedStats.highestCrabs || 0,
+                    highestFish: loadedStats.highestFish || 0,
+                    highestHealth: loadedStats.highestHealth || 0,
+                    highestTreasures: loadedStats.highestTreasures || 0,
+                    highestMushrooms: loadedStats.highestMushrooms || 0,
+                    levelTimes: loadedStats.levelTimes || [],
+                    
+                    // Current session stats (reset to 0 for new session)
                     totalScore: 0,
                     levelsCompleted: 0,
                     totalCoins: 0,
@@ -21150,12 +21186,63 @@
                     mushroomsEaten: 0,
                     currentSessionScore: 0,
                     levelStartTime: Date.now(),
-                    // Additional properties needed by updateLeaderboard
                     fishCollected: 0,
                     healthCollected: 0,
                     treasuresCollected: 0,
                     mushroomsCollected: 0,
-                    levelTimes: [],
+                    currentSessionLevels: 0,
+                    currentSessionCoins: 0,
+                    currentSessionCrabs: 0,
+                    currentSessionBosses: 0,
+                    currentSessionFish: 0,
+                    currentSessionHealth: 0,
+                    currentSessionTreasures: 0,
+                    currentSessionMushrooms: 0,
+                    jetpacksUsed: 0,
+                    lasersUsed: 0,
+                    fireballsShot: 0,
+                    fireballsHit: 0,
+                    underwaterTime: 0,
+                    jetpackTime: 0,
+                    laserTime: 0,
+                    damageTaken: 0,
+                    jumpsMade: 0,
+                    perfectLevels: 0,
+                    speedRunLevels: 0,
+                    noDamageLevels: 0,
+                    noJumpLevels: 0,
+                    noPowerupLevels: 0
+                };
+                console.log('📊 Loaded saved stats from localStorage and reset session stats');
+            } else {
+                // Initialize fresh stats if none exist
+                game.sessionStats = {
+                    // All-time stats (persistent)
+                    allTimeScore: 0,
+                    allTimeLevels: 0,
+                    allTimeCoins: 0,
+                    allTimeEnemies: 0,
+                    allTimeBosses: 0,
+                    allTimeFish: 0,
+                    allTimeHealth: 0,
+                    allTimeTreasures: 0,
+                    allTimeMushrooms: 0,
+                    allTimeJetpacks: 0,
+                    allTimeLasers: 0,
+                    allTimeFireballs: 0,
+                    allTimeUnderwater: 0,
+                    allTimeJetpackTime: 0,
+                    allTimeLaserTime: 0,
+                    allTimeDamage: 0,
+                    allTimeJumps: 0,
+                    allTimePerfectLevels: 0,
+                    allTimeSpeedRuns: 0,
+                    allTimeNoDamage: 0,
+                    allTimeNoJumps: 0,
+                    allTimeNoPowerups: 0,
+                    allTimeKeys: 0,
+                    
+                    // Session records (best single session)
                     highestScore: 0,
                     highestLevels: 0,
                     highestCoins: 0,
@@ -21164,6 +21251,27 @@
                     highestHealth: 0,
                     highestTreasures: 0,
                     highestMushrooms: 0,
+                    levelTimes: [],
+                    
+                    // Current session stats (reset to 0 for new session)
+                    totalScore: 0,
+                    levelsCompleted: 0,
+                    totalCoins: 0,
+                    crabsDefeated: 0,
+                    eaglesDefeated: 0,
+                    gatorsDefeated: 0,
+                    sharksDefeated: 0,
+                    bossesDefeated: 0,
+                    treasuresFound: 0,
+                    keysCollected: 0,
+                    healthPickups: 0,
+                    mushroomsEaten: 0,
+                    currentSessionScore: 0,
+                    levelStartTime: Date.now(),
+                    fishCollected: 0,
+                    healthCollected: 0,
+                    treasuresCollected: 0,
+                    mushroomsCollected: 0,
                     currentSessionLevels: 0,
                     currentSessionCoins: 0,
                     currentSessionCrabs: 0,
@@ -21171,7 +21279,21 @@
                     currentSessionFish: 0,
                     currentSessionHealth: 0,
                     currentSessionTreasures: 0,
-                    currentSessionMushrooms: 0
+                    currentSessionMushrooms: 0,
+                    jetpacksUsed: 0,
+                    lasersUsed: 0,
+                    fireballsShot: 0,
+                    fireballsHit: 0,
+                    underwaterTime: 0,
+                    jetpackTime: 0,
+                    laserTime: 0,
+                    damageTaken: 0,
+                    jumpsMade: 0,
+                    perfectLevels: 0,
+                    speedRunLevels: 0,
+                    noDamageLevels: 0,
+                    noJumpLevels: 0,
+                    noPowerupLevels: 0
                 };
                 console.log('🆕 No saved stats found - starting fresh');
             }
