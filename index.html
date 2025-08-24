@@ -4820,6 +4820,7 @@
                 console.log('   - userNFTs:', this.userNFTs.length);
                 console.log('   - stakedNFTs:', this.stakedNFTs.length);
                 console.log('   - fishCoins:', this.fishCoins);
+                console.log('   - account:', this.account);
                 
                 // 2. Add some test data
                 console.log('2️⃣ Adding test data...');
@@ -4833,9 +4834,18 @@
                         traits: ['Test Trait']
                     }
                 ];
-                this.stakedNFTs = [];
+                this.stakedNFTs = [
+                    {
+                        tokenId: '8888',
+                        name: 'Staked NFT #8888',
+                        rarity: 'test',
+                        multiplier: 2.0,
+                        image: 'https://via.placeholder.com/150/00FF00/000000?text=STAKED',
+                        traits: ['Staked Trait']
+                    }
+                ];
                 this.fishCoins = 100;
-                this.stakingStartTimes = {};
+                this.stakingStartTimes = { '8888': Date.now() };
                 
                 // 3. Save to localStorage
                 console.log('3️⃣ Saving to localStorage...');
@@ -4859,11 +4869,61 @@
                 console.log('   - stakedNFTs after load:', this.stakedNFTs.length);
                 console.log('   - fishCoins after load:', this.fishCoins);
                 
-                if (loaded && this.userNFTs.length > 0) {
+                if (loaded && (this.userNFTs.length > 0 || this.stakedNFTs.length > 0)) {
                     console.log('✅ LOCALSTORAGE PERSISTENCE TEST PASSED!');
                 } else {
                     console.log('❌ LOCALSTORAGE PERSISTENCE TEST FAILED!');
                 }
+            }
+            
+            // Force save test data
+            forceSaveTestData() {
+                console.log('💾 FORCE SAVING TEST DATA...');
+                
+                // Set account if not set
+                if (!this.account) {
+                    this.account = '0x16E315e37cDEda413D22a6899FFF67A4B001D91B';
+                    console.log('   - Set test account:', this.account);
+                }
+                
+                // Add test data
+                this.userNFTs = [
+                    {
+                        tokenId: '1111',
+                        name: 'Test NFT #1111',
+                        rarity: 'common',
+                        multiplier: 1.2,
+                        image: 'https://via.placeholder.com/150/FFD700/000000?text=1111',
+                        traits: ['Blue Eyes', 'Red Hat']
+                    },
+                    {
+                        tokenId: '2222',
+                        name: 'Test NFT #2222',
+                        rarity: 'rare',
+                        multiplier: 1.8,
+                        image: 'https://via.placeholder.com/150/00FFFF/000000?text=2222',
+                        traits: ['Green Eyes', 'Crown']
+                    }
+                ];
+                
+                this.stakedNFTs = [
+                    {
+                        tokenId: '3333',
+                        name: 'Staked NFT #3333',
+                        rarity: 'epic',
+                        multiplier: 2.5,
+                        image: 'https://via.placeholder.com/150/FF00FF/000000?text=3333',
+                        traits: ['Rainbow Eyes', 'Diamond Crown']
+                    }
+                ];
+                
+                this.fishCoins = 250;
+                this.stakingStartTimes = { '3333': Date.now() - 3600000 }; // 1 hour ago
+                
+                // Save to localStorage
+                this.saveNFTsToStorage();
+                
+                console.log('✅ Test data saved! Now refresh the page and check if it loads.');
             }
             
             // Test function to manually save current data
@@ -24069,6 +24129,7 @@
         // otterWallet.debugNFTDisplayIssue()  // NEW: Comprehensive debug
         // otterWallet.forceShowNFTs()  // NEW: Force show NFTs in profile tab
         // otterWallet.testLocalStoragePersistence()  // NEW: Test localStorage persistence
+        // otterWallet.forceSaveTestData()  // NEW: Force save test data
         // otterWallet.simulateStakeNFT('1001')
         // otterWallet.simulateUnstakeAll()
 
