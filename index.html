@@ -3374,11 +3374,12 @@
                             console.log('🔄 Account changed, attempting to auto-load saved NFTs...');
                             const loaded = this.loadNFTsFromStorage();
                             
-                            if (loaded) {
+                            // Check if we actually have NFTs after loading
+                            if (loaded && (this.userNFTs.length > 0 || this.stakedNFTs.length > 0)) {
                                 console.log('✅ Auto-loaded saved NFTs for new account!');
                                 this.updateNFTDisplay(); // Update the UI with loaded NFTs
                             } else {
-                                console.log('⚠️ No saved NFTs found for this account');
+                                console.log('⚠️ No saved NFTs found or no NFTs in saved data, loading demo NFTs...');
                                 // Load demo NFTs for new account
                                 this.loadDemoNFTs();
                                 this.updateNFTDisplay();
@@ -3471,13 +3472,14 @@
                     console.log('🔄 Attempting to auto-load saved NFTs from memory...');
                     const loadedFromStorage = this.loadNFTsFromStorage();
                     
-                    if (loadedFromStorage) {
+                    // Check if we actually have NFTs after loading (not just if data was found)
+                    if (loadedFromStorage && (this.userNFTs.length > 0 || this.stakedNFTs.length > 0)) {
                         console.log('✅ Auto-loaded saved NFTs successfully!');
                         this.updateNFTDisplay(); // Update the UI with loaded NFTs
                         this.saveNFTsToStorage(); // Save after loading to ensure data is current
                         this.showMessage(`✅ Auto-loaded ${this.userNFTs.length} NFTs and ${this.stakedNFTs.length} staked NFTs from previous session!`, 'success');
                     } else {
-                        console.log('⚠️ No saved NFTs found for this account');
+                        console.log('⚠️ No saved NFTs found or no NFTs in saved data, loading demo NFTs...');
                         // Load demo NFTs for testing
                         this.loadDemoNFTs();
                         this.updateNFTDisplay(); // Update the UI with demo NFTs
@@ -4817,14 +4819,16 @@
             manualLoadNFTs() {
                 console.log('🔧 MANUAL NFT LOAD TRIGGERED...');
                 const loaded = this.loadNFTsFromStorage();
-                if (loaded) {
+                
+                // Check if we actually have NFTs after loading
+                if (loaded && (this.userNFTs.length > 0 || this.stakedNFTs.length > 0)) {
                     this.updateNFTDisplay();
                     this.updateUI();
                     console.log('✅ MANUAL NFT LOAD COMPLETE!');
                     return true;
                 } else {
-                    console.log('❌ MANUAL NFT LOAD FAILED - NO DATA FOUND');
-                    // Load demo NFTs if no data found
+                    console.log('❌ MANUAL NFT LOAD FAILED - NO DATA FOUND OR NO NFTS');
+                    // Load demo NFTs if no data found or no NFTs
                     this.loadDemoNFTs();
                     this.updateNFTDisplay();
                     this.updateUI();
