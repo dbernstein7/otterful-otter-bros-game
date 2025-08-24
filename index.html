@@ -3379,9 +3379,12 @@
                                 console.log('✅ Auto-loaded saved NFTs for new account!');
                                 this.updateNFTDisplay(); // Update the UI with loaded NFTs
                             } else {
-                                console.log('⚠️ No saved NFTs found or no NFTs in saved data, loading demo NFTs...');
-                                // Load demo NFTs for new account
-                                this.loadDemoNFTs();
+                                console.log('⚠️ No saved NFTs found for new account');
+                                // Clear NFTs for new account
+                                this.userNFTs = [];
+                                this.stakedNFTs = [];
+                                this.fishCoins = 0;
+                                this.stakingStartTimes = {};
                                 this.updateNFTDisplay();
                             }
                             
@@ -3479,11 +3482,8 @@
                         this.saveNFTsToStorage(); // Save after loading to ensure data is current
                         this.showMessage(`✅ Auto-loaded ${this.userNFTs.length} NFTs and ${this.stakedNFTs.length} staked NFTs from previous session!`, 'success');
                     } else {
-                        console.log('⚠️ No saved NFTs found or no NFTs in saved data, loading demo NFTs...');
-                        // Load demo NFTs for testing
-                        this.loadDemoNFTs();
-                        this.updateNFTDisplay(); // Update the UI with demo NFTs
-                        this.showMessage('Demo NFTs loaded for testing!', 'info');
+                        console.log('⚠️ No saved NFTs found - user will need to load NFTs manually');
+                        this.showMessage('No saved NFTs found. Use "Check Token" or "Load Multiple" to load your NFTs.', 'info');
                     }
 
                 } catch (error) {
@@ -4838,11 +4838,8 @@
                     return true;
                 } else {
                     console.log('❌ MANUAL NFT LOAD FAILED - NO DATA FOUND OR NO NFTS');
-                    // Load demo NFTs if no data found or no NFTs
-                    this.loadDemoNFTs();
-                    this.updateNFTDisplay();
-                    this.updateUI();
-                    return true;
+                    this.showMessage('No saved NFTs found. Use "Check Token" or "Load Multiple" to load your NFTs.', 'info');
+                    return false;
                 }
             }
             
@@ -4898,9 +4895,10 @@
                     }
                 });
                 
-                // 3. Force load demo NFTs
-                console.log('3️⃣ Loading Demo NFTs...');
-                this.loadDemoNFTs();
+                // 3. Check localStorage for saved NFTs
+                console.log('3️⃣ Checking localStorage for saved NFTs...');
+                const loaded = this.loadNFTsFromStorage();
+                console.log('   - Loaded from localStorage:', loaded);
                 console.log('   - userNFTs after load:', this.userNFTs.length);
                 
                 // 4. Test container update
@@ -4937,9 +4935,15 @@
             forceShowNFTs() {
                 console.log('🚀 FORCE SHOWING NFTS...');
                 
-                // 1. Load demo NFTs
-                this.loadDemoNFTs();
-                console.log('✅ Demo NFTs loaded');
+                // 1. Load from localStorage
+                const loaded = this.loadNFTsFromStorage();
+                if (loaded && (this.userNFTs.length > 0 || this.stakedNFTs.length > 0)) {
+                    console.log('✅ Loaded saved NFTs');
+                } else {
+                    console.log('⚠️ No saved NFTs found');
+                    this.showMessage('No saved NFTs found. Use "Check Token" or "Load Multiple" to load your NFTs.', 'info');
+                    return;
+                }
                 
                 // 2. Show profile panel
                 const profilePanel = document.getElementById('profilePanel');
@@ -24005,7 +24009,6 @@
         // Console commands for debugging:
         // otterWallet.debugLocalStorage()
         // otterWallet.manualLoadNFTs() 
-        // otterWallet.loadDemoNFTs()
         // otterWallet.testNFTDisplay()  // Test NFT display system
         // otterWallet.debugNFTDisplayIssue()  // NEW: Comprehensive debug
         // otterWallet.forceShowNFTs()  // NEW: Force show NFTs in profile tab
