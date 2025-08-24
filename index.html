@@ -4653,6 +4653,7 @@
                     if (saved) {
                         console.log('✅ DATA SAVED TO LOCALSTORAGE SUCCESSFULLY!');
                         console.log('✅ Saved data size:', saved.length, 'characters');
+                        console.log('✅ Full saved data:', JSON.parse(saved));
                     } else {
                         console.log('❌ FAILED TO SAVE DATA TO LOCALSTORAGE!');
                     }
@@ -4807,6 +4808,61 @@
                     console.log('✅ Full data:', data);
                 } else {
                     console.log('❌ NO DATA FOUND IN LOCALSTORAGE');
+                }
+            }
+            
+            // Test localStorage persistence
+            testLocalStoragePersistence() {
+                console.log('🧪 TESTING LOCALSTORAGE PERSISTENCE...');
+                
+                // 1. Check current state
+                console.log('1️⃣ Current state:');
+                console.log('   - userNFTs:', this.userNFTs.length);
+                console.log('   - stakedNFTs:', this.stakedNFTs.length);
+                console.log('   - fishCoins:', this.fishCoins);
+                
+                // 2. Add some test data
+                console.log('2️⃣ Adding test data...');
+                this.userNFTs = [
+                    {
+                        tokenId: '9999',
+                        name: 'Test NFT #9999',
+                        rarity: 'test',
+                        multiplier: 1.0,
+                        image: 'https://via.placeholder.com/150/FF0000/000000?text=TEST',
+                        traits: ['Test Trait']
+                    }
+                ];
+                this.stakedNFTs = [];
+                this.fishCoins = 100;
+                this.stakingStartTimes = {};
+                
+                // 3. Save to localStorage
+                console.log('3️⃣ Saving to localStorage...');
+                this.saveNFTsToStorage();
+                
+                // 4. Clear memory
+                console.log('4️⃣ Clearing memory...');
+                this.userNFTs = [];
+                this.stakedNFTs = [];
+                this.fishCoins = 0;
+                this.stakingStartTimes = {};
+                
+                // 5. Load from localStorage
+                console.log('5️⃣ Loading from localStorage...');
+                const loaded = this.loadNFTsFromStorage();
+                
+                // 6. Check result
+                console.log('6️⃣ Result:');
+                console.log('   - Loaded successfully:', loaded);
+                console.log('   - userNFTs after load:', this.userNFTs.length);
+                console.log('   - stakedNFTs after load:', this.stakedNFTs.length);
+                console.log('   - fishCoins after load:', this.fishCoins);
+                
+                if (loaded && this.userNFTs.length > 0) {
+                    console.log('✅ LOCALSTORAGE PERSISTENCE TEST PASSED!');
+                } else {
+                    console.log('❌ LOCALSTORAGE PERSISTENCE TEST FAILED!');
                 }
             }
             
@@ -24012,6 +24068,7 @@
         // otterWallet.testNFTDisplay()  // Test NFT display system
         // otterWallet.debugNFTDisplayIssue()  // NEW: Comprehensive debug
         // otterWallet.forceShowNFTs()  // NEW: Force show NFTs in profile tab
+        // otterWallet.testLocalStoragePersistence()  // NEW: Test localStorage persistence
         // otterWallet.simulateStakeNFT('1001')
         // otterWallet.simulateUnstakeAll()
 
