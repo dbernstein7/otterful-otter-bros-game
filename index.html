@@ -4967,16 +4967,22 @@
                 console.log('🧪 Current userNFTs:', this.userNFTs.length);
                 console.log('🧪 Current stakedNFTs:', this.stakedNFTs.length);
                 
-                // Force load demo NFTs
-                this.loadDemoNFTs();
-                console.log('🧪 Demo NFTs loaded, now updating display...');
+                // Load from localStorage instead of demo NFTs
+                const loaded = this.loadNFTsFromStorage();
+                if (loaded && (this.userNFTs.length > 0 || this.stakedNFTs.length > 0)) {
+                    console.log('🧪 Loaded saved NFTs, now updating display...');
+                } else {
+                    console.log('🧪 No saved NFTs found');
+                    this.showMessage('No saved NFTs found. Use "Check Token" or "Load Multiple" to load your NFTs.', 'info');
+                    return;
+                }
                 
                 // Force update display
                 this.updateNFTDisplay();
                 this.updateUI();
                 
                 console.log('🧪 Display update complete. Check the UI now!');
-                console.log('🧪 You should see 3 demo NFTs in the gallery.');
+                console.log('🧪 You should see your saved NFTs in the gallery.');
             }
             
             // Comprehensive debug function to find the issue
@@ -5090,47 +5096,7 @@
                 console.log('🚀 FORCE SHOW COMPLETE - Check the Profile panel now!');
             }
             
-            // Load demo NFTs for testing (fallback when no saved data)
-            loadDemoNFTs() {
-                console.log('🎭 Loading demo NFTs for testing...');
-                
-                this.userNFTs = [
-                    {
-                        tokenId: '1001',
-                        name: 'Otter #1001',
-                        rarity: 'common',
-                        multiplier: 1.2,
-                        image: 'https://via.placeholder.com/150/FFD700/000000?text=Otter+1001',
-                        traits: ['Blue Eyes', 'Red Hat', 'Shiny Fur']
-                    },
-                    {
-                        tokenId: '1002', 
-                        name: 'Otter #1002',
-                        rarity: 'rare',
-                        multiplier: 1.8,
-                        image: 'https://via.placeholder.com/150/00FFFF/000000?text=Otter+1002',
-                        traits: ['Green Eyes', 'Crown', 'Golden Fur']
-                    },
-                    {
-                        tokenId: '1003',
-                        name: 'Otter #1003',
-                        rarity: 'epic',
-                        multiplier: 2.5,
-                        image: 'https://via.placeholder.com/150/FF00FF/000000?text=Otter+1003',
-                        traits: ['Rainbow Eyes', 'Diamond Crown', 'Cosmic Fur']
-                    }
-                ];
-                
-                this.stakedNFTs = [];
-                this.fishCoins = 0;
-                this.stakingStartTimes = {};
-                
-                // Save the demo NFTs
-                this.saveNFTsToStorage();
-                
-                console.log('✅ Demo NFTs loaded:', this.userNFTs.length);
-                this.showMessage('Demo NFTs loaded for testing!', 'info');
-            }
+
             
             async getOwnedTokenIds() {
                 console.log('🔍 ENABLING BLOCKCHAIN SCANNING - Looking for your real owned NFTs');
