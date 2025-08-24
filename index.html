@@ -3480,6 +3480,7 @@
                         console.log('⚠️ No saved NFTs found for this account');
                         // Load demo NFTs for testing
                         this.loadDemoNFTs();
+                        this.updateNFTDisplay(); // Update the UI with demo NFTs
                         this.showMessage('Demo NFTs loaded for testing!', 'info');
                     }
 
@@ -4829,6 +4830,24 @@
                     this.updateUI();
                     return true;
                 }
+            }
+            
+            // Test function to debug NFT display issues
+            testNFTDisplay() {
+                console.log('🧪 TESTING NFT DISPLAY SYSTEM...');
+                console.log('🧪 Current userNFTs:', this.userNFTs.length);
+                console.log('🧪 Current stakedNFTs:', this.stakedNFTs.length);
+                
+                // Force load demo NFTs
+                this.loadDemoNFTs();
+                console.log('🧪 Demo NFTs loaded, now updating display...');
+                
+                // Force update display
+                this.updateNFTDisplay();
+                this.updateUI();
+                
+                console.log('🧪 Display update complete. Check the UI now!');
+                console.log('🧪 You should see 3 demo NFTs in the gallery.');
             }
             
             // Load demo NFTs for testing (since we can't persist across refreshes)
@@ -23869,6 +23888,7 @@
         // otterWallet.debugMemoryStorage()
         // otterWallet.manualLoadNFTs() 
         // otterWallet.loadDemoNFTs()
+        // otterWallet.testNFTDisplay()  // NEW: Test NFT display system
         // otterWallet.simulateStakeNFT('1001')
         // otterWallet.simulateUnstakeAll()
 
