@@ -4850,6 +4850,110 @@
                 console.log('🧪 You should see 3 demo NFTs in the gallery.');
             }
             
+            // Comprehensive debug function to find the issue
+            debugNFTDisplayIssue() {
+                console.log('🔍 COMPREHENSIVE NFT DISPLAY DEBUG...');
+                
+                // 1. Check if we have NFTs
+                console.log('1️⃣ NFT Data Check:');
+                console.log('   - userNFTs length:', this.userNFTs.length);
+                console.log('   - userNFTs:', this.userNFTs);
+                
+                // 2. Check if containers exist
+                console.log('2️⃣ Container Check:');
+                const containers = [
+                    'profileNFTGallery',
+                    'nftCollection', 
+                    'userNfts',
+                    '.nft-grid',
+                    '.nft-container'
+                ];
+                
+                containers.forEach(containerId => {
+                    let element;
+                    if (containerId.startsWith('.')) {
+                        element = document.querySelector(containerId);
+                    } else {
+                        element = document.getElementById(containerId);
+                    }
+                    console.log(`   - ${containerId}:`, element ? 'FOUND' : 'NOT FOUND');
+                    if (element) {
+                        console.log(`     - Visible:`, element.offsetParent !== null);
+                        console.log(`     - Display:`, element.style.display);
+                        console.log(`     - InnerHTML length:`, element.innerHTML.length);
+                    }
+                });
+                
+                // 3. Force load demo NFTs
+                console.log('3️⃣ Loading Demo NFTs...');
+                this.loadDemoNFTs();
+                console.log('   - userNFTs after load:', this.userNFTs.length);
+                
+                // 4. Test container update
+                console.log('4️⃣ Testing Container Update...');
+                const mainContainer = document.getElementById('profileNFTGallery');
+                if (mainContainer) {
+                    console.log('   - Found main container, clearing and adding NFTs...');
+                    mainContainer.innerHTML = '';
+                    
+                    this.userNFTs.forEach((nft, index) => {
+                        const nftElement = this.createNFTElement(nft);
+                        mainContainer.appendChild(nftElement);
+                        console.log(`   - Added NFT ${index + 1}: ${nft.name}`);
+                    });
+                    
+                    console.log('   - Container innerHTML length after update:', mainContainer.innerHTML.length);
+                } else {
+                    console.log('   - Main container not found!');
+                }
+                
+                // 5. Check if profile panel is visible
+                console.log('5️⃣ Profile Panel Check:');
+                const profilePanel = document.getElementById('profilePanel');
+                console.log('   - Profile panel element:', profilePanel ? 'FOUND' : 'NOT FOUND');
+                if (profilePanel) {
+                    console.log('   - Profile panel display:', profilePanel.style.display);
+                    console.log('   - Profile panel visible:', profilePanel.offsetParent !== null);
+                }
+                
+                console.log('🔍 DEBUG COMPLETE - Check console for details!');
+            }
+            
+            // Force show NFTs in profile tab
+            forceShowNFTs() {
+                console.log('🚀 FORCE SHOWING NFTS...');
+                
+                // 1. Load demo NFTs
+                this.loadDemoNFTs();
+                console.log('✅ Demo NFTs loaded');
+                
+                // 2. Show profile panel
+                const profilePanel = document.getElementById('profilePanel');
+                if (profilePanel) {
+                    profilePanel.style.display = 'block';
+                    console.log('✅ Profile panel shown');
+                }
+                
+                // 3. Update NFT display
+                this.updateNFTDisplay();
+                this.updateUI();
+                
+                // 4. Force update the gallery
+                const gallery = document.getElementById('profileNFTGallery');
+                if (gallery) {
+                    gallery.innerHTML = '';
+                    this.userNFTs.forEach(nft => {
+                        const element = this.createNFTElement(nft);
+                        gallery.appendChild(element);
+                    });
+                    console.log('✅ Gallery updated with', this.userNFTs.length, 'NFTs');
+                } else {
+                    console.log('❌ Gallery container not found!');
+                }
+                
+                console.log('🚀 FORCE SHOW COMPLETE - Check the Profile panel now!');
+            }
+            
             // Load demo NFTs for testing (since we can't persist across refreshes)
             loadDemoNFTs() {
                 console.log('🎭 Loading demo NFTs for testing...');
@@ -23888,7 +23992,9 @@
         // otterWallet.debugMemoryStorage()
         // otterWallet.manualLoadNFTs() 
         // otterWallet.loadDemoNFTs()
-        // otterWallet.testNFTDisplay()  // NEW: Test NFT display system
+        // otterWallet.testNFTDisplay()  // Test NFT display system
+        // otterWallet.debugNFTDisplayIssue()  // NEW: Comprehensive debug
+        // otterWallet.forceShowNFTs()  // NEW: Force show NFTs in profile tab
         // otterWallet.simulateStakeNFT('1001')
         // otterWallet.simulateUnstakeAll()
 
