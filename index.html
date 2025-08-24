@@ -4598,75 +4598,90 @@
                 return false;
             }
 
-            // Save NFTs to local storage
+            // Save NFTs to local storage - SIMPLIFIED AND BULLETPROOF
             saveNFTsToStorage() {
                 try {
-                    console.log('💾 DEBUG: Saving NFTs to localStorage...');
-                    console.log('💾 DEBUG: Current account:', this.account);
-                    console.log('💾 DEBUG: User NFTs count:', this.userNFTs.length);
-                    console.log('💾 DEBUG: Staked NFTs count:', this.stakedNFTs.length);
-                    console.log('💾 DEBUG: Fish coins:', this.fishCoins);
+                    console.log('💾 SAVING DATA NOW...');
+                    console.log('💾 Account:', this.account);
+                    console.log('💾 User NFTs:', this.userNFTs.length);
+                    console.log('💾 Staked NFTs:', this.stakedNFTs.length);
+                    console.log('💾 Fish coins:', this.fishCoins);
                     
+                    // Create the data object
                     const nftData = {
-                        userNFTs: this.userNFTs,
-                        stakedNFTs: this.stakedNFTs,
-                        fishCoins: this.fishCoins,
-                        stakingStartTimes: this.stakingStartTimes,
-                        account: this.account,
+                        userNFTs: this.userNFTs || [],
+                        stakedNFTs: this.stakedNFTs || [],
+                        fishCoins: this.fishCoins || 0,
+                        stakingStartTimes: this.stakingStartTimes || {},
+                        account: this.account || '',
                         timestamp: Date.now()
                     };
                     
-                    localStorage.setItem('otterWalletNFTs', JSON.stringify(nftData));
-                    console.log('💾 Saved NFTs to local storage');
+                    // Save to localStorage
+                    const jsonString = JSON.stringify(nftData);
+                    localStorage.setItem('otterWalletNFTs', jsonString);
                     
-                    // Verify the save worked
-                    const verify = localStorage.getItem('otterWalletNFTs');
-                    console.log('💾 DEBUG: Verification - data saved successfully:', !!verify);
+                    // Double-check it saved
+                    const saved = localStorage.getItem('otterWalletNFTs');
+                    if (saved) {
+                        console.log('✅ DATA SAVED SUCCESSFULLY!');
+                        console.log('✅ Saved data size:', saved.length, 'characters');
+                    } else {
+                        console.log('❌ FAILED TO SAVE DATA!');
+                    }
                     
                 } catch (error) {
-                    console.error('❌ Error saving NFTs to storage:', error);
+                    console.error('❌ CRITICAL ERROR SAVING DATA:', error);
                 }
             }
 
-            // Load NFTs from local storage
+            // Load NFTs from local storage - SIMPLIFIED AND BULLETPROOF
             loadNFTsFromStorage() {
                 try {
-                    console.log('🔍 DEBUG: Attempting to load NFTs from localStorage...');
-                    console.log('🔍 DEBUG: Current account:', this.account);
+                    console.log('🔍 LOADING DATA NOW...');
+                    console.log('🔍 Current account:', this.account);
                     
                     const stored = localStorage.getItem('otterWalletNFTs');
-                    console.log('🔍 DEBUG: Stored data exists:', !!stored);
+                    console.log('🔍 Data exists in localStorage:', !!stored);
                     
                     if (stored) {
+                        console.log('🔍 Found stored data, parsing...');
                         const nftData = JSON.parse(stored);
-                        console.log('🔍 DEBUG: Parsed data:', nftData);
-                        console.log('🔍 DEBUG: Stored account:', nftData.account);
-                        console.log('🔍 DEBUG: Current account:', this.account);
+                        console.log('🔍 Parsed data:', nftData);
                         
-                        // Only load if it's for the same account (no time restriction - data saved forever)
-                        const isSameAccount = nftData.account === this.account;
-                        console.log('🔍 DEBUG: Is same account?', isSameAccount);
+                        // Check if accounts match
+                        const storedAccount = nftData.account || '';
+                        const currentAccount = this.account || '';
+                        const accountsMatch = storedAccount.toLowerCase() === currentAccount.toLowerCase();
                         
-                        if (isSameAccount) {
+                        console.log('🔍 Stored account:', storedAccount);
+                        console.log('🔍 Current account:', currentAccount);
+                        console.log('🔍 Accounts match:', accountsMatch);
+                        
+                        if (accountsMatch) {
+                            // Load the data
                             this.userNFTs = nftData.userNFTs || [];
                             this.stakedNFTs = nftData.stakedNFTs || [];
                             this.fishCoins = nftData.fishCoins || 0;
                             this.stakingStartTimes = nftData.stakingStartTimes || {};
-                            console.log('💾 Loaded NFTs from local storage:', this.userNFTs.length);
-                            console.log('💾 Loaded staked NFTs:', this.stakedNFTs.length);
-                            console.log('💾 Loaded fish coins:', this.fishCoins);
-                            console.log('💾 Loaded staking start times:', Object.keys(this.stakingStartTimes).length);
+                            
+                            console.log('✅ DATA LOADED SUCCESSFULLY!');
+                            console.log('✅ User NFTs loaded:', this.userNFTs.length);
+                            console.log('✅ Staked NFTs loaded:', this.stakedNFTs.length);
+                            console.log('✅ Fish coins loaded:', this.fishCoins);
+                            console.log('✅ Staking times loaded:', Object.keys(this.stakingStartTimes).length);
+                            
                             return true;
                         } else {
-                            console.log('🗑️ Clearing mismatched account stored NFTs');
-                            console.log('🔍 DEBUG: Account mismatch - stored:', nftData.account, 'current:', this.account);
-                            localStorage.removeItem('otterWalletNFTs');
+                            console.log('❌ ACCOUNT MISMATCH - Cannot load data');
+                            console.log('❌ Stored account:', storedAccount);
+                            console.log('❌ Current account:', currentAccount);
                         }
                     } else {
-                        console.log('🔍 DEBUG: No stored data found in localStorage');
+                        console.log('❌ NO DATA FOUND IN LOCALSTORAGE');
                     }
                 } catch (error) {
-                    console.error('❌ Error loading NFTs from storage:', error);
+                    console.error('❌ CRITICAL ERROR LOADING DATA:', error);
                 }
                 return false;
             }
@@ -4752,19 +4767,35 @@
             
             // Debug function to check localStorage
             debugLocalStorage() {
-                console.log('🔍 DEBUG: Checking localStorage contents...');
+                console.log('🔍 CHECKING LOCALSTORAGE CONTENTS...');
                 const stored = localStorage.getItem('otterWalletNFTs');
                 if (stored) {
                     const data = JSON.parse(stored);
-                    console.log('🔍 DEBUG: Found stored data:', data);
-                    console.log('🔍 DEBUG: Account:', data.account);
-                    console.log('🔍 DEBUG: User NFTs:', data.userNFTs?.length || 0);
-                    console.log('🔍 DEBUG: Staked NFTs:', data.stakedNFTs?.length || 0);
-                    console.log('🔍 DEBUG: Fish coins:', data.fishCoins || 0);
-                    console.log('🔍 DEBUG: Staking start times:', Object.keys(data.stakingStartTimes || {}).length);
+                    console.log('✅ FOUND STORED DATA:');
+                    console.log('✅ Account:', data.account);
+                    console.log('✅ User NFTs:', data.userNFTs?.length || 0);
+                    console.log('✅ Staked NFTs:', data.stakedNFTs?.length || 0);
+                    console.log('✅ Fish coins:', data.fishCoins || 0);
+                    console.log('✅ Staking start times:', Object.keys(data.stakingStartTimes || {}).length);
+                    console.log('✅ Full data:', data);
                 } else {
-                    console.log('🔍 DEBUG: No data found in localStorage');
+                    console.log('❌ NO DATA FOUND IN LOCALSTORAGE');
                 }
+            }
+            
+            // Test function to manually save current data
+            testSaveData() {
+                console.log('🧪 TESTING DATA SAVE...');
+                this.saveNFTsToStorage();
+                console.log('🧪 SAVE TEST COMPLETE');
+            }
+            
+            // Test function to manually load data
+            testLoadData() {
+                console.log('🧪 TESTING DATA LOAD...');
+                const result = this.loadNFTsFromStorage();
+                console.log('🧪 LOAD TEST RESULT:', result);
+                return result;
             }
             
             async getOwnedTokenIds() {
