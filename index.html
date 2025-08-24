@@ -3328,19 +3328,6 @@
                         this.saveNFTsToStorage();
                     }
                 }, 30000);
-                
-                // Debug: Check what's in localStorage on init
-                const stored = localStorage.getItem('otterWalletNFTs');
-                if (stored) {
-                    try {
-                        const nftData = JSON.parse(stored);
-                        console.log('🔍 localStorage on init:', nftData);
-                    } catch (error) {
-                        console.error('❌ Error parsing localStorage on init:', error);
-                    }
-                } else {
-                    console.log('📭 No localStorage data found on init');
-                }
             }
 
             setupEventListeners() {
@@ -4623,12 +4610,7 @@
                         timestamp: Date.now()
                     };
                     localStorage.setItem('otterWalletNFTs', JSON.stringify(nftData));
-                    console.log('💾 Saved NFTs to local storage:', {
-                        userNFTs: this.userNFTs.length,
-                        stakedNFTs: this.stakedNFTs.length,
-                        fishCoins: this.fishCoins,
-                        account: this.account
-                    });
+                    console.log('💾 Saved NFTs to local storage');
                 } catch (error) {
                     console.error('❌ Error saving NFTs to storage:', error);
                 }
@@ -4640,49 +4622,23 @@
                     const stored = localStorage.getItem('otterWalletNFTs');
                     if (stored) {
                         const nftData = JSON.parse(stored);
-                        console.log('🔍 Found stored NFT data:', nftData);
                         
-                        // Check if we have an account to compare against
-                        if (!this.account) {
-                            console.log('⚠️ No current account to compare against');
-                            return false;
-                        }
+                        // Only load if it's for the same account (no time restriction - data saved forever)
+                        const isSameAccount = nftData.account === this.account;
                         
-                        // Only load if it's for the same account and not too old (7 days for testing)
-                        const isSameAccount = nftData.account && nftData.account.toLowerCase() === this.account.toLowerCase();
-                        const isRecent = nftData.timestamp && (Date.now() - nftData.timestamp) < (7 * 24 * 60 * 60 * 1000); // 7 days instead of 24 hours
-                        
-                        console.log('🔍 Account comparison:', {
-                            storedAccount: nftData.account,
-                            currentAccount: this.account,
-                            isSameAccount: isSameAccount,
-                            isRecent: isRecent,
-                            timeDiff: nftData.timestamp ? Date.now() - nftData.timestamp : 'no timestamp'
-                        });
-                        
-                        if (isSameAccount && isRecent) {
+                        if (isSameAccount) {
                             this.userNFTs = nftData.userNFTs || [];
                             this.stakedNFTs = nftData.stakedNFTs || [];
                             this.fishCoins = nftData.fishCoins || 0;
                             this.stakingStartTimes = nftData.stakingStartTimes || {};
-                            console.log('💾 Loaded NFTs from local storage:', {
-                                userNFTs: this.userNFTs.length,
-                                stakedNFTs: this.stakedNFTs.length,
-                                fishCoins: this.fishCoins
-                            });
+                            console.log('💾 Loaded NFTs from local storage:', this.userNFTs.length);
+                            console.log('💾 Loaded staked NFTs:', this.stakedNFTs.length);
+                            console.log('💾 Loaded fish coins:', this.fishCoins);
                             return true;
-                        } else if (isSameAccount && !isRecent) {
-                            console.log('⚠️ Data is for same account but too old, clearing');
-                            localStorage.removeItem('otterWalletNFTs');
-                        } else if (!isSameAccount) {
-                            console.log('⚠️ Data is for different account, clearing');
-                            localStorage.removeItem('otterWalletNFTs');
                         } else {
-                            console.log('⚠️ Unknown condition, clearing data');
+                            console.log('🗑️ Clearing mismatched account stored NFTs');
                             localStorage.removeItem('otterWalletNFTs');
                         }
-                    } else {
-                        console.log('📭 No stored NFT data found');
                     }
                 } catch (error) {
                     console.error('❌ Error loading NFTs from storage:', error);
