@@ -4932,8 +4932,32 @@
             clearLocalStorage() {
                 console.log('🗑️ CLEARING LOCALSTORAGE COMPLETELY...');
                 localStorage.removeItem('otterWalletNFTs');
-                console.log('✅ localStorage cleared!');
+                localStorage.clear(); // Clear ALL localStorage
+                console.log('✅ localStorage completely cleared!');
                 console.log('🔄 Now refresh the page and connect your wallet - no demo NFTs will load!');
+            }
+            
+            // Force clear and reset everything
+            forceReset() {
+                console.log('🔄 FORCE RESETTING EVERYTHING...');
+                
+                // Clear localStorage
+                localStorage.clear();
+                
+                // Clear memory
+                this.userNFTs = [];
+                this.stakedNFTs = [];
+                this.fishCoins = 0;
+                this.stakingStartTimes = {};
+                
+                // Clear UI
+                const gallery = document.getElementById('profileNFTGallery');
+                if (gallery) {
+                    gallery.innerHTML = '<div style="text-align: center; color: #FFD700; padding: 20px;">NO NFTS FOUND IN WALLET</div>';
+                }
+                
+                console.log('✅ FORCE RESET COMPLETE!');
+                console.log('🔄 Refresh the page now - everything is cleared!');
             }
             
             // Test function to manually save current data
@@ -24109,6 +24133,7 @@
         // otterWallet.testLocalStoragePersistence()  // NEW: Test localStorage persistence
         // otterWallet.forceSaveTestData()  // NEW: Force save test data
         // otterWallet.clearLocalStorage()  // NEW: Clear localStorage completely
+        // otterWallet.forceReset()  // NEW: Force reset everything
         // otterWallet.simulateStakeNFT('1001')
         // otterWallet.simulateUnstakeAll()
 
