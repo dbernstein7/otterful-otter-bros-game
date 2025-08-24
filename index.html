@@ -4601,6 +4601,12 @@
             // Save NFTs to local storage
             saveNFTsToStorage() {
                 try {
+                    console.log('💾 DEBUG: Saving NFTs to localStorage...');
+                    console.log('💾 DEBUG: Current account:', this.account);
+                    console.log('💾 DEBUG: User NFTs count:', this.userNFTs.length);
+                    console.log('💾 DEBUG: Staked NFTs count:', this.stakedNFTs.length);
+                    console.log('💾 DEBUG: Fish coins:', this.fishCoins);
+                    
                     const nftData = {
                         userNFTs: this.userNFTs,
                         stakedNFTs: this.stakedNFTs,
@@ -4609,8 +4615,14 @@
                         account: this.account,
                         timestamp: Date.now()
                     };
+                    
                     localStorage.setItem('otterWalletNFTs', JSON.stringify(nftData));
                     console.log('💾 Saved NFTs to local storage');
+                    
+                    // Verify the save worked
+                    const verify = localStorage.getItem('otterWalletNFTs');
+                    console.log('💾 DEBUG: Verification - data saved successfully:', !!verify);
+                    
                 } catch (error) {
                     console.error('❌ Error saving NFTs to storage:', error);
                 }
@@ -4619,12 +4631,21 @@
             // Load NFTs from local storage
             loadNFTsFromStorage() {
                 try {
+                    console.log('🔍 DEBUG: Attempting to load NFTs from localStorage...');
+                    console.log('🔍 DEBUG: Current account:', this.account);
+                    
                     const stored = localStorage.getItem('otterWalletNFTs');
+                    console.log('🔍 DEBUG: Stored data exists:', !!stored);
+                    
                     if (stored) {
                         const nftData = JSON.parse(stored);
+                        console.log('🔍 DEBUG: Parsed data:', nftData);
+                        console.log('🔍 DEBUG: Stored account:', nftData.account);
+                        console.log('🔍 DEBUG: Current account:', this.account);
                         
                         // Only load if it's for the same account (no time restriction - data saved forever)
                         const isSameAccount = nftData.account === this.account;
+                        console.log('🔍 DEBUG: Is same account?', isSameAccount);
                         
                         if (isSameAccount) {
                             this.userNFTs = nftData.userNFTs || [];
@@ -4634,11 +4655,15 @@
                             console.log('💾 Loaded NFTs from local storage:', this.userNFTs.length);
                             console.log('💾 Loaded staked NFTs:', this.stakedNFTs.length);
                             console.log('💾 Loaded fish coins:', this.fishCoins);
+                            console.log('💾 Loaded staking start times:', Object.keys(this.stakingStartTimes).length);
                             return true;
                         } else {
                             console.log('🗑️ Clearing mismatched account stored NFTs');
+                            console.log('🔍 DEBUG: Account mismatch - stored:', nftData.account, 'current:', this.account);
                             localStorage.removeItem('otterWalletNFTs');
                         }
+                    } else {
+                        console.log('🔍 DEBUG: No stored data found in localStorage');
                     }
                 } catch (error) {
                     console.error('❌ Error loading NFTs from storage:', error);
@@ -4709,24 +4734,37 @@
                     document.body.appendChild(messageContainer);
                 }
                 
-                // Set message content and style
-                messageContainer.textContent = message;
-                messageContainer.style.backgroundColor = {
-                    'success': '#4CAF50',
-                    'error': '#f44336',
-                    'warning': '#ff9800',
-                    'info': '#2196F3'
-                }[type] || '#2196F3';
+                // Set background color based on message type
+                let bgColor = '#2196F3'; // default blue
+                if (type === 'success') bgColor = '#4CAF50';
+                if (type === 'error') bgColor = '#F44336';
+                if (type === 'warning') bgColor = '#FF9800';
                 
-                // Show message
-                messageContainer.style.opacity = '1';
-                messageContainer.style.transform = 'translateX(0)';
+                messageContainer.style.backgroundColor = bgColor;
+                messageContainer.textContent = message;
+                messageContainer.style.display = 'block';
                 
                 // Auto-hide after 5 seconds
                 setTimeout(() => {
-                    messageContainer.style.opacity = '0';
-                    messageContainer.style.transform = 'translateX(100%)';
+                    messageContainer.style.display = 'none';
                 }, 5000);
+            }
+            
+            // Debug function to check localStorage
+            debugLocalStorage() {
+                console.log('🔍 DEBUG: Checking localStorage contents...');
+                const stored = localStorage.getItem('otterWalletNFTs');
+                if (stored) {
+                    const data = JSON.parse(stored);
+                    console.log('🔍 DEBUG: Found stored data:', data);
+                    console.log('🔍 DEBUG: Account:', data.account);
+                    console.log('🔍 DEBUG: User NFTs:', data.userNFTs?.length || 0);
+                    console.log('🔍 DEBUG: Staked NFTs:', data.stakedNFTs?.length || 0);
+                    console.log('🔍 DEBUG: Fish coins:', data.fishCoins || 0);
+                    console.log('🔍 DEBUG: Staking start times:', Object.keys(data.stakingStartTimes || {}).length);
+                } else {
+                    console.log('🔍 DEBUG: No data found in localStorage');
+                }
             }
             
             async getOwnedTokenIds() {
