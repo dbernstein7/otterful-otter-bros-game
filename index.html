@@ -3321,6 +3321,13 @@
                 // Don't auto-connect - let user manually connect
                 // this.checkConnection();
                 this.startStakingRewardsTimer();
+                
+                // Periodic save every 30 seconds
+                setInterval(() => {
+                    if (this.isConnected) {
+                        this.saveNFTsToStorage();
+                    }
+                }, 30000);
             }
 
             setupEventListeners() {
@@ -3335,6 +3342,13 @@
                         }
                     });
                 }
+                
+                // Save data when page is about to unload
+                window.addEventListener('beforeunload', () => {
+                    if (this.isConnected) {
+                        this.saveNFTsToStorage();
+                    }
+                });
 
                 // Wallet event listeners
                 if (window.ethereum) {
@@ -3342,6 +3356,11 @@
                         if (accounts.length === 0) {
                             this.disconnect(true); // Clear NFTs when fully disconnecting
                         } else {
+                            // Save current data before switching accounts
+                            if (this.isConnected) {
+                                this.saveNFTsToStorage();
+                            }
+                            
                             // Switching accounts - preserve NFTs
                             this.account = accounts[0];
                             this.updateUI();
@@ -3351,6 +3370,11 @@
                     });
 
                     window.ethereum.on('chainChanged', (chainId) => {
+                        // Save current data before chain change
+                        if (this.isConnected) {
+                            this.saveNFTsToStorage();
+                        }
+                        
                         this.updateUI();
                         if (chainId === this.apeChainId) {
                             // Removed automatic NFT loading - user must load manually
@@ -3428,6 +3452,7 @@
                     if (loadedFromStorage) {
                         console.log('💾 Restored NFTs from local storage');
                         this.updateNFTDisplay();
+                        this.saveNFTsToStorage(); // Save after loading to ensure data is current
                         this.showMessage(`Restored ${this.userNFTs.length} NFTs from previous session!`, 'success');
                     } else {
                         console.log('🔄 NFT loading disabled - user must load manually');
@@ -3682,6 +3707,7 @@
                     }
                     
                     console.log(`🎉 SUCCESS! Loaded ${this.userNFTs.length} NFTs for this wallet`);
+                    this.saveNFTsToStorage(); // Save loaded NFTs to localStorage
                     this.updateNFTDisplay();
                     this.showMessage(`Successfully loaded ${this.userNFTs.length} Otterful Otters!`, 'success');
                     
@@ -3794,6 +3820,7 @@
                     }
                     
                     console.log(`🎉 SUCCESS! Loaded ${this.userNFTs.length} NFTs for this wallet`);
+                    this.saveNFTsToStorage(); // Save loaded NFTs to localStorage
                     this.updateNFTDisplay();
                     this.showMessage(`Successfully loaded ${this.userNFTs.length} Otterful Otters!`, 'success');
                     
@@ -4509,6 +4536,9 @@
                 // Update any NFT grid displays
                 this.updateNFTGrid();
                 
+                // Save data to localStorage whenever display is updated
+                this.saveNFTsToStorage();
+                
                 console.log('✅ UI update completed');
             }
 
@@ -5137,6 +5167,11 @@
             }
 
             disconnect(clearNFTs = true) {
+                // Save current data before disconnecting
+                if (this.isConnected) {
+                    this.saveNFTsToStorage();
+                }
+                
                 this.provider = null;
                 this.account = null;
                 this.isConnected = false;
@@ -5174,6 +5209,9 @@
                     }
                     
                     this.updateStakingStats();
+                    
+                    // Save data to localStorage whenever UI is updated
+                    this.saveNFTsToStorage();
                 } else {
                     if (connectWalletBtn) {
                         connectWalletBtn.innerHTML = '<span style="position: relative; z-index: 2;">🔗 Connect Wallet</span>';
@@ -5291,6 +5329,7 @@
                         this.stakingStartTimes[nft.tokenId] = Date.now();
                     }
                 });
+                this.saveNFTsToStorage(); // Save to localStorage immediately
                 this.updateUI();
                 this.showMessage('All otters auto-staked for demo! (Simulated)', 'success');
             }
@@ -5302,6 +5341,7 @@
                     this.stakedNFTs.push(nft);
                     this.stakingStartTimes[tokenId] = Date.now();
                     this.userNFTs = this.userNFTs.filter(n => n.tokenId !== tokenId);
+                    this.saveNFTsToStorage(); // Save to localStorage immediately
                     this.updateUI();
                     this.showMessage(`NFT ${tokenId} staked (simulated)!`, 'success');
                     return true;
@@ -5315,6 +5355,7 @@
                     this.userNFTs.push(nft);
                     this.stakedNFTs = this.stakedNFTs.filter(n => n.tokenId !== tokenId);
                     delete this.stakingStartTimes[tokenId];
+                    this.saveNFTsToStorage(); // Save to localStorage immediately
                     this.updateUI();
                     this.showMessage(`NFT ${tokenId} unstaked (simulated)!`, 'success');
                     return true;
@@ -5340,6 +5381,7 @@
                 });
                 this.stakedNFTs = [];
                 this.stakingStartTimes = {};
+                this.saveNFTsToStorage(); // Save to localStorage immediately
                 this.updateUI();
                 this.showMessage(`All ${stakedCount} NFTs unstaked (simulated)!`, 'success');
                 return stakedCount;
@@ -5470,6 +5512,7 @@
                     
                     // Reset local fish coins (claimed on blockchain)
                     this.fishCoins = 0;
+                    this.saveNFTsToStorage(); // Save the updated fish coins balance
                     this.updateUI();
                     this.showMessage('Rewards claimed successfully!', 'success');
                     
