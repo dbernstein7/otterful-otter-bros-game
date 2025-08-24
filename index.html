@@ -3371,7 +3371,7 @@
                             this.account = accounts[0];
                             
                             // **AUTO-LOAD NFTs for the new account**
-                            console.log('🔄 Account changed, attempting to auto-load saved NFTs...');
+                            console.log('🔄 Account changed, attempting to auto-load saved NFTs from localStorage...');
                             const loaded = this.loadNFTsFromStorage();
                             
                             // Check if we actually have NFTs after loading
@@ -3468,8 +3468,8 @@
                     console.log('🔄 Updating UI...');
                     this.updateUI();
                     
-                    // **AUTO-LOAD NFTs from memory after connecting**
-                    console.log('🔄 Attempting to auto-load saved NFTs from memory...');
+                    // **AUTO-LOAD NFTs from localStorage after connecting**
+                    console.log('🔄 Attempting to auto-load saved NFTs from localStorage...');
                     const loadedFromStorage = this.loadNFTsFromStorage();
                     
                     // Check if we actually have NFTs after loading (not just if data was found)
@@ -4625,10 +4625,10 @@
                 return false;
             }
 
-            // Save NFTs to memory storage - SIMPLIFIED AND BULLETPROOF
+            // Save NFTs to localStorage - SIMPLIFIED AND BULLETPROOF
             saveNFTsToStorage() {
                 try {
-                    console.log('💾 SAVING DATA TO MEMORY...');
+                    console.log('💾 SAVING DATA TO LOCALSTORAGE...');
                     console.log('💾 Account:', this.account);
                     console.log('💾 User NFTs:', this.userNFTs.length);
                     console.log('💾 Staked NFTs:', this.stakedNFTs.length);
@@ -4644,31 +4644,40 @@
                         timestamp: Date.now()
                     };
                     
-                    // Save to memory storage
-                    this.memoryStorage.nftData = nftData;
+                    // Save to localStorage
+                    const jsonString = JSON.stringify(nftData);
+                    localStorage.setItem('otterWalletNFTs', jsonString);
                     
-                    console.log('✅ DATA SAVED TO MEMORY SUCCESSFULLY!');
-                    console.log('✅ Saved data:', nftData);
+                    // Double-check it saved
+                    const saved = localStorage.getItem('otterWalletNFTs');
+                    if (saved) {
+                        console.log('✅ DATA SAVED TO LOCALSTORAGE SUCCESSFULLY!');
+                        console.log('✅ Saved data size:', saved.length, 'characters');
+                    } else {
+                        console.log('❌ FAILED TO SAVE DATA TO LOCALSTORAGE!');
+                    }
                     
                 } catch (error) {
                     console.error('❌ CRITICAL ERROR SAVING DATA:', error);
                 }
             }
 
-            // Load NFTs from memory storage - SIMPLIFIED AND BULLETPROOF
+            // Load NFTs from localStorage - SIMPLIFIED AND BULLETPROOF
             loadNFTsFromStorage() {
                 try {
-                    console.log('🔍 LOADING DATA FROM MEMORY...');
+                    console.log('🔍 LOADING DATA FROM LOCALSTORAGE...');
                     console.log('🔍 Current account:', this.account);
                     
-                    const stored = this.memoryStorage.nftData;
-                    console.log('🔍 Data exists in memory:', !!stored);
+                    const stored = localStorage.getItem('otterWalletNFTs');
+                    console.log('🔍 Data exists in localStorage:', !!stored);
                     
                     if (stored) {
-                        console.log('📦 Found stored data:', stored);
+                        console.log('🔍 Found stored data, parsing...');
+                        const nftData = JSON.parse(stored);
+                        console.log('🔍 Parsed data:', nftData);
                         
                         // Check if accounts match
-                        const storedAccount = stored.account || '';
+                        const storedAccount = nftData.account || '';
                         const currentAccount = this.account || '';
                         const accountsMatch = storedAccount.toLowerCase() === currentAccount.toLowerCase();
                         
@@ -4678,12 +4687,12 @@
                         
                         if (accountsMatch) {
                             // Load the data
-                            this.userNFTs = stored.userNFTs || [];
-                            this.stakedNFTs = stored.stakedNFTs || [];
-                            this.fishCoins = stored.fishCoins || 0;
-                            this.stakingStartTimes = stored.stakingStartTimes || {};
+                            this.userNFTs = nftData.userNFTs || [];
+                            this.stakedNFTs = nftData.stakedNFTs || [];
+                            this.fishCoins = nftData.fishCoins || 0;
+                            this.stakingStartTimes = nftData.stakingStartTimes || {};
                             
-                            console.log('✅ DATA LOADED FROM MEMORY SUCCESSFULLY!');
+                            console.log('✅ DATA LOADED FROM LOCALSTORAGE SUCCESSFULLY!');
                             console.log('✅ User NFTs loaded:', this.userNFTs.length);
                             console.log('✅ Staked NFTs loaded:', this.stakedNFTs.length);
                             console.log('✅ Fish coins loaded:', this.fishCoins);
@@ -4696,7 +4705,7 @@
                             console.log('❌ Current account:', currentAccount);
                         }
                     } else {
-                        console.log('❌ NO DATA FOUND IN MEMORY');
+                        console.log('❌ NO DATA FOUND IN LOCALSTORAGE');
                     }
                 } catch (error) {
                     console.error('❌ CRITICAL ERROR LOADING DATA:', error);
@@ -4783,12 +4792,13 @@
                 }, 5000);
             }
             
-            // Debug function to check memory storage
-            debugMemoryStorage() {
-                console.log('🧠 CHECKING MEMORY STORAGE CONTENTS...');
-                if (this.memoryStorage.nftData) {
-                    const data = this.memoryStorage.nftData;
-                    console.log('✅ FOUND STORED DATA IN MEMORY:');
+            // Debug function to check localStorage
+            debugLocalStorage() {
+                console.log('🔍 CHECKING LOCALSTORAGE CONTENTS...');
+                const stored = localStorage.getItem('otterWalletNFTs');
+                if (stored) {
+                    const data = JSON.parse(stored);
+                    console.log('✅ FOUND STORED DATA IN LOCALSTORAGE:');
                     console.log('✅ Account:', data.account);
                     console.log('✅ User NFTs:', data.userNFTs?.length || 0);
                     console.log('✅ Staked NFTs:', data.stakedNFTs?.length || 0);
@@ -4796,7 +4806,7 @@
                     console.log('✅ Staking start times:', Object.keys(data.stakingStartTimes || {}).length);
                     console.log('✅ Full data:', data);
                 } else {
-                    console.log('❌ NO DATA FOUND IN MEMORY STORAGE');
+                    console.log('❌ NO DATA FOUND IN LOCALSTORAGE');
                 }
             }
             
@@ -4958,7 +4968,7 @@
                 console.log('🚀 FORCE SHOW COMPLETE - Check the Profile panel now!');
             }
             
-            // Load demo NFTs for testing (since we can't persist across refreshes)
+            // Load demo NFTs for testing (fallback when no saved data)
             loadDemoNFTs() {
                 console.log('🎭 Loading demo NFTs for testing...');
                 
@@ -23993,7 +24003,7 @@
         }
 
         // Console commands for debugging:
-        // otterWallet.debugMemoryStorage()
+        // otterWallet.debugLocalStorage()
         // otterWallet.manualLoadNFTs() 
         // otterWallet.loadDemoNFTs()
         // otterWallet.testNFTDisplay()  // Test NFT display system
@@ -24002,7 +24012,7 @@
         // otterWallet.simulateStakeNFT('1001')
         // otterWallet.simulateUnstakeAll()
 
-        console.log('✅ In-memory storage system loaded - data will persist during session but not across page refreshes');
+        console.log('✅ localStorage system loaded - data will persist across page refreshes');
 
     </script>
 </body>
