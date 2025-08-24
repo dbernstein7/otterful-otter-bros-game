@@ -3361,11 +3361,28 @@
                                 this.saveNFTsToStorage();
                             }
                             
-                            // Switching accounts - preserve NFTs
+                            // Switch to new account
                             this.account = accounts[0];
+                            
+                            // **AUTO-LOAD NFTs for the new account**
+                            console.log('🔄 Account changed, attempting to auto-load saved NFTs...');
+                            const loaded = this.loadNFTsFromStorage();
+                            
+                            if (loaded) {
+                                console.log('✅ Auto-loaded saved NFTs for new account!');
+                                this.updateNFTDisplay(); // Update the UI with loaded NFTs
+                            } else {
+                                console.log('⚠️ No saved NFTs found for this account');
+                                // Clear NFTs if no saved data found
+                                this.userNFTs = [];
+                                this.stakedNFTs = [];
+                                this.fishCoins = 0;
+                                this.stakingStartTimes = {};
+                                this.updateNFTDisplay();
+                            }
+                            
                             this.updateUI();
-                            console.log('🔄 Account switched - NFTs preserved');
-                            // Removed automatic NFT loading - user must load manually
+                            console.log('✅ Account switched and NFTs auto-loaded');
                         }
                     });
 
@@ -3447,15 +3464,17 @@
                     console.log('🔄 Updating UI...');
                     this.updateUI();
                     
-                    // Try to load NFTs from local storage
+                    // **AUTO-LOAD NFTs from localStorage after connecting**
+                    console.log('🔄 Attempting to auto-load saved NFTs...');
                     const loadedFromStorage = this.loadNFTsFromStorage();
+                    
                     if (loadedFromStorage) {
-                        console.log('💾 Restored NFTs from local storage');
-                        this.updateNFTDisplay();
+                        console.log('✅ Auto-loaded saved NFTs successfully!');
+                        this.updateNFTDisplay(); // Update the UI with loaded NFTs
                         this.saveNFTsToStorage(); // Save after loading to ensure data is current
-                        this.showMessage(`Restored ${this.userNFTs.length} NFTs from previous session!`, 'success');
+                        this.showMessage(`✅ Auto-loaded ${this.userNFTs.length} NFTs and ${this.stakedNFTs.length} staked NFTs from previous session!`, 'success');
                     } else {
-                        console.log('🔄 NFT loading disabled - user must load manually');
+                        console.log('⚠️ No saved NFTs found for this account');
                         this.showMessage('Successfully connected to ApeChain! Use "Check Token" or "Load Multiple" to load your NFTs.', 'success');
                     }
 
@@ -4796,6 +4815,21 @@
                 const result = this.loadNFTsFromStorage();
                 console.log('🧪 LOAD TEST RESULT:', result);
                 return result;
+            }
+            
+            // Manual load function for debugging
+            manualLoadNFTs() {
+                console.log('🔧 MANUAL NFT LOAD TRIGGERED...');
+                const loaded = this.loadNFTsFromStorage();
+                if (loaded) {
+                    this.updateNFTDisplay();
+                    this.updateUI();
+                    console.log('✅ MANUAL NFT LOAD COMPLETE!');
+                    return true;
+                } else {
+                    console.log('❌ MANUAL NFT LOAD FAILED - NO DATA FOUND');
+                    return false;
+                }
             }
             
             async getOwnedTokenIds() {
@@ -18707,6 +18741,45 @@
             
             // Update NFT gallery
             updateNFTGallery();
+            
+            // **ADD MANUAL LOAD NFTS BUTTON if wallet is connected**
+            if (otterWallet.isConnected) {
+                // Add load NFTs button to the profile
+                const profileActions = document.getElementById('profileActions');
+                if (profileActions) {
+                    // Check if button already exists
+                    if (!document.getElementById('loadNFTsBtn')) {
+                        const loadNFTsBtn = document.createElement('button');
+                        loadNFTsBtn.id = 'loadNFTsBtn';
+                        loadNFTsBtn.textContent = '🔄 Load Saved NFTs';
+                        loadNFTsBtn.style.cssText = `
+                            background: linear-gradient(135deg, #00FFFF, #0080FF);
+                            color: white;
+                            border: none;
+                            padding: 10px 15px;
+                            border-radius: 10px;
+                            cursor: pointer;
+                            font-weight: bold;
+                            margin: 5px;
+                            transition: all 0.3s ease;
+                        `;
+                        
+                        loadNFTsBtn.addEventListener('click', () => {
+                            console.log('🔄 Manual NFT load requested...');
+                            const loaded = otterWallet.loadNFTsFromStorage();
+                            if (loaded) {
+                                otterWallet.updateNFTDisplay();
+                                updateWalletProfile(); // Refresh the profile display
+                                console.log('✅ Manual NFT load successful!');
+                            } else {
+                                console.log('⚠️ No saved NFTs found');
+                            }
+                        });
+                        
+                        profileActions.appendChild(loadNFTsBtn);
+                    }
+                }
+            }
         }
         
         function updateActiveTraitsDisplay() {
