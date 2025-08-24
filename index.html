@@ -3330,7 +3330,7 @@
                 
                 // Periodic save every 30 seconds
                 setInterval(() => {
-                    if (this.isConnected) {
+                    if (this.isConnected && (this.userNFTs.length > 0 || this.stakedNFTs.length > 0 || this.fishCoins > 0)) {
                         this.saveNFTsToStorage();
                     }
                 }, 30000);
@@ -3351,7 +3351,7 @@
                 
                 // Save data when page is about to unload
                 window.addEventListener('beforeunload', () => {
-                    if (this.isConnected) {
+                    if (this.isConnected && (this.userNFTs.length > 0 || this.stakedNFTs.length > 0 || this.fishCoins > 0)) {
                         this.saveNFTsToStorage();
                     }
                 });
@@ -3363,7 +3363,7 @@
                             this.disconnect(true); // Clear NFTs when fully disconnecting
                         } else {
                             // Save current data before switching accounts
-                            if (this.isConnected) {
+                            if (this.isConnected && (this.userNFTs.length > 0 || this.stakedNFTs.length > 0 || this.fishCoins > 0)) {
                                 this.saveNFTsToStorage();
                             }
                             
@@ -3395,7 +3395,7 @@
 
                     window.ethereum.on('chainChanged', (chainId) => {
                         // Save current data before chain change
-                        if (this.isConnected) {
+                        if (this.isConnected && (this.userNFTs.length > 0 || this.stakedNFTs.length > 0 || this.fishCoins > 0)) {
                             this.saveNFTsToStorage();
                         }
                         
@@ -4563,8 +4563,10 @@
                 // Update any NFT grid displays
                 this.updateNFTGrid();
                 
-                // Save data to localStorage whenever display is updated
-                this.saveNFTsToStorage();
+                // Save data to localStorage whenever display is updated (only if we have data)
+                if (this.userNFTs.length > 0 || this.stakedNFTs.length > 0 || this.fishCoins > 0) {
+                    this.saveNFTsToStorage();
+                }
                 
                 console.log('✅ UI update completed');
             }
@@ -5612,8 +5614,10 @@
                     
                     this.updateStakingStats();
                     
-                    // Save data to localStorage whenever UI is updated
-                    this.saveNFTsToStorage();
+                    // Save data to localStorage whenever UI is updated (only if we have data)
+                    if (this.userNFTs.length > 0 || this.stakedNFTs.length > 0 || this.fishCoins > 0) {
+                        this.saveNFTsToStorage();
+                    }
                 } else {
                     if (connectWalletBtn) {
                         connectWalletBtn.innerHTML = '<span style="position: relative; z-index: 2;">🔗 Connect Wallet</span>';
