@@ -4928,6 +4928,14 @@
                 console.log('✅ Test data saved! Now refresh the page and check if it loads.');
             }
             
+            // Clear localStorage completely
+            clearLocalStorage() {
+                console.log('🗑️ CLEARING LOCALSTORAGE COMPLETELY...');
+                localStorage.removeItem('otterWalletNFTs');
+                console.log('✅ localStorage cleared!');
+                console.log('🔄 Now refresh the page and connect your wallet - no demo NFTs will load!');
+            }
+            
             // Test function to manually save current data
             testSaveData() {
                 console.log('🧪 TESTING DATA SAVE...');
@@ -24100,6 +24108,7 @@
         // otterWallet.forceShowNFTs()  // NEW: Force show NFTs in profile tab
         // otterWallet.testLocalStoragePersistence()  // NEW: Test localStorage persistence
         // otterWallet.forceSaveTestData()  // NEW: Force save test data
+        // otterWallet.clearLocalStorage()  // NEW: Clear localStorage completely
         // otterWallet.simulateStakeNFT('1001')
         // otterWallet.simulateUnstakeAll()
 
