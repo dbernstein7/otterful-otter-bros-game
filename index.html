@@ -4960,6 +4960,29 @@
                 console.log('🔄 Refresh the page now - everything is cleared!');
             }
             
+            // Nuclear option - clear everything and reload page
+            nuclearClear() {
+                console.log('💥 NUCLEAR CLEAR - CLEARING EVERYTHING AND RELOADING...');
+                
+                // Clear all localStorage
+                localStorage.clear();
+                
+                // Clear sessionStorage too
+                sessionStorage.clear();
+                
+                // Clear memory
+                this.userNFTs = [];
+                this.stakedNFTs = [];
+                this.fishCoins = 0;
+                this.stakingStartTimes = {};
+                
+                console.log('✅ NUCLEAR CLEAR COMPLETE!');
+                console.log('🔄 RELOADING PAGE...');
+                
+                // Force reload the page
+                window.location.reload(true);
+            }
+            
             // Test function to manually save current data
             testSaveData() {
                 console.log('🧪 TESTING DATA SAVE...');
@@ -24134,9 +24157,36 @@
         // otterWallet.forceSaveTestData()  // NEW: Force save test data
         // otterWallet.clearLocalStorage()  // NEW: Clear localStorage completely
         // otterWallet.forceReset()  // NEW: Force reset everything
+        // otterWallet.nuclearClear()  // NEW: Nuclear clear and reload
         // otterWallet.simulateStakeNFT('1001')
         // otterWallet.simulateUnstakeAll()
 
+        // AUTO-CLEAR DEMO NFTS ON STARTUP
+        console.log('🧹 AUTO-CLEARING DEMO NFTS ON STARTUP...');
+        
+        // Check if there are demo NFTs in localStorage and clear them
+        const stored = localStorage.getItem('otterWalletNFTs');
+        if (stored) {
+            try {
+                const data = JSON.parse(stored);
+                const hasDemoNFTs = data.userNFTs && data.userNFTs.some(nft => 
+                    nft.tokenId === '1001' || nft.tokenId === '1002' || nft.tokenId === '1003' ||
+                    nft.name && nft.name.includes('Otter #1001') || nft.name && nft.name.includes('Otter #1002') || nft.name && nft.name.includes('Otter #1003')
+                );
+                
+                if (hasDemoNFTs) {
+                    console.log('🗑️ FOUND DEMO NFTS - CLEARING THEM!');
+                    localStorage.clear();
+                    console.log('✅ DEMO NFTS CLEARED!');
+                } else {
+                    console.log('✅ No demo NFTs found in localStorage');
+                }
+            } catch (error) {
+                console.log('❌ Error checking localStorage, clearing anyway');
+                localStorage.clear();
+            }
+        }
+        
         console.log('✅ localStorage system loaded - data will persist across page refreshes');
 
     </script>
