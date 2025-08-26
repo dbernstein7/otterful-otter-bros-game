@@ -6594,14 +6594,7 @@
             
             ctx.save();
             
-            // Draw owl glow effect (simplified)
-            if (Math.random() < 0.2) { // Only 20% chance to draw glow
-                ctx.fillStyle = `rgba(255, 215, 0, ${game.aiBot.glowIntensity * 0.3})`;
-                ctx.beginPath();
-                ctx.arc(botScreenX + game.aiBot.width/2, botScreenY + game.aiBot.height/2, 
-                       game.aiBot.width/2 + 8, 0, Math.PI * 2);
-                ctx.fill();
-            }
+            // Owl glow effect removed
             
             // Draw owl image with hat if equipped, otherwise default owl
             if (game.marketplace.currentHat && game.marketplace.currentHat !== 'none') {
@@ -13131,9 +13124,8 @@
             // 🌊 WATER PHYSICS
             // ========================================
             // Check if player is in water (more precise detection)
-            // Use actual player position for water detection, not collision box
-            const playerBottom = player.y + player.height;
-            const playerTop = player.y;
+            const playerBottom = player.y + player.collisionHeight + player.collisionOffsetY;
+            const playerTop = player.y + player.collisionOffsetY;
             const waterTop = game.waterLevel;
             const waterBottom = game.waterLevel + game.waterDepth;
             
@@ -13148,7 +13140,6 @@
                 }
                 
                 // Check if player is at water surface (within 20px of surface for more reliable detection)
-                // Use actual player position, not collision box
                 const isAtWaterSurface = playerBottom <= waterTop + 20;
                 
                 // Always allow jumping when in water (both surface and underwater)
@@ -13182,11 +13173,10 @@
                         // Much faster upward movement
                         player.velY = Math.max(player.velY - player.swimSpeed * 1.2, -player.swimSpeed * 2.0);
                         player.swimming = true;
-                        console.log('🌊 Swimming up - velY:', player.velY, 'isGiant:', player.isGiant);
+                        console.log('🌊 Swimming up - velY:', player.velY);
                     } else if (game.keys['ArrowDown'] || game.keys['KeyS']) {
                         player.velY = Math.min(player.velY + player.swimSpeed * 0.8, player.swimSpeed * 1.6);
                         player.swimming = true;
-                        console.log('🌊 Swimming down - velY:', player.velY, 'isGiant:', player.isGiant);
                     } else {
                         // Gradually return to neutral when no keys pressed
                         if (player.velY < 0) {
@@ -14449,7 +14439,6 @@
             
             if (player.y > worldBottom) {
                 console.log('Player fell off world! Player Y:', player.y, 'World bottom:', worldBottom);
-                console.log('Player state - inWater:', player.inWater, 'swimming:', player.swimming, 'isGiant:', player.isGiant);
                 console.log('Player lives before death:', game.lives);
                 game.lives--;
                 if (game.lives <= 0) {
