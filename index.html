@@ -13131,8 +13131,9 @@
             // 🌊 WATER PHYSICS
             // ========================================
             // Check if player is in water (more precise detection)
-            const playerBottom = player.y + player.collisionHeight + player.collisionOffsetY;
-            const playerTop = player.y + player.collisionOffsetY;
+            // Use actual player position for water detection, not collision box
+            const playerBottom = player.y + player.height;
+            const playerTop = player.y;
             const waterTop = game.waterLevel;
             const waterBottom = game.waterLevel + game.waterDepth;
             
@@ -13147,6 +13148,7 @@
                 }
                 
                 // Check if player is at water surface (within 20px of surface for more reliable detection)
+                // Use actual player position, not collision box
                 const isAtWaterSurface = playerBottom <= waterTop + 20;
                 
                 // Always allow jumping when in water (both surface and underwater)
@@ -13180,10 +13182,11 @@
                         // Much faster upward movement
                         player.velY = Math.max(player.velY - player.swimSpeed * 1.2, -player.swimSpeed * 2.0);
                         player.swimming = true;
-                        console.log('🌊 Swimming up - velY:', player.velY);
+                        console.log('🌊 Swimming up - velY:', player.velY, 'isGiant:', player.isGiant);
                     } else if (game.keys['ArrowDown'] || game.keys['KeyS']) {
                         player.velY = Math.min(player.velY + player.swimSpeed * 0.8, player.swimSpeed * 1.6);
                         player.swimming = true;
+                        console.log('🌊 Swimming down - velY:', player.velY, 'isGiant:', player.isGiant);
                     } else {
                         // Gradually return to neutral when no keys pressed
                         if (player.velY < 0) {
@@ -14446,6 +14449,7 @@
             
             if (player.y > worldBottom) {
                 console.log('Player fell off world! Player Y:', player.y, 'World bottom:', worldBottom);
+                console.log('Player state - inWater:', player.inWater, 'swimming:', player.swimming, 'isGiant:', player.isGiant);
                 console.log('Player lives before death:', game.lives);
                 game.lives--;
                 if (game.lives <= 0) {
