@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ollie the Otter - 2D Platformer</title>
+    <title>Otterful Otter Bros</title>
+    <!-- Cache bust: Updated title to Otterful Otter Bros - v3 -->
+    <script>
+        // Force set the title to ensure it's correct
+        document.title = "Otterful Otter Bros";
+    </script>
     <style>
             @keyframes levelUpPulse {
                 0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
@@ -3133,7 +3138,7 @@
                 </ul>
             </div>
             <div class="asset-section">
-                <h4>🦦 Player Character (Ollie the Otter)</h4>
+                <h4>🦦 Player Character (Otterful Otter Bros)</h4>
                 <p style="color: #FFD700; font-size: 12px; margin: 5px 0;">Replace the otter character sprite (recommended: 100x100px PNG with transparent background)</p>
                 <div style="display: flex; gap: 10px; align-items: center;">
                     <input type="file" id="playerSprite" accept="image/*" onchange="loadAsset('player', this)">
