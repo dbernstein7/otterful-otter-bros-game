@@ -3890,10 +3890,19 @@
                     const recentTokens = await this.findTokensFromEvents();
                     ownedTokens.push(...recentTokens);
                     
-                    // Strategy 2: If events don't work, scan a reasonable range
-                    if (ownedTokens.length === 0) {
-                        console.log('🔍 Method 2: Direct ownership scanning...');
-                        const scannedTokens = await this.scanTokenRange(1, 200); // Scan first 200 tokens
+                    // Strategy 2: If events don't work or found fewer than balance, scan the full range
+                    const balance = await this.getTokenBalance();
+                    console.log(`💰 Wallet balance: ${balance} NFTs`);
+                    
+                    if (ownedTokens.length < balance) {
+                        console.log(`🔍 Method 2: Events found ${ownedTokens.length} but balance is ${balance}, scanning full range...`);
+                        // Scan all 2222 tokens to find all owned NFTs
+                        const scannedTokens = await this.scanTokenRange(1, 2222);
+                        ownedTokens.push(...scannedTokens);
+                    } else if (ownedTokens.length === 0) {
+                        // If events found nothing, try scanning full range
+                        console.log('🔍 Method 2: No tokens from events, scanning full range...');
+                        const scannedTokens = await this.scanTokenRange(1, 2222);
                         ownedTokens.push(...scannedTokens);
                     }
                     
@@ -3905,7 +3914,13 @@
                     
                     // Remove duplicates
                     const uniqueTokens = [...new Set(ownedTokens)];
-                    console.log(`📊 Found ${uniqueTokens.length} owned tokens total`);
+                    console.log(`📊 Found ${uniqueTokens.length} owned tokens total (expected ${balance})`);
+                    
+                    // If we found fewer than the balance, warn the user
+                    if (balance > 0 && uniqueTokens.length < balance) {
+                        console.warn(`⚠️ Found ${uniqueTokens.length} tokens but balance shows ${balance}. Some NFTs may not be displayed.`);
+                        this.showMessage(`Found ${uniqueTokens.length} of ${balance} NFTs. Some may be missing. Try manual scan.`, 'warning');
+                    }
                     
                     return uniqueTokens;
                     
@@ -4010,10 +4025,18 @@
                         ownedTokens.push(...recentTokens);
                     }
                     
-                    // Strategy 3: If events don't work, scan a reasonable range with validation
-                    if (ownedTokens.length === 0) {
-                        console.log('🔍 Method 3: Direct ownership scanning with validation...');
-                        const scannedTokens = await this.scanTokenRangeImproved(1, 200); // Scan first 200 tokens
+                    // Strategy 3: If events don't work or found fewer than balance, scan the full range
+                    const balance = await this.getTokenBalance();
+                    console.log(`💰 Wallet balance: ${balance} NFTs`);
+                    
+                    if (ownedTokens.length < balance) {
+                        console.log(`🔍 Method 3: Found ${ownedTokens.length} but balance is ${balance}, scanning full range...`);
+                        // Scan all 2222 tokens to find all owned NFTs
+                        const scannedTokens = await this.scanTokenRangeImproved(1, 2222);
+                        ownedTokens.push(...scannedTokens);
+                    } else if (ownedTokens.length === 0) {
+                        console.log('🔍 Method 3: No tokens found, scanning full range...');
+                        const scannedTokens = await this.scanTokenRangeImproved(1, 2222);
                         ownedTokens.push(...scannedTokens);
                     }
                     
@@ -4025,7 +4048,12 @@
                     
                     // Remove duplicates and validate each token
                     const uniqueTokens = [...new Set(ownedTokens)];
-                    console.log(`📊 Found ${uniqueTokens.length} owned tokens before validation`);
+                    console.log(`📊 Found ${uniqueTokens.length} owned tokens before validation (expected ${balance || 'unknown'})`);
+                    
+                    // If we found fewer than the balance, warn the user
+                    if (balance > 0 && uniqueTokens.length < balance) {
+                        console.warn(`⚠️ Found ${uniqueTokens.length} tokens but balance shows ${balance}. Some NFTs may not be displayed.`);
+                    }
                     
                     // DOUBLE-CHECK OWNERSHIP TO PREVENT FALSE POSITIVES
                     const validatedTokens = [];
