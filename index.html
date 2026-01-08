@@ -13117,14 +13117,7 @@
             // 🚀 ROBUST DOUBLE JUMP SYSTEM
             // ========================================
             if (game.keys['jumpJustPressed']) {
-                console.log('🎯 Jump attempt:', {
-                    onGround: player.onGround,
-                    canDoubleJump: player.canDoubleJump,
-                    velY: player.velY.toFixed(2),
-                    velX: player.velX,
-                    movingRight: game.keys['ArrowRight'] || game.keys['KeyD'],
-                    movingLeft: game.keys['ArrowLeft'] || game.keys['KeyA']
-                });
+                // Removed console.log for performance
                 
                 if (player.onGround) {
                     // ✅ FIRST JUMP - From ground
@@ -13132,23 +13125,17 @@
                     player.onGround = false;
                     player.onMovingPlatform = false; // Reset moving platform state when jumping
                     game.sessionStats.jumpsMade++;
-                    console.log('✅ First jump executed');
                 } else if (player.canDoubleJump) {
                     // ⭐ DOUBLE JUMP - From air (always works regardless of velocity)
                     player.velY = -player.jumpPower * 0.7; // Reduced double jump power for better control
                     player.canDoubleJump = false;
                     game.sessionStats.jumpsMade++;
-                    console.log('⭐ Double jump executed');
                 } else if (player.inWater) {
                     // 🌊 WATER JUMP - Swim up when in water (always works, regardless of position)
                     player.velY = -player.swimSpeed * 0.25; // Reduced water jump power for better control
                     player.swimming = true;
                     player.onGround = false; // Ensure we're off ground when water jumping
                     game.sessionStats.jumpsMade++;
-                    console.log('🌊 Water jump executed - velY:', player.velY);
-
-                } else {
-                    console.log('❌ Jump failed - onGround:', player.onGround, 'canDoubleJump:', player.canDoubleJump, 'inWater:', player.inWater);
                 }
                 
                 // 🔄 ALWAYS reset the flag, even if jump failed
@@ -13192,7 +13179,6 @@
                 // Player is in water
                 if (!player.inWater) {
                     player.inWater = true;
-                    console.log('🌊 Player entered water');
                     // Show owl underwater message
                     showSituationalOwlMessage('underwater');
                 }
@@ -13205,12 +13191,10 @@
                     // At water surface - treat like normal ground for jumping
                     player.onGround = true;
                     player.canDoubleJump = true;
-                    console.log('🌊 Player at water surface - allowing normal jumping');
                 } else {
                     // Underwater - still allow jumping but apply water physics
                     if (player.onGround) {
                         player.onGround = false;
-                        console.log('🌊 Underwater - off ground but can still jump');
                     }
                 }
                 
@@ -13231,7 +13215,6 @@
                         // Much faster upward movement
                         player.velY = Math.max(player.velY - player.swimSpeed * 1.2, -player.swimSpeed * 2.0);
                         player.swimming = true;
-                        console.log('🌊 Swimming up - velY:', player.velY);
                     } else if (game.keys['ArrowDown'] || game.keys['KeyS']) {
                         player.velY = Math.min(player.velY + player.swimSpeed * 0.8, player.swimSpeed * 1.6);
                         player.swimming = true;
@@ -13263,13 +13246,7 @@
                 if (player.inWater) {
                     player.inWater = false;
                     player.swimming = false;
-                    console.log('🌊 Player left water');
                 }
-            }
-            
-            // Debug water state
-            if (player.inWater) {
-                console.log('🌊 Water debug - onGround:', player.onGround, 'velY:', player.velY.toFixed(2), 'swimming:', player.swimming);
             }
             
             // ========================================
@@ -13399,14 +13376,12 @@
             // 🧱 Left boundary check - 200px from spawn
             const leftBoundaryX = 240 - 200; // 40px left of spawn
             if (player.x < leftBoundaryX) {
-                console.log('🧱 Player hit left boundary - stopping movement');
                 player.x = leftBoundaryX;
                 player.velX = 0; // Stop horizontal movement
             }
 
             // 💀 Death barrier check
             if (player.y > game.deathBarrier) {
-                console.log('💀 Player hit death barrier - respawning');
                 game.lives--;
                 if (game.lives <= 0) {
                     game.gameOver = true;
@@ -13433,7 +13408,6 @@
             // 🧱 Invisible wall check - 300px past goal
             const invisibleWallX = game.goalX + 300;
             if (player.x > invisibleWallX) {
-                console.log('🧱 Player hit invisible wall - stopping movement');
                 player.x = invisibleWallX;
                 player.velX = 0; // Stop horizontal movement
             }
@@ -14189,7 +14163,6 @@
                         if (timeSinceDisappear >= 5000) { // 5 seconds to respawn
                             platform.isVisible = true;
                             platform.respawnStartTime = null;
-                            console.log('☁️ Cloud respawned!');
                         }
                     }
                 }
@@ -14218,7 +14191,6 @@
                 
                 // Safety check: force player off platform if stuck for too long (5 seconds)
                 if (player.onMovingPlatform && Date.now() - player.platformStartTime > 5000) {
-                    console.log('Safety: Forcing player off stuck platform');
                     player.onMovingPlatform = false;
                     player.velY = -5; // Give player a small upward boost
                 }
@@ -14231,7 +14203,23 @@
             let wasOnGround = player.onGround; // 📝 Remember previous ground state
             player.onGround = false;
 
+            // Optimize: Only check platforms near the player (spatial culling)
+            const playerCollisionX = player.x + player.collisionOffsetX;
+            const playerCollisionY = player.y + player.collisionOffsetY;
+            const checkRadius = 300; // Only check platforms within 300px
+            
             for (const platform of platforms) {
+                // Quick distance check to skip far platforms
+                const platformCenterX = platform.x + platform.width / 2;
+                const platformCenterY = platform.y + platform.height / 2;
+                const distanceX = Math.abs(platformCenterX - playerCollisionX);
+                const distanceY = Math.abs(platformCenterY - playerCollisionY);
+                
+                // Skip platforms that are too far away
+                if (distanceX > checkRadius || distanceY > checkRadius) {
+                    continue;
+                }
+                
                 if (platform.isVisible !== false) { // Skip invisible disappearing platforms and clouds
                     const collisionX = player.x + player.collisionOffsetX;
                     const collisionY = player.y + player.collisionOffsetY;
@@ -14259,7 +14247,6 @@
                     // Reset down jump flag if player successfully dropped through a platform
                     if (game.keys['downJumpPressed'] && player.velY > 0 && player.y > (player.lastPlatform ? player.lastPlatform.y + 50 : 0)) {
                         game.keys['downJumpPressed'] = false;
-                        console.log('🔽 Down jump flag reset - successfully dropped through platform');
                     }
                     
                     // 🌊 SWIMMING CHECK - Skip collision if player is swimming up in water
@@ -14278,7 +14265,6 @@
                         if (platform.type === 'linear') {
                             player.onMovingPlatform = true;
                             player.platformStartTime = Date.now();
-                            console.log('Player landed on moving platform');
                         } else {
                             player.onMovingPlatform = false;
                         }
@@ -14287,7 +14273,6 @@
                         if (platform.type === 'cloud' && !platform.isDisappearing) {
                             platform.isDisappearing = true;
                             platform.cloudStartTime = Date.now();
-                            console.log('☁️ Cloud disappearing timer started! Will disappear in 3 seconds, respawn in 8 seconds total.');
                         }
                         
                         break; // Exit loop once we find a platform we're standing on
@@ -14296,8 +14281,21 @@
             }
 
             // 🧱 BARRIER COLLISION DETECTION - Prevent going too far left
+            // Optimize: Only check barriers near the player
+            const barrierCheckRadius = 200;
+            
             for (const platform of platforms) {
                 if (platform.type === 'barrier') {
+                    // Quick distance check
+                    const platformCenterX = platform.x + platform.width / 2;
+                    const platformCenterY = platform.y + platform.height / 2;
+                    const distanceX = Math.abs(platformCenterX - playerCollisionX);
+                    const distanceY = Math.abs(platformCenterY - playerCollisionY);
+                    
+                    if (distanceX > barrierCheckRadius || distanceY > barrierCheckRadius) {
+                        continue;
+                    }
+                    
                     const collisionX = player.x + player.collisionOffsetX;
                     const collisionY = player.y + player.collisionOffsetY;
                     
@@ -14318,7 +14316,6 @@
                         // Push player back to the right of the barrier
                         player.x = barrierRight - player.collisionOffsetX;
                         player.velX = Math.max(0, player.velX); // Stop leftward movement
-                        console.log('🧱 Hit left barrier - pushed back!');
                     }
                 }
             }
