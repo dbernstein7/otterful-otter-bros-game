@@ -9195,8 +9195,15 @@
         }
         
         function createParticle(x, y, type) {
+            // Limit particles if we already have too many
+            const MAX_PARTICLES = 200;
+            if (game.particles && game.particles.length > MAX_PARTICLES * 0.8) {
+                return []; // Don't create more particles if we're near the limit
+            }
+            
             const particles = [];
-            const count = type === 'land' ? 8 : type === 'splash' ? 12 : type === 'stomp' ? 15 : type === 'golden' ? 10 : 6;
+            // Reduced particle counts for better performance
+            const count = type === 'land' ? 6 : type === 'splash' ? 8 : type === 'stomp' ? 10 : type === 'golden' ? 8 : 4;
             
             for (let i = 0; i < count; i++) {
                 particles.push({
@@ -10936,14 +10943,14 @@
                 ctx.fillStyle = lavaOverlay;
                 ctx.fillRect(0, lavaTop, canvas.width, lavaBottom - lavaTop);
                 
-                // Add lava surface effect
-                const time = Date.now() * 0.002;
+                // Add lava surface effect (optimized: cache time, reduce particles)
+                const time = (game.frameCount || 0) * 0.033; // Use frame count instead of Date.now() for better performance
                 ctx.strokeStyle = 'rgba(255, 255, 0, 0.6)';
                 ctx.lineWidth = 3;
                 ctx.beginPath();
                 
-                // Animated lava surface waves
-                for (let x = 0; x < canvas.width; x += 15) {
+                // Animated lava surface waves (reduced resolution for performance)
+                for (let x = 0; x < canvas.width; x += 20) { // Increased from 15 to 20
                     const waveY = lavaTop + Math.sin(time + x * 0.02) * 5;
                     if (x === 0) {
                         ctx.moveTo(x, waveY);
@@ -10953,10 +10960,10 @@
                 }
                 ctx.stroke();
                 
-                // Add lava particles/bubbles
+                // Add lava particles/bubbles (reduced count for performance)
                 ctx.fillStyle = 'rgb(255, 100, 0)';
-                for (let i = 0; i < 12; i++) {
-                    const particleX = (i * 120 + Math.sin(time + i) * 40) % canvas.width;
+                for (let i = 0; i < 8; i++) { // Reduced from 12 to 8
+                    const particleX = (i * 150 + Math.sin(time + i) * 40) % canvas.width;
                     const particleY = lavaBottom - 15 - Math.sin(time * 3 + i) * 8;
                     const particleSize = 3 + Math.sin(time + i * 0.7) * 2;
                     
@@ -10988,14 +10995,14 @@
                 ctx.fillStyle = waterOverlay;
                 ctx.fillRect(0, waterTop, canvas.width, waterBottom - waterTop);
                 
-                // Add water surface effect
-                const time = Date.now() * 0.001;
+                // Add water surface effect (optimized: use frame count instead of Date.now())
+                const time = (game.frameCount || 0) * 0.016; // Use frame count for better performance
                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
                 
-                // Animated water surface waves
-                for (let x = 0; x < canvas.width; x += 20) {
+                // Animated water surface waves (reduced resolution for performance)
+                for (let x = 0; x < canvas.width; x += 25) { // Increased from 20 to 25
                     const waveY = waterTop + Math.sin(time + x * 0.01) * 3;
                     if (x === 0) {
                         ctx.moveTo(x, waveY);
@@ -11005,10 +11012,10 @@
                 }
                 ctx.stroke();
                 
-                // Add water bubbles
+                // Add water bubbles (reduced count for performance)
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-                for (let i = 0; i < 8; i++) {
-                    const bubbleX = (i * 150 + Math.sin(time + i) * 50) % canvas.width;
+                for (let i = 0; i < 6; i++) { // Reduced from 8 to 6
+                    const bubbleX = (i * 180 + Math.sin(time + i) * 50) % canvas.width;
                     const bubbleY = waterBottom - 20 - Math.sin(time * 2 + i) * 10;
                     const bubbleSize = 2 + Math.sin(time + i * 0.5) * 1;
                     
@@ -16207,17 +16214,30 @@
                 });
             }
             
-            // Update particles
-            game.particles.forEach((particle, index) => {
+            // Update particles (optimized: reverse loop to avoid index issues, limit particles)
+            // Limit particles to prevent performance issues
+            const MAX_PARTICLES = 200;
+            if (game.particles.length > MAX_PARTICLES) {
+                game.particles = game.particles.slice(-MAX_PARTICLES);
+            }
+            
+            // Reverse loop to avoid index shifting issues when removing particles
+            for (let i = game.particles.length - 1; i >= 0; i--) {
+                const particle = game.particles[i];
                 particle.x += particle.velX;
                 particle.y += particle.velY;
                 particle.velY += 0.3; // Gravity
                 particle.life -= particle.decay;
                 
-                if (particle.life <= 0) {
-                    game.particles.splice(index, 1);
+                // Remove particles that are off-screen and dead
+                if (particle.life <= 0 || 
+                    particle.x < game.camera.x - 200 || 
+                    particle.x > game.camera.x + game.canvasWidth + 200 ||
+                    particle.y < game.camera.y - 200 || 
+                    particle.y > game.camera.y + game.canvasHeight + 200) {
+                    game.particles.splice(i, 1);
                 }
-            });
+            }
             
             // Update screen shake
             if (game.screenShake > 0) {
@@ -16396,15 +16416,20 @@
             
             // Draw platforms in correct order (bottom to top) so green grass is visible
             // Cloud platforms are drawn last to appear on top
-            const regularPlatforms = platforms.filter(p => p.type !== 'cloud');
-            const cloudPlatforms = platforms.filter(p => p.type === 'cloud');
+            // Cache platform filtering and sorting (only recalculate if platforms changed)
+            if (!game._cachedPlatforms || game._platformsCacheFrame !== game.frameCount) {
+                const regularPlatforms = platforms.filter(p => p.type !== 'cloud');
+                const cloudPlatforms = platforms.filter(p => p.type === 'cloud');
+                
+                // Sort regular platforms by Y position (bottom first) - cache this
+                game._cachedRegularPlatforms = [...regularPlatforms].sort((a, b) => a.y - b.y);
+                game._cachedCloudPlatforms = cloudPlatforms;
+                game._platformsCacheFrame = game.frameCount;
+            }
             
-            // Sort regular platforms by Y position (bottom first)
-            const sortedRegularPlatforms = [...regularPlatforms].sort((a, b) => a.y - b.y);
-            sortedRegularPlatforms.forEach(drawPlatform);
-            
-            // Draw cloud platforms last (on top)
-            cloudPlatforms.forEach(drawPlatform);
+            // Draw cached platforms
+            game._cachedRegularPlatforms.forEach(drawPlatform);
+            game._cachedCloudPlatforms.forEach(drawPlatform);
             
             // Draw goal
             drawGoal();
@@ -16553,10 +16578,8 @@
                         if (screenX > -100 && screenX < game.canvasWidth + 100 && 
                             screenY > -100 && screenY < game.canvasHeight + 100) {
                             
-                            console.log('🔫 Drawing laser at screen position:', screenX, screenY);
+                            // Removed console.log for performance
                             drawLaser(screenX, screenY);
-                            
-
                         }
                     }
                 });
@@ -16651,9 +16674,7 @@
                 // Removed console.log to prevent spam
             }
             enemies.forEach(enemy => {
-                if (enemy.type === 'wizgator') {
-                    console.log('🎨 FOUND WIZGATOR IN DRAW LOOP! Position:', enemy.x, enemy.y);
-                }
+                // Removed console.log for performance
                 // Draw based on enemy type
                 if (enemy.type === 'eagle') {
                     drawEagle(enemy);
