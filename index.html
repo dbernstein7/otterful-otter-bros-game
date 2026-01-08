@@ -8246,16 +8246,65 @@
             // Generate exactly 100 coins per level
             const coinCount = 100;
             
-            // Filter out platforms in lava areas
-            const safePlatforms = platforms.filter(p => !game.bossActive || p.y < game.lavaLevel - 100);
+            // Filter out platforms in lava areas and ensure platforms are wide enough
+            const safePlatforms = platforms.filter(p => {
+                const isSafe = !game.bossActive || p.y < game.lavaLevel - 100;
+                const isWideEnough = p.width >= 50; // Ensure platform is wide enough for coin placement
+                return isSafe && isWideEnough;
+            });
             
-            for (let i = 0; i < coinCount; i++) {
-                if (safePlatforms.length === 0) break; // No safe platforms available
+            if (safePlatforms.length === 0) {
+                console.warn(`⚠️ No safe platforms available for coins in level ${levelNum}`);
+                return coins;
+            }
+            
+            // Distribute coins evenly across safe platforms
+            // Calculate how many coins per platform, with remainder distributed randomly
+            const coinsPerPlatform = Math.floor(coinCount / safePlatforms.length);
+            const remainder = coinCount % safePlatforms.length;
+            
+            // Shuffle platforms for random distribution
+            const shuffledPlatforms = [...safePlatforms].sort(() => Math.random() - 0.5);
+            
+            let coinIndex = 0;
+            
+            // Place coins evenly across all platforms
+            for (let i = 0; i < shuffledPlatforms.length && coinIndex < coinCount; i++) {
+                const platform = shuffledPlatforms[i];
+                const coinsForThisPlatform = coinsPerPlatform + (i < remainder ? 1 : 0);
                 
-                // Place coins evenly across safe platforms
+                for (let j = 0; j < coinsForThisPlatform && coinIndex < coinCount; j++) {
+                    // Distribute coins evenly across the platform width
+                    const spacing = platform.width / (coinsForThisPlatform + 1);
+                    const coinX = platform.x + spacing * (j + 1) + (Math.random() - 0.5) * spacing * 0.4; // Add slight randomness
+                    
+                    // Ensure coin is within platform bounds
+                    const clampedX = Math.max(platform.x + 20, Math.min(platform.x + platform.width - 20, coinX));
+                    
+                    // Place coin above platform with some variation
+                    const coinY = platform.y - 36 - Math.random() * 48; // Scaled from 15, 20 (15*2.4=36, 20*2.4=48)
+                    
+                    // Ensure coin is not too high (within reasonable jump distance)
+                    const maxHeight = platform.y - 20;
+                    const minHeight = platform.y - 100;
+                    const clampedY = Math.max(minHeight, Math.min(maxHeight, coinY));
+                    
+                    coins.push({
+                        x: clampedX,
+                        y: clampedY,
+                        collected: false,
+                        type: 'coin'
+                    });
+                    
+                    coinIndex++;
+                }
+            }
+            
+            // If we still haven't placed all coins (shouldn't happen, but safety check)
+            while (coinIndex < coinCount && safePlatforms.length > 0) {
                 const platform = safePlatforms[Math.floor(Math.random() * safePlatforms.length)];
-                const coinX = platform.x + Math.random() * platform.width;
-                const coinY = platform.y - 36 - Math.random() * 48; // Scaled from 15, 20 (15*2.4=36, 20*2.4=48)
+                const coinX = platform.x + 20 + Math.random() * (platform.width - 40);
+                const coinY = platform.y - 36 - Math.random() * 48;
                 
                 coins.push({
                     x: coinX,
@@ -8263,9 +8312,11 @@
                     collected: false,
                     type: 'coin'
                 });
+                
+                coinIndex++;
             }
             
-            console.log(`💰 Generated ${coins.length} coins for level ${levelNum} (lava-protected)`);
+            console.log(`💰 Generated ${coins.length} coins for level ${levelNum} (lava-protected, distributed across ${safePlatforms.length} platforms)`);
             return coins;
         }
         
