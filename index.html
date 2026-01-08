@@ -3363,7 +3363,7 @@
 
                 // Wallet event listeners
                 if (window.ethereum) {
-                    window.ethereum.on('accountsChanged', (accounts) => {
+                    window.ethereum.on('accountsChanged', async (accounts) => {
                         if (accounts.length === 0) {
                             this.disconnect(true); // Clear NFTs when fully disconnecting
                         } else {
@@ -3384,13 +3384,24 @@
                                 console.log('✅ Auto-loaded saved NFTs for new account!');
                                 this.updateNFTDisplay(); // Update the UI with loaded NFTs
                             } else {
-                                console.log('⚠️ No saved NFTs found for new account');
+                                console.log('⚠️ No saved NFTs found for new account - auto-scanning wallet...');
                                 // Clear NFTs for new account
                                 this.userNFTs = [];
                                 this.stakedNFTs = [];
                                 this.fishCoins = 0;
                                 this.stakingStartTimes = {};
                                 this.updateNFTDisplay();
+                                
+                                // Automatically scan for NFTs in the new account
+                                try {
+                                    const balance = await this.getTokenBalance();
+                                    if (balance > 0) {
+                                        console.log(`💰 Found ${balance} Otterful Otters in new wallet, loading...`);
+                                        await this.loadUserNFTsWithMetadata(balance);
+                                    }
+                                } catch (error) {
+                                    console.error('❌ Error auto-scanning for NFTs:', error);
+                                }
                             }
                             
                             this.updateUI();
@@ -3430,7 +3441,23 @@
                             });
                             
                             if (chainId === this.apeChainId) {
-                                // Removed automatic NFT loading - user must load manually
+                                // Auto-load NFTs from localStorage first
+                                const loadedFromStorage = this.loadNFTsFromStorage();
+                                if (!loadedFromStorage || (this.userNFTs.length === 0 && this.stakedNFTs.length === 0)) {
+                                    // If no saved NFTs, automatically scan wallet
+                                    console.log('🔄 Auto-scanning wallet for Otterful Otters NFTs...');
+                                    try {
+                                        const balance = await this.getTokenBalance();
+                                        if (balance > 0) {
+                                            console.log(`💰 Found ${balance} Otterful Otters in wallet, loading...`);
+                                            await this.loadUserNFTsWithMetadata(balance);
+                                        }
+                                    } catch (error) {
+                                        console.error('❌ Error auto-scanning for NFTs:', error);
+                                    }
+                                } else {
+                                    this.updateNFTDisplay();
+                                }
                             }
                         }
                     } catch (error) {
@@ -3487,8 +3514,21 @@
                         this.saveNFTsToStorage(); // Save after loading to ensure data is current
                         this.showMessage(`✅ Auto-loaded ${this.userNFTs.length} NFTs and ${this.stakedNFTs.length} staked NFTs from previous session!`, 'success');
                     } else {
-                        console.log('⚠️ No saved NFTs found - user will need to load NFTs manually');
-                        this.showMessage('No saved NFTs found. Use "Check Token" or "Load Multiple" to load your NFTs.', 'info');
+                        console.log('⚠️ No saved NFTs found - automatically scanning wallet for Otterful Otters...');
+                        // Automatically scan for NFTs when wallet is connected
+                        this.showMessage('Scanning wallet for Otterful Otters NFTs...', 'info');
+                        try {
+                            const balance = await this.getTokenBalance();
+                            if (balance > 0) {
+                                console.log(`💰 Found ${balance} Otterful Otters in wallet, loading...`);
+                                await this.loadUserNFTsWithMetadata(balance);
+                            } else {
+                                this.showMessage('No Otterful Otters NFTs found in this wallet.', 'info');
+                            }
+                        } catch (error) {
+                            console.error('❌ Error auto-scanning for NFTs:', error);
+                            this.showMessage('Auto-scan failed. Use "Check Token" or "Load Multiple" to load your NFTs.', 'warning');
+                        }
                     }
 
                 } catch (error) {
@@ -4741,7 +4781,10 @@
                 nftDiv.innerHTML = `
                     <div style="margin-bottom: 10px;">
                         <h4 style="margin: 0; color: #FFD700; font-size: 16px;">${nft.name}</h4>
-                        <span style="background: #FFD700; color: #000; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: bold;">${nft.rarity.toUpperCase()}</span>
+                        <div style="margin-top: 5px; margin-bottom: 5px;">
+                            <span style="background: #00FFFF; color: #000; padding: 3px 10px; border-radius: 10px; font-size: 11px; font-weight: bold;">Token #${nft.tokenId}</span>
+                            <span style="background: #FFD700; color: #000; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-left: 5px;">${nft.rarity.toUpperCase()}</span>
+                        </div>
                     </div>
                     <div style="margin-bottom: 10px;">
                         ${nft.image ? `<img src="${nft.image}" alt="${nft.name}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 10px;">` : '<div style="width: 80px; height: 80px; background: #f0f0f0; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #999; font-size: 12px;">NO IMAGE</div>'}
