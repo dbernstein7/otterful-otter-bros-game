@@ -1998,6 +1998,68 @@
         </button>
     </div>
     
+    <!-- Sign In Modal (thirdweb style) -->
+    <div id="signInModal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.8); z-index: 5000; font-family: 'Arial', sans-serif; align-items: center; justify-content: center;">
+        <div style="background: #1a1a1a; border-radius: 16px; padding: 32px; max-width: 420px; width: 90%; max-height: 90vh; overflow-y: auto; position: relative; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+            <!-- Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: -0.5px;">SIGN IN</h2>
+                <button id="closeSignInModal" style="background: none; border: none; color: #ffffff; font-size: 24px; cursor: pointer; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'">×</button>
+            </div>
+            
+            <!-- Quick Sign-In Buttons -->
+            <div style="display: flex; gap: 8px; margin-bottom: 24px;">
+                <button class="quick-signin-btn" style="flex: 1; background: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='#ffffff'">
+                    <span style="font-size: 20px;">G</span>
+                </button>
+                <button class="quick-signin-btn" style="flex: 1; background: #5865F2; border: 1px solid #5865F2; border-radius: 8px; padding: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='#4752C4'" onmouseout="this.style.background='#5865F2'">
+                    <span style="color: white; font-size: 20px;">💬</span>
+                </button>
+                <button class="quick-signin-btn" style="flex: 1; background: #0088cc; border: 1px solid #0088cc; border-radius: 8px; padding: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='#0077b5'" onmouseout="this.style.background='#0088cc'">
+                    <span style="color: white; font-size: 20px;">✈️</span>
+                </button>
+                <button class="quick-signin-btn" style="flex: 1; background: #6366f1; border: 1px solid #6366f1; border-radius: 8px; padding: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='#4f46e5'" onmouseout="this.style.background='#6366f1'">
+                    <span style="color: white; font-size: 20px;">🔷</span>
+                </button>
+            </div>
+            
+            <!-- Input Fields -->
+            <div style="margin-bottom: 16px;">
+                <div style="position: relative; margin-bottom: 12px;">
+                    <input type="email" id="emailInput" placeholder="EMAIL ADDRESS" style="width: 100%; padding: 14px 16px; background: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 8px; color: #ffffff; font-size: 14px; box-sizing: border-box; padding-right: 40px;" />
+                    <span style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: #888; cursor: pointer;">→</span>
+                </div>
+                <div style="position: relative; margin-bottom: 12px;">
+                    <span style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #4a9eff; font-size: 18px;">📱</span>
+                    <input type="tel" id="phoneInput" placeholder="PHONE NUMBER" style="width: 100%; padding: 14px 16px 14px 48px; background: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 8px; color: #ffffff; font-size: 14px; box-sizing: border-box;" />
+                </div>
+                <div style="position: relative;">
+                    <span style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #4a9eff; font-size: 18px;">🔐</span>
+                    <input type="text" id="passkeyInput" placeholder="PASSKEY" style="width: 100%; padding: 14px 16px 14px 48px; background: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 8px; color: #ffffff; font-size: 14px; box-sizing: border-box;" />
+                </div>
+            </div>
+            
+            <!-- OR Separator -->
+            <div style="display: flex; align-items: center; margin: 24px 0;">
+                <div style="flex: 1; height: 1px; background: #3a3a3a;"></div>
+                <span style="padding: 0 16px; color: #ffffff; font-size: 14px;">OR</span>
+                <div style="flex: 1; height: 1px; background: #3a3a3a;"></div>
+            </div>
+            
+            <!-- Connect Wallet Button -->
+            <button id="connectWalletFromModal" style="width: 100%; padding: 14px 16px; background: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 8px; color: #ffffff; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.2s; margin-bottom: 24px;" onmouseover="this.style.background='#333'" onmouseout="this.style.background='#2a2a2a'">
+                <span style="color: #4a9eff; font-size: 18px;">💼</span>
+                <span>CONNECT A WALLET</span>
+            </button>
+            
+            <!-- Powered By -->
+            <div style="text-align: center; margin-top: 24px; padding-top: 24px; border-top: 1px solid #3a3a3a;">
+                <div style="color: #888; font-size: 12px; margin-bottom: 8px;">POWERED BY</div>
+                <div style="color: #ffffff; font-size: 16px; font-weight: 600; letter-spacing: 0.5px;">thirdweb</div>
+            </div>
+        </div>
+    </div>
+    
     <div id="gameContainer">
         <canvas id="gameCanvas"></canvas>
         <div id="levelComplete">
@@ -3349,7 +3411,35 @@
                         if (this.isConnected) {
                             this.disconnect();
                         } else {
-                            this.connect();
+                            // Show sign-in modal instead of directly connecting
+                            showSignInModal();
+                        }
+                    });
+                }
+                
+                // Close sign-in modal button
+                const closeSignInModal = document.getElementById('closeSignInModal');
+                if (closeSignInModal) {
+                    closeSignInModal.addEventListener('click', () => {
+                        hideSignInModal();
+                    });
+                }
+                
+                // Connect wallet from modal button
+                const connectWalletFromModal = document.getElementById('connectWalletFromModal');
+                if (connectWalletFromModal) {
+                    connectWalletFromModal.addEventListener('click', () => {
+                        hideSignInModal();
+                        this.connect();
+                    });
+                }
+                
+                // Close modal when clicking outside
+                const signInModal = document.getElementById('signInModal');
+                if (signInModal) {
+                    signInModal.addEventListener('click', (e) => {
+                        if (e.target === signInModal) {
+                            hideSignInModal();
                         }
                     });
                 }
@@ -18229,6 +18319,21 @@
                     return gameAssets.snowPlumberSwimming || gameAssets.swimmingOtter;
                 default:
                     return gameAssets.swimmingOtter; // Default swimming otter
+            }
+        }
+        
+        // Sign In Modal Functions
+        function showSignInModal() {
+            const modal = document.getElementById('signInModal');
+            if (modal) {
+                modal.style.display = 'flex';
+            }
+        }
+        
+        function hideSignInModal() {
+            const modal = document.getElementById('signInModal');
+            if (modal) {
+                modal.style.display = 'none';
             }
         }
         
