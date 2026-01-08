@@ -3832,13 +3832,14 @@
                             // Get the real metadata from blockchain/IPFS
                             const metadata = await this.getRealNFTMetadata(tokenId);
                             
+                            let nft;
                             if (metadata) {
                                 console.log(`✅ Loaded metadata for token ${tokenId}:`, metadata);
                                 
                                 // Extract traits from the actual metadata
                                 const traits = this.extractTraitsFromMetadata(metadata);
                                 
-                                const nft = {
+                                nft = {
                                     tokenId: tokenId,
                                     name: metadata.name || `Otterful Otter #${tokenId}`,
                                     traits: traits,
@@ -3849,13 +3850,26 @@
                                     description: metadata.description || `Otterful Otter #${tokenId}`,
                                     rawMetadata: metadata // Store for debugging
                                 };
-                                
-                                this.userNFTs.push(nft);
-                                console.log(`🦦 Added NFT: ${nft.name} with traits: ${nft.traits.join(', ')}`);
                             } else {
-                                console.log(`⚠️ No metadata found for token ${tokenId}, skipping this token`);
-                                // DO NOT ADD ANYTHING - skip invalid tokens
+                                // Create basic NFT entry even if metadata fails - user owns it!
+                                console.log(`⚠️ No metadata found for token ${tokenId}, creating basic NFT entry`);
+                                const basicTraits = this.generateTraitsFromTokenId ? this.generateTraitsFromTokenId(tokenId) : ['Base-Normal'];
+                                nft = {
+                                    tokenId: tokenId,
+                                    name: `Otterful Otter #${tokenId}`,
+                                    traits: basicTraits,
+                                    multiplier: this.calculateMultiplier(basicTraits),
+                                    perks: this.calculatePerks(basicTraits),
+                                    rarity: this.calculateRarity(basicTraits),
+                                    image: this.processImageUrl(null, tokenId), // Will use compressed PNG if available
+                                    description: `Otterful Otter #${tokenId}`,
+                                    rawMetadata: null
+                                };
                             }
+                            
+                            // Always add the NFT if we found it in the wallet
+                            this.userNFTs.push(nft);
+                            console.log(`🦦 Added NFT: ${nft.name} (Token #${tokenId})`);
                             
                             // Small delay between requests to be nice to servers
                             if (i < ownedTokens.length - 1) {
@@ -3864,7 +3878,21 @@
                             
                         } catch (error) {
                             console.warn(`⚠️ Error loading metadata for token ${tokenId}:`, error.message);
-                            // DO NOT ADD ANYTHING - skip invalid tokens
+                            // Still create a basic NFT entry even on error - user owns it!
+                            const basicTraits = this.generateTraitsFromTokenId ? this.generateTraitsFromTokenId(tokenId) : ['Base-Normal'];
+                            const nft = {
+                                tokenId: tokenId,
+                                name: `Otterful Otter #${tokenId}`,
+                                traits: basicTraits,
+                                multiplier: this.calculateMultiplier(basicTraits),
+                                perks: this.calculatePerks(basicTraits),
+                                rarity: this.calculateRarity(basicTraits),
+                                image: this.processImageUrl(null, tokenId),
+                                description: `Otterful Otter #${tokenId}`,
+                                rawMetadata: null
+                            };
+                            this.userNFTs.push(nft);
+                            console.log(`🦦 Added NFT (fallback): ${nft.name} (Token #${tokenId})`);
                         }
                     }
                     
@@ -3960,13 +3988,14 @@
                             // Get the real metadata from blockchain/IPFS
                             const metadata = await this.getRealNFTMetadata(tokenId);
                             
+                            let nft;
                             if (metadata) {
                                 console.log(`✅ Loaded metadata for token ${tokenId}:`, metadata);
                                 
                                 // Extract traits from the actual metadata
                                 const traits = this.extractTraitsFromMetadata(metadata);
                                 
-                                const nft = {
+                                nft = {
                                     tokenId: tokenId,
                                     name: metadata.name || `Otterful Otter #${tokenId}`,
                                     traits: traits,
@@ -3977,13 +4006,26 @@
                                     description: metadata.description || `Otterful Otter #${tokenId}`,
                                     rawMetadata: metadata // Store for debugging
                                 };
-                                
-                                this.userNFTs.push(nft);
-                                console.log(`🦦 Added NFT: ${nft.name} with traits: ${nft.traits.join(', ')}`);
                             } else {
-                                console.log(`⚠️ No metadata found for token ${tokenId}, skipping this token`);
-                                // DO NOT ADD ANYTHING - skip invalid tokens
+                                // Create basic NFT entry even if metadata fails - user owns it!
+                                console.log(`⚠️ No metadata found for token ${tokenId}, creating basic NFT entry`);
+                                const basicTraits = this.generateTraitsFromTokenId ? this.generateTraitsFromTokenId(tokenId) : ['Base-Normal'];
+                                nft = {
+                                    tokenId: tokenId,
+                                    name: `Otterful Otter #${tokenId}`,
+                                    traits: basicTraits,
+                                    multiplier: this.calculateMultiplier(basicTraits),
+                                    perks: this.calculatePerks(basicTraits),
+                                    rarity: this.calculateRarity(basicTraits),
+                                    image: this.processImageUrl(null, tokenId), // Will use compressed PNG if available
+                                    description: `Otterful Otter #${tokenId}`,
+                                    rawMetadata: null
+                                };
                             }
+                            
+                            // Always add the NFT if we found it in the wallet
+                            this.userNFTs.push(nft);
+                            console.log(`🦦 Added NFT: ${nft.name} (Token #${tokenId})`);
                             
                             // Small delay between requests to be nice to servers
                             if (i < ownedTokens.length - 1) {
@@ -3992,7 +4034,21 @@
                             
                         } catch (error) {
                             console.warn(`⚠️ Error loading metadata for token ${tokenId}:`, error.message);
-                            // DO NOT ADD ANYTHING - skip invalid tokens
+                            // Still create a basic NFT entry even on error - user owns it!
+                            const basicTraits = this.generateTraitsFromTokenId ? this.generateTraitsFromTokenId(tokenId) : ['Base-Normal'];
+                            const nft = {
+                                tokenId: tokenId,
+                                name: `Otterful Otter #${tokenId}`,
+                                traits: basicTraits,
+                                multiplier: this.calculateMultiplier(basicTraits),
+                                perks: this.calculatePerks(basicTraits),
+                                rarity: this.calculateRarity(basicTraits),
+                                image: this.processImageUrl(null, tokenId),
+                                description: `Otterful Otter #${tokenId}`,
+                                rawMetadata: null
+                            };
+                            this.userNFTs.push(nft);
+                            console.log(`🦦 Added NFT (fallback): ${nft.name} (Token #${tokenId})`);
                         }
                     }
                     
@@ -4708,6 +4764,8 @@
             // Add this function to update the UI after loading NFTs
             updateNFTDisplay() {
                 console.log('🖥️ Updating NFT display in UI...');
+                console.log(`📊 userNFTs array length: ${this.userNFTs.length}`);
+                console.log(`📋 userNFTs array:`, this.userNFTs);
                 
                 // Update NFT count displays
                 const totalNftsEl = document.getElementById('totalNfts');
@@ -4726,6 +4784,24 @@
                 // Update any NFT grid displays
                 this.updateNFTGrid();
                 
+                // Force update profile gallery if it exists
+                const profileGallery = document.getElementById('profileNFTGallery');
+                if (profileGallery) {
+                    console.log('🔄 Force updating profile gallery...');
+                    profileGallery.innerHTML = '';
+                    if (this.userNFTs.length > 0) {
+                        this.userNFTs.forEach((nft, index) => {
+                            try {
+                                const nftElement = this.createNFTElement(nft);
+                                profileGallery.appendChild(nftElement);
+                                console.log(`✅ Force-added NFT ${index + 1}: Token #${nft.tokenId}`);
+                            } catch (error) {
+                                console.error(`❌ Error force-adding NFT ${nft.tokenId}:`, error);
+                            }
+                        });
+                    }
+                }
+                
                 // Save data to localStorage whenever display is updated (only if we have data)
                 if (this.userNFTs.length > 0 || this.stakedNFTs.length > 0 || this.fishCoins > 0) {
                     this.saveNFTsToStorage();
@@ -4737,6 +4813,10 @@
             // Add this function to update NFT grid display
             updateNFTGrid() {
                 console.log('🖼️ Updating NFT grid display...');
+                console.log(`📊 Current userNFTs count: ${this.userNFTs.length}`);
+                if (this.userNFTs.length > 0) {
+                    console.log(`📋 NFT token IDs:`, this.userNFTs.map(n => n.tokenId).join(', '));
+                }
                 
                 // Look for NFT container elements - ADD THE CORRECT CONTAINER ID
                 const nftContainers = [
@@ -4761,14 +4841,20 @@
                             console.log('📭 No NFTs to display');
                             container.innerHTML = '<div style="text-align: center; color: #FFD700; padding: 20px;">NO NFTS FOUND IN WALLET</div>';
                         } else {
-                            console.log(`🖼️ Adding ${this.userNFTs.length} NFTs to container`);
+                            console.log(`🖼️ Adding ${this.userNFTs.length} NFTs to container ${container.id || container.className}`);
                             
                             // Add NFTs to container
-                            this.userNFTs.forEach(nft => {
-                                const nftElement = this.createNFTElement(nft);
-                                container.appendChild(nftElement);
-                                console.log(`✅ Added NFT ${nft.tokenId} to gallery`);
+                            this.userNFTs.forEach((nft, index) => {
+                                try {
+                                    const nftElement = this.createNFTElement(nft);
+                                    container.appendChild(nftElement);
+                                    console.log(`✅ Added NFT ${index + 1}/${this.userNFTs.length}: Token #${nft.tokenId} to gallery`);
+                                } catch (error) {
+                                    console.error(`❌ Error creating NFT element for token ${nft.tokenId}:`, error);
+                                }
                             });
+                            
+                            console.log(`✅ Successfully added ${this.userNFTs.length} NFTs to ${container.id || container.className}`);
                         }
                         
                         containerUpdated = true;
@@ -4776,7 +4862,9 @@
                 });
                 
                 if (!containerUpdated) {
-                    console.error('❌ No NFT containers found!');
+                    console.error('❌ No NFT containers found! Available containers:', nftContainers.map(c => c ? (c.id || c.className) : 'null'));
+                } else {
+                    console.log('✅ NFT grid update completed');
                 }
             }
 
