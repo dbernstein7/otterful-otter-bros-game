@@ -90,6 +90,11 @@
                 background: #87CEEB; /* Match game sky color on mobile */
             }
             
+            /* Show mobile-only settings section on mobile */
+            .mobile-only-settings {
+                display: block !important;
+            }
+            
             #gameContainer {
                 width: 100vw;
                 height: 100vh;
@@ -192,6 +197,11 @@
             #ui .score-item {
                 font-size: 8px !important;
                 padding: 2px 4px !important;
+            }
+            
+            /* Hide XP bar group on mobile - moved to settings */
+            #ui .score-row .score-item:last-child {
+                display: none !important;
             }
             
             .corner-display {
@@ -338,31 +348,14 @@
             
             /* Abilities display - position directly above armor bar */
             /* IMPORTANT: Hard refresh browser (Ctrl+Shift+R or Cmd+Shift+R) to see changes */
+            /* Hide abilities display on mobile - moved to settings */
             #abilities-display,
             div.abilities-display,
             .abilities-display {
-                position: fixed !important;
-                bottom: 70px !important; /* Position above health-bar-container (which is at bottom: 10px) */
-                top: auto !important;
-                right: 10px !important;
-                left: auto !important;
-                gap: 4px !important;
-                transform: none !important; /* Remove any transforms that might interfere */
-                margin: 0 !important;
-                width: auto !important;
-                height: auto !important;
+                display: none !important;
             }
             
-            /* Adjust abilities position when in landscape/horizontal mode */
-            @media (orientation: landscape) and (max-width: 768px) {
-                #abilities-display,
-                div.abilities-display,
-                .abilities-display {
-                    bottom: 70px !important; /* Keep same position in landscape */
-                    top: auto !important;
-                    right: 10px !important;
-                }
-            }
+            /* XP bar group remains hidden in landscape too */
             
             .abilities-title {
                 font-size: 8px !important;
@@ -2583,6 +2576,33 @@
                             <span class="toggle-slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);"></span>
                         </label>
                         <span id="aiOwlStatus" style="color: #4CAF50; font-size: 16px; font-weight: bold;">ON</span>
+                    </div>
+                </div>
+                
+                <!-- Mobile-only: Abilities and XP Bar -->
+                <div id="mobileAbilitiesXpSection" class="mobile-only-settings" style="display: none; background: rgba(255,107,53,0.05); padding: 25px; border-radius: 20px; border: 2px solid rgba(255,107,53,0.3); margin-bottom: 25px;">
+                    <h3 style="margin: 0 0 20px 0; color: #FF6B35; text-align: center; font-size: 24px; text-shadow: 0 0 10px rgba(255,107,53,0.5);">⚡ Abilities & XP Progress</h3>
+                    
+                    <!-- XP Bar Group -->
+                    <div style="background: rgba(0,255,255,0.1); padding: 20px; border-radius: 15px; border: 1px solid rgba(0,255,255,0.3); margin-bottom: 20px;">
+                        <h4 style="margin: 0 0 15px 0; color: #00FFFF; font-size: 18px; text-align: center;">📈 Experience Progress</h4>
+                        <div class="xp-bar-container" style="display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%;">
+                            <div class="xp-bar" style="width: 100%; height: 28px; background: linear-gradient(135deg, rgba(0,0,0,0.9), rgba(26,26,46,0.95)); border: 3px solid #00FFFF; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.8), inset 0 0 25px rgba(0,255,255,0.2), 0 0 30px rgba(0,255,255,0.6); backdrop-filter: blur(15px); overflow: hidden; position: relative;">
+                                <div class="xp-bar-fill" id="mobileXpBarFill" style="height: 100%; background: linear-gradient(90deg, #00FFFF, #0080FF, #00FFFF); border-radius: 12px; transition: width 0.5s ease-in-out; position: relative; min-width: 0%; width: 0%;"></div>
+                            </div>
+                            <div class="xp-text" id="mobileXpText" style="color: #00FFFF; font-size: clamp(16px, 2vw, 24px); font-family: 'SuperMario', 'Orbitron', 'Arial Black', sans-serif; font-weight: 900; text-shadow: 2px 2px 4px rgba(0,0,0,0.9), 0 0 15px rgba(0,255,255,0.8); text-align: center;">Level 1 <span id="mobileXpProgress">(0/1000 XP)</span></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Abilities Display -->
+                    <div style="background: rgba(255,107,53,0.1); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,107,53,0.3);">
+                        <h4 style="margin: 0 0 15px 0; color: #FF6B35; font-size: 18px; text-align: center;">⚡ Abilities</h4>
+                        <div class="abilities-display" style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                            <div class="abilities-title" style="color: #FF6B35; font-size: clamp(12px, 1.6vw, 18px); font-family: 'SuperMario', 'Orbitron', 'Arial Black', sans-serif; font-weight: 900; text-shadow: 2px 2px 4px rgba(0,0,0,0.9), 0 0 15px rgba(255,107,53,0.8); background: linear-gradient(135deg, rgba(0,0,0,0.85), rgba(26,26,46,0.95)); padding: clamp(6px, 1vw, 10px) clamp(10px, 1.6vw, 16px); border-radius: 8px; border: 2px solid #FF6B35; box-shadow: 0 4px 12px rgba(0,0,0,0.6), inset 0 0 12px rgba(255,107,53,0.15), 0 0 16px rgba(255,107,53,0.5); backdrop-filter: blur(10px);">⚡ ABILITIES</div>
+                            <div class="abilities-grid" id="mobileAbilitiesGrid" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: center;">
+                                <!-- Abilities will be populated here -->
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -16617,6 +16637,14 @@
                 
                 xpBarFill.style.width = xpPercentage + '%';
                 xpText.innerHTML = `Level ${player.level} <span id="xpProgress">(${currentLevelXP}/${xpForNextLevel} XP)</span>`;
+                
+                // Also update mobile XP bar
+                const mobileXpBarFill = document.getElementById('mobileXpBarFill');
+                const mobileXpText = document.getElementById('mobileXpText');
+                if (mobileXpBarFill && mobileXpText) {
+                    mobileXpBarFill.style.width = xpPercentage + '%';
+                    mobileXpText.innerHTML = `Level ${player.level} <span id="mobileXpProgress">(${currentLevelXP}/${xpForNextLevel} XP)</span>`;
+                }
             }
             
             // Update XP display
@@ -18143,6 +18171,16 @@
             }
             if (xpBarFill) {
                 xpBarFill.style.width = '0%';
+            }
+            
+            // Also initialize mobile XP bar
+            const mobileXpText = document.getElementById('mobileXpText');
+            const mobileXpBarFill = document.getElementById('mobileXpBarFill');
+            if (mobileXpText) {
+                mobileXpText.innerHTML = `Level 1 <span id="mobileXpProgress">(0/1000 XP)</span>`;
+            }
+            if (mobileXpBarFill) {
+                mobileXpBarFill.style.width = '0%';
             }
             
             // Regenerate level
@@ -23458,6 +23496,13 @@
             document.getElementById('pauseCoins').textContent = game.coins;
             document.getElementById('pauseHealth').textContent = player.health;
             document.getElementById('pauseLevel').textContent = player.level;
+            
+            // Sync mobile abilities from main abilities display
+            const mainAbilitiesGrid = document.querySelector('.abilities-display .abilities-grid');
+            const mobileAbilitiesGrid = document.getElementById('mobileAbilitiesGrid');
+            if (mainAbilitiesGrid && mobileAbilitiesGrid) {
+                mobileAbilitiesGrid.innerHTML = mainAbilitiesGrid.innerHTML;
+            }
         }
         
         // Populate pause menu customization options
