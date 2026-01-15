@@ -19476,22 +19476,9 @@
         }
 
         function refreshMetadata() {
-            console.log('🌐 Refreshing metadata...');
-            if (otterWallet && otterWallet.isConnected) {
-                console.log('👤 Current wallet address:', otterWallet.account);
-                console.log('📊 Current NFTs:', otterWallet.userNFTs.length);
-                
-                // Force reload NFTs with fresh metadata
-                otterWallet.loadUserNFTsWithMetadata(otterWallet.userNFTs.length).then(() => {
-                    updateWalletProfile();
-                    console.log('✅ Metadata refreshed');
-                    console.log('📊 Updated NFTs:', otterWallet.userNFTs.length);
-                }).catch(error => {
-                    console.error('❌ Failed to refresh metadata:', error);
-                });
-            } else {
-                console.log('⚠️ Wallet not connected, cannot refresh metadata');
-            }
+            console.log('🌐 Wallet system disabled - metadata refresh not available');
+            // Wallet system completely disabled
+            return;
         }
 
         // Wallet functions removed for performance
