@@ -6409,6 +6409,10 @@
                 return false;
             }
             
+            // Enable high-quality image smoothing to prevent pixelation
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            
             console.log('✅ Canvas initialized successfully');
             
             // Update game object with canvas dimensions
@@ -6451,6 +6455,10 @@
             
             canvas.width = newWidth;
             canvas.height = newHeight;
+            
+            // Re-enable image smoothing after canvas resize (setting width/height resets context)
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
             
             // Calculate scale factors
             const baseWidth = 1920;
@@ -23080,6 +23088,8 @@
                         tempCanvas.width = img.width;
                         tempCanvas.height = img.height;
                         const tempCtx = tempCanvas.getContext('2d');
+                        tempCtx.imageSmoothingEnabled = true;
+                        tempCtx.imageSmoothingQuality = 'high';
                         tempCtx.drawImage(img, 0, 0);
                         gameAssets.backgroundPattern = tempCtx.createPattern(tempCanvas, 'repeat');
                     }
