@@ -3101,6 +3101,25 @@
 
 
     <script>
+        // PERFORMANCE: Disable verbose console logging in production to reduce memory usage
+        const originalLog = console.log;
+        const originalWarn = console.warn;
+        console.log = function(...args) {
+            // Only log important messages, skip verbose game loop logs
+            if (args[0] && typeof args[0] === 'string' && (
+                args[0].includes('ERROR') || 
+                args[0].includes('WARNING') ||
+                args[0].includes('Initializing') ||
+                args[0].includes('DOM loaded')
+            )) {
+                originalLog.apply(console, args);
+            }
+        };
+        console.warn = function(...args) {
+            // Keep warnings but reduce frequency
+            originalWarn.apply(console, args);
+        };
+        
         // WALLET/STAKING SYSTEM REMOVED FOR PERFORMANCE
         // OtterfulWallet class removed - entire wallet/staking system disabled
         /*
@@ -13524,17 +13543,7 @@
                         height: enemy.collisionHeight || enemy.height
                     };
                     
-                    // Use enhanced laser collision detection
-                    if (checkLaserCollision(laser, enemyCollisionBox)) {
-                        console.log('🔍 Laser collision detected with enemy:', {
-                            laser: { x: laser.x, y: laser.y, width: laser.width, height: laser.height },
-                            enemy: { x: enemy.x, y: enemy.y, width: enemy.width, height: enemy.height, type: enemy.type, health: enemy.health },
-                            enemyCollisionBox: enemyCollisionBox,
-                            enemyIndex: enemyIndex,
-                            totalEnemies: enemies.length
-                        });
-                    }
-                    
+                    // Use enhanced laser collision detection (removed verbose logging for performance)
                     if (checkLaserCollision(laser, enemyCollisionBox)) {
                         // Laser hit enemy - use enhanced damage for charged lasers
                         let damage = laser.damage || 1;
@@ -13560,9 +13569,8 @@
                         let finalDamage = damage;
                         // Wallet system disabled - no damage multipliers
                         
-                        console.log('🔫 BEFORE: Enemy health was:', enemy.health, 'Type:', enemy.type);
+                        // Removed verbose logging for performance
                         enemy.health -= finalDamage;
-                        console.log('🔫 AFTER: Laser hit', enemy.type, 'enemy! Damage:', finalDamage, 'Health remaining:', enemy.health);
                         
                         if (enemy.health <= 0) {
                             // Enemy defeated
@@ -13607,7 +13615,7 @@
                             
                             // Enhanced screen shake for charged lasers
                             addScreenShake(2 + (laser.chargeLevel || 0));
-                            console.log('🔫 Enemy defeated by laser!');
+                            // Removed console.log for performance
                         }
                         
                         // Remove laser if it's not a piercing laser or if it's a regular laser
