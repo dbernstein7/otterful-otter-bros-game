@@ -9487,18 +9487,22 @@
         }
         
         function createParticle(x, y, type) {
-            // Limit particles if we already have too many
-            // Mobile optimization: reduce particles significantly
+            // Mobile optimization: disable particles completely on mobile for performance
             const isMobile = game.isMobile || window.innerWidth < 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            const MAX_PARTICLES = isMobile ? 50 : 100; // Even fewer particles on mobile
+            if (isMobile) {
+                return []; // Disable particles on mobile
+            }
+            
+            // Limit particles if we already have too many
+            const MAX_PARTICLES = 100;
             if (game.particles && game.particles.length > MAX_PARTICLES * 0.8) {
                 return []; // Don't create more particles if we're near the limit
             }
             
             const particles = [];
-            // Further reduced particle counts for better performance (50% reduction, even more on mobile)
+            // Reduced particle counts for better performance
             const baseCount = type === 'land' ? 3 : type === 'splash' ? 4 : type === 'stomp' ? 5 : type === 'golden' ? 4 : 2;
-            const count = isMobile ? Math.max(1, Math.floor(baseCount * 0.5)) : baseCount; // 50% fewer on mobile
+            const count = baseCount;
             
             for (let i = 0; i < count; i++) {
                 particles.push({
