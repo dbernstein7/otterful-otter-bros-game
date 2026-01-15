@@ -9055,6 +9055,13 @@
                 return;
             }
             
+            // PERFORMANCE: Clear all arrays and particles before loading new level to prevent memory leaks
+            game.particles = [];
+            if (typeof playerLasers !== 'undefined') playerLasers.length = 0;
+            if (typeof playerFireballs !== 'undefined') playerFireballs.length = 0;
+            if (typeof lasers !== 'undefined') lasers.length = 0;
+            if (typeof bossLasers !== 'undefined') bossLasers.length = 0;
+            
             currentLevel = generateLevel(levelNum);
             platforms = [...currentLevel.platforms];
             fish = currentLevel.fish.map(f => ({ ...f, collected: false }));
@@ -9269,14 +9276,14 @@
         
         function createParticle(x, y, type) {
             // Limit particles if we already have too many
-            const MAX_PARTICLES = 200;
+            const MAX_PARTICLES = 100; // Reduced from 200 to 100 for better performance
             if (game.particles && game.particles.length > MAX_PARTICLES * 0.8) {
                 return []; // Don't create more particles if we're near the limit
             }
             
             const particles = [];
-            // Reduced particle counts for better performance
-            const count = type === 'land' ? 6 : type === 'splash' ? 8 : type === 'stomp' ? 10 : type === 'golden' ? 8 : 4;
+            // Further reduced particle counts for better performance (50% reduction)
+            const count = type === 'land' ? 3 : type === 'splash' ? 4 : type === 'stomp' ? 5 : type === 'golden' ? 4 : 2;
             
             for (let i = 0; i < count; i++) {
                 particles.push({
@@ -16231,7 +16238,7 @@
             
             // Update particles (optimized: reverse loop to avoid index issues, limit particles)
             // Limit particles to prevent performance issues
-            const MAX_PARTICLES = 200;
+            const MAX_PARTICLES = 100; // Reduced from 200 to 100 for better performance
             if (game.particles.length > MAX_PARTICLES) {
                 game.particles = game.particles.slice(-MAX_PARTICLES);
             }
@@ -16244,12 +16251,12 @@
                 particle.velY += 0.3; // Gravity
                 particle.life -= particle.decay;
                 
-                // Remove particles that are off-screen and dead
+                // Remove particles that are off-screen and dead (more aggressive cleanup for performance)
                 if (particle.life <= 0 || 
-                    particle.x < game.camera.x - 200 || 
-                    particle.x > game.camera.x + game.canvasWidth + 200 ||
-                    particle.y < game.camera.y - 200 || 
-                    particle.y > game.camera.y + game.canvasHeight + 200) {
+                    particle.x < game.camera.x - 100 || 
+                    particle.x > game.camera.x + game.canvasWidth + 100 ||
+                    particle.y < game.camera.y - 100 || 
+                    particle.y > game.camera.y + game.canvasHeight + 100) {
                     game.particles.splice(i, 1);
                 }
             }
