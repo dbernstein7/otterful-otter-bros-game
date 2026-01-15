@@ -8287,7 +8287,7 @@
         function generateRandomCoins(platforms, levelNum) {
             const coins = [];
             
-            // Fixed coin count: always 50 coins per level
+            // Always generate exactly 50 coins per level
             const coinCount = 50;
             
             // Calculate level boundaries from platforms
@@ -23807,11 +23807,11 @@
             game.secretChestConditions.treasuresCollected = treasuresCollected;
             game.secretChestConditions.keysCollected = keysCollected;
             
-            // Secret chest spawning disabled - no secret chests will spawn
-            // if (coinsCollected >= 100 && treasuresCollected >= 11 && keysCollected >= 1 && !game.secretChestsSpawned) {
-            //     spawnSecretChests();
-            //     showAIOwlBotMessage("🦉 *whispers* Hoot hoot! I sense something special at the beginning of this level... maybe you should go back and check? *winks*");
-            // }
+            // Check if all conditions are met and chests haven't been spawned yet
+            if (coinsCollected >= 100 && treasuresCollected >= 11 && keysCollected >= 1 && !game.secretChestsSpawned) {
+                spawnSecretChests();
+                showAIOwlBotMessage("🦉 *whispers* Hoot hoot! I sense something special at the beginning of this level... maybe you should go back and check? *winks*");
+            }
         }
 
         function spawnSecretChests() {
