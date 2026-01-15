@@ -23809,22 +23809,38 @@
             console.log('🎁 SECRET CHESTS SPAWNING!');
             game.secretChestsSpawned = true;
             
-            // Find the spawn point (beginning of level)
-            const spawnX = 100; // Player spawn position
-            const spawnY = 1000; // Ground level
+            // Get level boundaries from platforms (same logic as coins)
+            const levelMinX = platforms.length > 0 ? Math.min(...platforms.map(p => p.x)) : 0;
+            const levelMaxX = platforms.length > 0 ? Math.max(...platforms.map(p => p.x + p.width)) : 2000;
             
-            // Create 20 chests equally spaced
+            // Find the spawn point (beginning of level) - use player starting position
+            const spawnX = 240; // Player spawn position (from player.x)
+            const spawnY = 1200; // Ground level (from player starting y)
+            
+            // Ensure spawn is within level bounds
+            const safeSpawnX = Math.max(levelMinX + 50, Math.min(levelMaxX - 50, spawnX));
+            
+            // Create 20 chests equally spaced, but ensure they're all within bounds
             const chestSpacing = 60; // Space between chests
             const totalWidth = 19 * chestSpacing; // 20 chests = 19 spaces
-            const startX = spawnX - totalWidth / 2; // Center the chests around spawn
+            let startX = safeSpawnX - totalWidth / 2; // Center the chests around spawn
+            
+            // Ensure startX is within level bounds
+            startX = Math.max(levelMinX + 20, Math.min(levelMaxX - (totalWidth + 20), startX));
             
             for (let i = 0; i < 20; i++) {
-                const chestX = startX + (i * chestSpacing);
+                let chestX = startX + (i * chestSpacing);
                 const chestY = spawnY - 50; // Slightly above ground
+                
+                // Clamp chest X position to level boundaries
+                chestX = Math.max(levelMinX + 20, Math.min(levelMaxX - 20, chestX));
+                
+                // Ensure chest Y is within reasonable bounds
+                const safeChestY = Math.max(0, Math.min(2500, chestY));
                 
                 const secretChest = {
                     x: chestX,
-                    y: chestY,
+                    y: safeChestY,
                     width: 40,
                     height: 40,
                     collected: false,
@@ -23838,6 +23854,8 @@
                 
                 treasures.push(secretChest);
             }
+            
+            console.log(`🎁 Spawned 20 secret chests at spawn (${safeSpawnX}, ${spawnY}), boundaries: ${levelMinX} to ${levelMaxX}`);
             
             // Show special notification
             showSecretChestNotification();
