@@ -127,11 +127,42 @@
                 font-size: 10px !important;
             }
             
-            /* Reduce visual effects on mobile */
+            /* Reduce visual effects on mobile for performance */
             .corner-display {
                 backdrop-filter: none !important;
                 box-shadow: 0 2px 5px rgba(0,0,0,0.5) !important;
                 animation: none !important;
+            }
+            
+            /* Disable all animations and transitions on mobile for performance */
+            * {
+                animation: none !important;
+                transition: none !important;
+            }
+            
+            /* Disable backdrop filters on mobile (very expensive) */
+            * {
+                backdrop-filter: none !important;
+            }
+            
+            /* Simplify box shadows on mobile */
+            .corner-display,
+            .score-item,
+            .health-bar-container,
+            .health-bar,
+            .armor-bar,
+            .lives-display,
+            .abilities-display,
+            .collectiblesCounter,
+            .xp-bar-container {
+                box-shadow: 0 1px 3px rgba(0,0,0,0.5) !important;
+            }
+            
+            /* Disable hover effects on mobile */
+            .corner-display:hover,
+            .xp-bar-container:hover {
+                transform: none !important;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.5) !important;
             }
         }
         
@@ -206,7 +237,7 @@
                 display: block !important; /* Ensure it's visible */
             }
             
-            /* XP bar on mobile - match level display size */
+            /* XP bar on mobile - match level display size, disable animations for performance */
             .xp-bar-container {
                 top: 5px !important;
                 right: 5px !important;
@@ -214,17 +245,38 @@
                 padding: 2px 4px !important;
                 border-width: 1px !important;
                 gap: 2px !important;
+                animation: none !important;
+                transition: none !important;
+                backdrop-filter: none !important;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.5) !important;
+            }
+            
+            .xp-bar-container:hover {
+                transform: none !important;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.5) !important;
+                animation: none !important;
             }
             
             .xp-bar {
                 height: 10px !important;
                 border-width: 1px !important;
                 max-width: 80px !important;
+                box-shadow: none !important;
+            }
+            
+            .xp-bar-fill {
+                transition: none !important;
+                animation: none !important;
             }
             
             .xp-text {
                 font-size: 8px !important;
                 padding: 0 !important;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.8) !important;
+            }
+            
+            .xp-text span {
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.8) !important;
             }
             
             #collectiblesCounter {
@@ -22402,6 +22454,12 @@
         function initHomeScreenParticles() {
             const particleContainer = document.getElementById('particleContainer');
             if (!particleContainer) return;
+            
+            // Mobile optimization: reduce or disable particles
+            const isMobile = game.isMobile || window.innerWidth < 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if (isMobile) {
+                return; // Disable particles completely on mobile for performance
+            }
             
             const particles = [];
             const particleCount = 20;
