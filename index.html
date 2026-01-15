@@ -269,34 +269,38 @@
             .health-bar-container {
                 bottom: 10px !important;
                 right: 10px !important;
-                gap: 8px !important;
+                gap: 4px !important;
                 flex-direction: row !important; /* Horizontal layout */
-                flex-wrap: wrap !important; /* Allow wrapping */
-                align-items: flex-start !important;
+                flex-wrap: nowrap !important; /* No wrapping - all in one row */
+                align-items: center !important;
                 justify-content: flex-end !important;
             }
             
-            /* Lives display - next to health bar, lowered position */
+            /* Lives display - same size as health/armor bars, in same row */
             #livesDisplay,
             .health-bar-container .lives-display,
             .health-bar-container #livesDisplay {
-                order: 2 !important; /* Lives comes after health and armor bars */
+                order: 0 !important; /* Lives first */
                 margin-top: 0 !important;
-                padding: 4px 6px !important;
+                padding: 2px 4px !important;
                 gap: 2px !important;
                 border-width: 1px !important;
                 border-radius: 6px !important;
-                margin-bottom: -20px !important; /* Lower the lives image */
+                height: 12px !important; /* Same height as bars */
+                display: flex !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                min-width: 60px !important;
             }
             
-            /* Health bar group - first, appears on same row as armor bar */
+            /* Health bar group - second, appears on same row */
             .health-bar-container .bar-group:first-of-type {
-                order: 0 !important;
+                order: 1 !important;
             }
             
-            /* Armor bar - on same row as health bar */
+            /* Armor bar - third, appears on same row */
             .health-bar-container .bar-group:last-of-type {
-                order: 1 !important;
+                order: 2 !important;
                 flex-basis: auto !important; /* Don't force to new line */
                 width: auto !important;
             }
@@ -307,7 +311,7 @@
             }
             
             .health-bar, .armor-bar {
-                width: 120px !important;
+                width: 100px !important;
                 height: 12px !important;
                 border-width: 1px !important;
                 border-radius: 6px !important;
@@ -325,7 +329,7 @@
             }
             
             .lives-icon {
-                font-size: 12px !important;
+                font-size: 10px !important;
             }
             
             .lives-text {
@@ -556,37 +560,13 @@
             background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,165,0,0.1));
             border-radius: 8px;
             border-left: 3px solid #FFD700;
-            transition: all 0.3s ease;
-            animation: counterItemPulse 3s ease-in-out infinite;
-        }
-        
-        .counter-item:hover {
-            background: linear-gradient(135deg, rgba(255,215,0,0.3), rgba(255,165,0,0.2));
-            transform: translateX(-3px) scale(1.05);
-            box-shadow: 0 4px 15px rgba(255,215,0,0.4);
-            animation: counterItemHover 0.3s ease-in-out;
-        }
-        
-        @keyframes counterItemPulse {
-            0%, 100% { transform: translateX(0px); }
-            50% { transform: translateX(-1px); }
-        }
-        
-        @keyframes counterItemHover {
-            0% { transform: translateX(-3px) scale(1.05); }
-            50% { transform: translateX(-5px) scale(1.08); }
-            100% { transform: translateX(-3px) scale(1.05); }
+            /* Removed transition and animation for performance */
         }
         
         .counter-icon {
             font-size: 18px;
             filter: drop-shadow(0 0 8px rgba(255,215,0,0.7));
-            animation: iconGlow 2s ease-in-out infinite alternate;
-        }
-        
-        @keyframes iconGlow {
-            from { filter: drop-shadow(0 0 8px rgba(255,215,0,0.7)); }
-            to { filter: drop-shadow(0 0 12px rgba(255,215,0,0.9)) drop-shadow(0 0 20px rgba(255,215,0,0.5)); }
+            /* Removed animation for performance */
         }
         
         .counter-label {
@@ -604,24 +584,10 @@
             text-shadow: 0 0 8px rgba(0,255,255,0.7), 1px 1px 2px rgba(0,0,0,0.8);
             min-width: 30px;
             text-align: right;
-            animation: valueShine 3s ease-in-out infinite;
+            /* Removed animation for performance */
         }
         
-        @keyframes valueShine {
-            0%, 100% { text-shadow: 0 0 8px rgba(0,255,255,0.7), 1px 1px 2px rgba(0,0,0,0.8); }
-            50% { text-shadow: 0 0 15px rgba(0,255,255,0.9), 0 0 25px rgba(0,255,255,0.6), 1px 1px 2px rgba(0,0,0,0.8); }
-        }
-        
-        /* Counter animation for when values change */
-        .counter-value.updated {
-            animation: counterPulse 0.5s ease-in-out;
-        }
-        
-        @keyframes counterPulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); color: #FFFF00; }
-            100% { transform: scale(1); }
-        }
+        /* Removed counter animation for performance */
         
         @keyframes cornerGlow {
             from { 
@@ -843,25 +809,7 @@
             font-size: 14px;
             border: 2px solid #FFD700;
             box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-            transition: all 0.3s ease;
-            animation: scoreItemPulse 2s ease-in-out infinite;
-        }
-        
-        .score-item:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.5);
-            animation: scoreItemHover 0.3s ease-in-out;
-        }
-        
-        @keyframes scoreItemPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-        }
-        
-        @keyframes scoreItemHover {
-            0% { transform: translateY(-3px) scale(1.05); }
-            50% { transform: translateY(-5px) scale(1.08); }
-            100% { transform: translateY(-3px) scale(1.05); }
+            /* Removed transition and animation for performance */
         }
         
         /* Enhanced XP Bar Styles - COOL VERSION */
@@ -870,24 +818,13 @@
             flex-direction: column;
             align-items: center;
             gap: 6px;
-            animation: xpContainerFloat 4s ease-in-out infinite;
+            /* Removed animation and transition for performance */
             background: linear-gradient(135deg, rgba(0,0,0,0.9), rgba(26,26,46,0.95));
             padding: 12px 16px;
             border-radius: 15px;
             border: 3px solid #00FFFF;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 25px rgba(0,255,255,0.2), 0 0 35px rgba(0,255,255,0.6), 0 0 60px rgba(0,255,255,0.4);
             backdrop-filter: blur(15px);
-            transition: all 0.3s ease;
-        }
-        
-        .xp-bar-container:hover {
-            transform: scale(1.05);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.9), inset 0 0 35px rgba(0,255,255,0.3), 0 0 50px rgba(0,255,255,0.8), 0 0 80px rgba(0,255,255,0.6);
-        }
-        
-        @keyframes xpContainerFloat {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-3px); }
         }
         
         .xp-bar {
@@ -899,18 +836,7 @@
             overflow: hidden;
             position: relative;
             box-shadow: 0 8px 25px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,255,255,0.2), 0 0 30px rgba(0,255,255,0.6), 0 0 50px rgba(0,255,255,0.4);
-            animation: xpBarGlow 3s ease-in-out infinite alternate;
-        }
-        
-        @keyframes xpBarGlow {
-            from { 
-                box-shadow: 0 8px 25px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,255,255,0.2), 0 0 30px rgba(0,255,255,0.6), 0 0 50px rgba(0,255,255,0.4);
-                border-color: #00FFFF;
-            }
-            to { 
-                box-shadow: 0 8px 25px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,255,255,0.3), 0 0 40px rgba(0,255,255,0.8), 0 0 70px rgba(0,255,255,0.6);
-                border-color: #87CEEB;
-            }
+            /* Removed animation for performance */
         }
         
         .xp-bar::before {
@@ -930,25 +856,10 @@
             background: linear-gradient(90deg, #00FFFF, #0080FF, #0040FF, #0000FF, #8000FF, #FF00FF);
             background-size: 200% 100%;
             width: 0%;
-            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            /* Removed transition and animation for performance */
             border-radius: 12px;
             position: relative;
             z-index: 2;
-            animation: xpFillGlow 2s ease-in-out infinite alternate, xpFillMove 3s ease-in-out infinite;
-        }
-        
-        @keyframes xpFillGlow {
-            from { 
-                box-shadow: inset 0 0 15px rgba(0,255,255,0.6), 0 0 20px rgba(0,255,255,0.4);
-            }
-            to { 
-                box-shadow: inset 0 0 25px rgba(0,255,255,0.9), 0 0 35px rgba(0,255,255,0.7), 0 0 50px rgba(0,255,255,0.5);
-            }
-        }
-        
-        @keyframes xpFillMove {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
         }
         
         .xp-text {
@@ -956,7 +867,7 @@
             font-weight: bold;
             color: #FFD700;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.9), 0 0 15px rgba(255,215,0,0.8);
-            animation: xpTextShine 3s ease-in-out infinite;
+            /* Removed animation for performance */
             background: linear-gradient(135deg, rgba(0,0,0,0.85), rgba(26,26,46,0.95));
             padding: 8px 12px;
             border-radius: 10px;
@@ -969,18 +880,7 @@
             color: #00FFFF;
             font-weight: bold;
             text-shadow: 0 0 10px rgba(0,255,255,0.8), 1px 1px 2px rgba(0,0,0,0.9);
-            animation: valueShine 3s ease-in-out infinite;
-        }
-        
-        @keyframes xpTextShine {
-            0%, 100% { 
-                text-shadow: 2px 2px 4px rgba(0,0,0,0.9), 0 0 15px rgba(255,215,0,0.8);
-                box-shadow: 0 4px 15px rgba(0,0,0,0.7), inset 0 0 12px rgba(255,215,0,0.15), 0 0 20px rgba(255,215,0,0.5);
-            }
-            50% { 
-                text-shadow: 2px 2px 4px rgba(0,0,0,0.9), 0 0 25px rgba(255,215,0,0.9), 0 0 35px rgba(255,215,0,0.7);
-                box-shadow: 0 4px 15px rgba(0,0,0,0.7), inset 0 0 12px rgba(255,215,0,0.25), 0 0 30px rgba(255,215,0,0.7), 0 0 45px rgba(255,215,0,0.4);
-            }
+            /* Removed animation for performance */
         }
         
         @keyframes profileXpShine {
@@ -1193,25 +1093,17 @@
             flex-direction: column;
             align-items: flex-end;
             gap: 12px;
-            animation: healthContainerFloat 4s ease-in-out infinite;
-            transition: all 0.3s ease;
+            /* Removed animation and transition for performance */
         }
         
-        @keyframes healthContainerFloat {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-3px); }
-        }
+        /* Removed @keyframes healthContainerFloat for performance */
         
         .bar-group {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
             gap: 6px;
-            transition: all 0.3s ease;
-        }
-        
-        .bar-group:hover {
-            transform: scale(1.05);
+            /* Removed transition for performance */
         }
         
         .health-bar {
@@ -1222,41 +1114,20 @@
             border-radius: 15px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.8), inset 0 0 25px rgba(0,255,0,0.2), 0 0 30px rgba(0,255,0,0.6), 0 0 50px rgba(0,255,0,0.4);
             backdrop-filter: blur(15px);
-            animation: healthBarGlow 2s ease-in-out infinite alternate;
+            /* Removed animation and transition for performance */
             overflow: hidden;
             position: relative;
-            transition: all 0.3s ease;
         }
         
-        .health-bar:hover {
-            transform: scale(1.08);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.9), inset 0 0 35px rgba(0,255,0,0.3), 0 0 45px rgba(0,255,0,0.8), 0 0 70px rgba(0,255,0,0.6);
-        }
-        
-        @keyframes healthBarGlow {
-            from { 
-                box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 25px rgba(0,255,0,0.2), 0 0 30px rgba(0,255,0,0.6), 0 0 50px rgba(0,255,0,0.4);
-                border-color: #00FF00;
-            }
-            to { 
-                box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 25px rgba(0,255,0,0.3), 0 0 40px rgba(0,255,0,0.8), 0 0 70px rgba(0,255,0,0.6);
-                border-color: #32CD32;
-            }
-        }
+        /* Removed hover and animation for performance */
         
         .health-bar-fill {
             height: 100%;
             background: linear-gradient(90deg, #00FF00, #66FF66, #99FF99, #CCFFCC);
             border-radius: 12px;
-            transition: width 0.5s ease;
+            /* Removed transition and animation for performance */
             position: relative;
             overflow: hidden;
-            animation: healthFillPulse 2s ease-in-out infinite;
-        }
-        
-        @keyframes healthFillPulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.9; }
         }
         
         .health-bar-fill.medium {
@@ -1268,20 +1139,7 @@
         }
         
         .health-bar-fill::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            animation: healthShine 2s ease-in-out infinite;
-        }
-        
-        @keyframes healthShine {
-            0% { left: -100%; }
-            50% { left: 100%; }
-            100% { left: 100%; }
+            display: none; /* Removed shine animation for performance */
         }
         
         .health-text {
@@ -1296,24 +1154,7 @@
             border: 2px solid #00FF00;
             box-shadow: 0 6px 18px rgba(0,0,0,0.7), inset 0 0 15px rgba(0,255,0,0.15), 0 0 20px rgba(0,255,0,0.6);
             backdrop-filter: blur(15px);
-            transition: all 0.3s ease;
-            animation: healthTextGlow 2s ease-in-out infinite alternate;
-        }
-        
-        .health-text:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,255,0,0.25), 0 0 30px rgba(0,255,0,0.8);
-        }
-        
-        @keyframes healthTextGlow {
-            from { 
-                box-shadow: 0 6px 18px rgba(0,0,0,0.7), inset 0 0 15px rgba(0,255,0,0.15), 0 0 20px rgba(0,255,0,0.6);
-                border-color: #00FF00;
-            }
-            to { 
-                box-shadow: 0 6px 18px rgba(0,0,0,0.7), inset 0 0 15px rgba(0,255,0,0.25), 0 0 25px rgba(0,255,0,0.8), 0 0 40px rgba(0,255,0,0.4);
-                border-color: #32CD32;
-            }
+            /* Removed transition and animation for performance */
         }
         
         .armor-bar {
@@ -1324,52 +1165,22 @@
             border-radius: 15px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.8), inset 0 0 25px rgba(65,105,225,0.2), 0 0 30px rgba(65,105,225,0.6), 0 0 50px rgba(65,105,225,0.4);
             backdrop-filter: blur(15px);
-            animation: armorGlow 2s ease-in-out infinite alternate;
+            /* Removed animation and transition for performance */
             overflow: hidden;
             position: relative;
-            transition: all 0.3s ease;
-        }
-        
-        .armor-bar:hover {
-            transform: scale(1.08);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.9), inset 0 0 35px rgba(65,105,225,0.3), 0 0 45px rgba(65,105,225,0.8), 0 0 70px rgba(65,105,225,0.6);
         }
         
         .armor-bar-fill {
             height: 100%;
             background: linear-gradient(90deg, #4169E1, #6495ED, #87CEEB);
             border-radius: 12px;
-            transition: width 0.3s ease;
+            /* Removed transition for performance */
             position: relative;
             overflow: hidden;
         }
         
         .armor-bar-fill::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            animation: armorShine 2s ease-in-out infinite;
-        }
-        
-        @keyframes armorShine {
-            0% { left: -100%; }
-            50% { left: 100%; }
-            100% { left: 100%; }
-        }
-        
-        @keyframes armorGlow {
-            from { 
-                box-shadow: 0 8px 25px rgba(0,0,0,0.6), inset 0 0 20px rgba(65,105,225,0.15), 0 0 25px rgba(65,105,225,0.5), 0 0 40px rgba(65,105,225,0.3);
-                border-color: #4169E1;
-            }
-            to { 
-                box-shadow: 0 8px 25px rgba(0,0,0,0.6), inset 0 0 20px rgba(65,105,225,0.25), 0 0 35px rgba(65,105,225,0.8), 0 0 60px rgba(65,105,225,0.5);
-                border-color: #87CEEB;
-            }
+            display: none; /* Removed shine animation for performance */
         }
         
         .armor-text {
@@ -1384,24 +1195,7 @@
             border: 2px solid #4169E1;
             box-shadow: 0 6px 18px rgba(0,0,0,0.7), inset 0 0 15px rgba(65,105,225,0.15), 0 0 20px rgba(65,105,225,0.6);
             backdrop-filter: blur(15px);
-            transition: all 0.3s ease;
-            animation: armorTextGlow 2s ease-in-out infinite alternate;
-        }
-        
-        .armor-text:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.8), inset 0 0 20px rgba(65,105,225,0.25), 0 0 30px rgba(65,105,225,0.8);
-        }
-        
-        @keyframes armorTextGlow {
-            from { 
-                box-shadow: 0 6px 18px rgba(0,0,0,0.7), inset 0 0 15px rgba(65,105,225,0.15), 0 0 20px rgba(65,105,225,0.6);
-                border-color: #4169E1;
-            }
-            to { 
-                box-shadow: 0 6px 18px rgba(0,0,0,0.7), inset 0 0 15px rgba(65,105,225,0.25), 0 0 25px rgba(65,105,225,0.8), 0 0 40px rgba(65,105,225,0.4);
-                border-color: #87CEEB;
-            }
+            /* Removed transition and animation for performance */
         }
         
         .lives-display {
@@ -1415,37 +1209,17 @@
             border: 2px solid #FF1493;
             box-shadow: 0 8px 25px rgba(255,20,147,0.4), inset 0 0 20px rgba(255,20,147,0.1), 0 0 30px rgba(255,20,147,0.6);
             backdrop-filter: blur(15px);
-            transition: all 0.3s ease;
-            animation: livesGlow 3s ease-in-out infinite alternate;
+            /* Removed transition and animation for performance */
             align-self: flex-end;
-        }
-        
-        .lives-display:hover {
-            transform: scale(1.1);
-            box-shadow: 0 12px 35px rgba(255,20,147,0.6), inset 0 0 30px rgba(255,20,147,0.2), 0 0 45px rgba(255,20,147,0.8);
-        }
-        
-        @keyframes livesGlow {
-            from { 
-                box-shadow: 0 8px 25px rgba(255,20,147,0.4), inset 0 0 20px rgba(255,20,147,0.1), 0 0 30px rgba(255,20,147,0.6);
-                border-color: #FF1493;
-            }
-            to { 
-                box-shadow: 0 8px 25px rgba(255,20,147,0.6), inset 0 0 20px rgba(255,20,147,0.2), 0 0 40px rgba(255,20,147,0.8), 0 0 60px rgba(255,20,147,0.4);
-                border-color: #FF69B4;
-            }
         }
         
         .lives-icon {
             font-size: 32px;
-            animation: heartBeat 2s ease-in-out infinite;
+            /* Removed animation for performance */
             filter: drop-shadow(0 0 10px rgba(255,20,147,0.8));
         }
         
-        @keyframes heartBeat {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-        }
+        /* Removed @keyframes heartBeat for performance */
         
         .lives-text {
             color: #FFD700;
@@ -10271,26 +10045,14 @@
                         game.keys['KeyD'] = false;
                     }
                     
-                    // Up/Down movement (up for jetpack/swimming up, down for downward movement)
-                    // Note: Jump (Space) works independently - joystick doesn't block it
-                    // Jump button and jet button work independently of joystick direction
+                    // Up/Down movement (up for jetpack, down for downward movement)
+                    // Allow independent control - don't block jump or down movement
+                    // Only set up/down keys if joystick is significantly tilted
                     if (normalizedY < -0.3) {
-                        // Pointing up - for jetpack/swimming up
-                        // Set ArrowUp/KeyW for swimming in water, but don't interfere with jump button
-                        // Jump uses Space key, not ArrowUp, so this won't block jump
-                        if (player && player.inWater) {
-                            game.keys['ArrowUp'] = true;
-                            game.keys['KeyW'] = true;
-                        } else {
-                            // On land, don't set ArrowUp to avoid conflicts
-                            // Jet button handles jetpack activation separately
-                            game.keys['ArrowUp'] = false;
-                            game.keys['KeyW'] = false;
-                        }
-                        // Allow going down by moving joystick down - don't force ArrowDown to false here
-                        // It will be set to false when joystick moves to neutral or down
-                        game.keys['ArrowDown'] = false;
-                        game.keys['KeyS'] = false;
+                        // Pointing up - for jetpack (but don't block jump button)
+                        game.keys['ArrowUp'] = true;
+                        game.keys['KeyW'] = true;
+                        // Don't set ArrowDown to false - allow jump button to work
                     } else if (normalizedY > 0.3) {
                         // Pointing down - for downward movement
                         game.keys['ArrowDown'] = true;
@@ -10298,11 +10060,18 @@
                         game.keys['ArrowUp'] = false;
                         game.keys['KeyW'] = false;
                     } else {
-                        // Neutral position - reset vertical movement keys
-                        game.keys['ArrowUp'] = false;
-                        game.keys['KeyW'] = false;
-                        game.keys['ArrowDown'] = false;
-                        game.keys['KeyS'] = false;
+                        // Neutral position - only clear if not actively using other controls
+                        // Don't interfere with jump button
+                        if (Math.abs(normalizedX) < 0.3) {
+                            // Only clear up/down if joystick is in center (not moving horizontally)
+                            game.keys['ArrowUp'] = false;
+                            game.keys['KeyW'] = false;
+                            game.keys['ArrowDown'] = false;
+                            game.keys['KeyS'] = false;
+                        } else {
+                            // Moving horizontally - keep up/down keys as they were
+                            // This allows jump button to work while moving horizontally
+                        }
                     }
                 };
                 
@@ -10340,23 +10109,17 @@
             if (mobileJump) {
                 mobileJump.addEventListener('touchstart', (e) => {
                     e.preventDefault();
-                    e.stopPropagation(); // Prevent event from bubbling to joystick
-                    e.stopImmediatePropagation(); // Also stop immediate propagation
                     // Allow jump in all situations: on ground, in air (double jump), or in water
-                    // Jump works independently of joystick direction
                     if (!game.keys['jumpJustPressed']) {
                         game.keys['Space'] = true;
                         game.keys['jumpJustPressed'] = true;
-                        console.log('Jump button pressed on mobile');
                     }
-                }, { capture: true }); // Use capture phase to get event first
+                });
                 mobileJump.addEventListener('touchend', (e) => {
                     e.preventDefault();
-                    e.stopPropagation(); // Prevent event from bubbling to joystick
-                    e.stopImmediatePropagation(); // Also stop immediate propagation
                     game.keys['Space'] = false;
                     // Don't reset jumpJustPressed here - let the game logic handle it
-                }, { capture: true }); // Use capture phase to get event first
+                });
             }
             
             // Laser button
@@ -10466,8 +10229,7 @@
                 mobileJetpack.addEventListener('touchstart', (e) => {
                     e.preventDefault();
                     e.stopPropagation(); // Prevent event from bubbling to joystick
-                    e.stopImmediatePropagation(); // Also stop immediate propagation
-                    if (player && player.hasJetpack) {
+                    if (player.hasJetpack) {
                         game.keys['ShiftLeft'] = true;
                         game.keys['ShiftRight'] = true;
                         
@@ -10488,7 +10250,7 @@
                                 console.log('Jetpack activated via mobile button!');
                             }
                             
-                            // Apply boost - horizontal in water, vertical on land
+                            // Apply initial boost - horizontal in water, vertical on land
                             if (player.inWater) {
                                 // Horizontal boost in water - much stronger
                                 player.velX = player.direction * player.waterJetpackPower;
@@ -10501,18 +10263,19 @@
                             player.jetpackTime = currentTime;
                         }
                     }
-                }, { capture: true }); // Use capture phase to get event first
+                });
+                mobileJetpack.addEventListener('touchmove', (e) => {
+                    // Allow touch to move over button without canceling
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
                 mobileJetpack.addEventListener('touchend', (e) => {
                     e.preventDefault();
                     e.stopPropagation(); // Prevent event from bubbling to joystick
-                    e.stopImmediatePropagation(); // Also stop immediate propagation
                     game.keys['ShiftLeft'] = false;
                     game.keys['ShiftRight'] = false;
-                    // Also deactivate jetpack when button is released
-                    if (player) {
-                        player.jetpackActive = false;
-                    }
-                }, { capture: true }); // Use capture phase to get event first
+                    // Don't deactivate jetpack - let it stay active until level ends or player dies
+                });
             }
             
             // Update action button visibility based on player abilities
@@ -14099,6 +13862,19 @@
                     player.velX += player.direction * player.waterJetpackPower * 0.3;
                     player.jetpackTime = currentTime;
                     console.log('🌊 Continuous water jetpack boost - velX:', player.velX.toFixed(2));
+                }
+            }
+            
+            // 🚀 Continuous jetpack boost on land (for mobile button)
+            if (player.hasJetpack && player.jetpackActive && !player.inWater && (game.keys['ShiftLeft'] || game.keys['ShiftRight'])) {
+                const currentTime = Date.now();
+                const timeSinceLastBoost = currentTime - player.jetpackTime;
+                
+                // Apply continuous boost every 200ms while holding Shift on land
+                if (timeSinceLastBoost > 200) {
+                    // Apply vertical boost on land
+                    player.velY = -player.jetpackPower;
+                    player.jetpackTime = currentTime;
                 }
             }
 
