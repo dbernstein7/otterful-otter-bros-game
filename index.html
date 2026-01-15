@@ -15173,6 +15173,13 @@
                 game.secretChestConditions.treasuresCollected = 0;
                 game.secretChestConditions.keysCollected = 0;
                 
+                // PERFORMANCE: Clear particles and arrays when level completes to prevent memory buildup
+                game.particles = [];
+                if (typeof playerLasers !== 'undefined') playerLasers.length = 0;
+                if (typeof playerFireballs !== 'undefined') playerFireballs.length = 0;
+                if (typeof lasers !== 'undefined') lasers.length = 0;
+                if (typeof bossLasers !== 'undefined') bossLasers.length = 0;
+                
                 document.getElementById('levelCompleteName').textContent = `${currentLevel.name} Complete!`;
                 document.getElementById('levelComplete').style.display = 'block';
                 
