@@ -10202,8 +10202,8 @@
                         game.keys['ArrowUp'] = true;
                         game.keys['KeyW'] = true;
                         // Don't set ArrowDown to false - allow jump button to work
-                    } else if (normalizedY > 0.3) {
-                        // Pointing down - for downward movement
+                    } else if (normalizedY > 0.2) {
+                        // Pointing down - for downward movement (lowered threshold for better responsiveness)
                         game.keys['ArrowDown'] = true;
                         game.keys['KeyS'] = true;
                         game.keys['ArrowUp'] = false;
@@ -13766,10 +13766,11 @@
             // 🔽 DOWN JUMP - Drop through platforms (Mobile & Desktop)
             // ========================================
             // Check if down key is pressed (from keyboard or mobile joystick)
+            // Also check if down key was just pressed to ensure it triggers even if onGround check is slightly off
             if ((game.keys['ArrowDown'] || game.keys['KeyS']) && player.onGround && !game.keys['downJumpPressed']) {
                 game.keys['downJumpPressed'] = true;
                 player.onGround = false;
-                player.velY = 2; // Small downward push to start falling
+                player.velY = 3; // Increased downward push to ensure falling starts
                 console.log('🔽 Down jump activated - dropping through platform', player.isGiant ? '(Giant Mode)' : '');
             }
             
@@ -14917,8 +14918,8 @@
                     // Must be: holding down key, this is the last platform you were on, and you're still near it
                     const isActivelyDropping = (game.keys['ArrowDown'] || game.keys['KeyS']) && 
                                               player.lastPlatform === platform &&
-                                              player.y >= player.lastPlatform.y - 20 && // Still above or just below
-                                              player.y < player.lastPlatform.y + 60; // Not too far below
+                                              player.y >= player.lastPlatform.y - 30 && // Still above or just below (more forgiving)
+                                              player.y < player.lastPlatform.y + 80; // Not too far below (increased range)
                     
                     // Reset down jump flag once you've passed the platform or released the key
                     if (game.keys['downJumpPressed']) {
