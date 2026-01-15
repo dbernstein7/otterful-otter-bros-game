@@ -206,9 +206,16 @@
         /* Mobile responsive adjustments */
         @media (max-width: 768px) {
             /* Show UI elements on mobile but make them smaller */
+            /* Hide entire #ui container (Score, Coins, XP boxes) on mobile */
             #ui {
-                display: block !important;
-                font-size: 8px !important;
+                display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+                height: 0 !important;
+                width: 0 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                overflow: hidden !important;
             }
             
             #ui .game-title,
