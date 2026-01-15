@@ -23992,13 +23992,6 @@
             }
         }
 
-        // Add event listeners after all functions are defined
-        document.getElementById('continueGameBtn').addEventListener('click', (event) => {
-            addButtonClickEffect(event.target);
-            console.log('🎮 Continue Game clicked!');
-            continueGame();
-        });
-        
         // Setup button event listeners after DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
             // Wait a bit to ensure all elements are fully loaded
