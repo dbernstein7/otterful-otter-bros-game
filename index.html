@@ -10401,8 +10401,10 @@
             
             // Update action button visibility based on player abilities
             function updateMobileActionButtons() {
+                // Mobile action buttons are now hidden - abilities moved to settings
+                // Keep this function to prevent errors but don't show buttons
                 if (mobileLaser) {
-                    mobileLaser.style.display = player.hasLaser ? 'block' : 'none';
+                    mobileLaser.style.display = 'none'; // Always hidden on mobile
                 }
                 if (mobileFireball) {
                     mobileFireball.style.display = player.hasFireball ? 'block' : 'none';
