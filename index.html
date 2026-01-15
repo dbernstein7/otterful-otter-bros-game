@@ -612,6 +612,11 @@
             flex-wrap: wrap;
         }
         
+        /* Hide XP bar group on all screens - moved to settings on mobile */
+        .score-row .score-item:last-child {
+            display: none;
+        }
+        
         .score-item {
             margin: 0;
             padding: clamp(2px, 0.5vw, 4px) clamp(6px, 1vw, 10px);
@@ -1233,13 +1238,13 @@
             text-align: center;
         }
         
-        /* Abilities Display Styles - Smaller */
+        /* Abilities Display Styles - Hidden on all screens, only shown in settings on mobile */
         .abilities-display {
             position: fixed;
             top: 18px;
             right: 2vw;
             z-index: 10;
-            display: flex;
+            display: none; /* Hidden by default */
             flex-direction: column;
             align-items: center;
             gap: 6px;
