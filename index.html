@@ -1893,14 +1893,7 @@
         </div>
     </div>
 
-    <!-- Wallet Info Display -->
-    <div id="walletInfo" class="wallet-info">
-        <div style="font-weight: bold; margin-bottom: 8px;">🔗 Wallet Connected</div>
-        <div id="walletAddress" style="font-size: 10px; margin-bottom: 8px; word-break: break-all;"></div>
-        <div style="font-size: 11px; margin-bottom: 8px;">🦦 Staked Otters: <span id="stakedCount">0</span></div>
-        <div style="font-size: 11px; margin-bottom: 8px;">🐟 $FISH Earned: <span id="fishEarned">0</span></div>
-        <div style="font-size: 11px;">⚡ Staking Rate: <span id="stakingRate">10/day</span></div>
-    </div>
+    <!-- Wallet Info Display - REMOVED FOR PERFORMANCE -->
 
     <!-- Fish Earnings Display -->
     <div id="fishEarnings" class="fish-earnings">
@@ -1962,11 +1955,7 @@
                     <div class="button-shine" style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent); transform: rotate(45deg); animation: buttonShine 3s ease-in-out infinite;"></div>
                 </button>
                 
-                <!-- Connect Wallet Button -->
-                <button id="connectWalletBtn" class="home-button wallet-btn" style="background: linear-gradient(135deg, #667eea, #764ba2, #667eea); background-size: 200% 200%; color: #FFFFFF; border: 3px solid #667eea; padding: 18px 35px; border-radius: 30px; font-size: clamp(18px, 3vw, 24px); font-weight: bold; cursor: pointer; box-shadow: 0 0 40px rgba(102,126,234,0.6), 0 8px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.3); transition: all 0.3s ease; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); position: relative; overflow: hidden; animation: buttonGlow 2s ease-in-out infinite 0.3s; font-family: 'SuperMario', 'Orbitron', 'Arial Black', sans-serif;">
-                    <span style="position: relative; z-index: 2;">🔗 Connect Wallet</span>
-                    <div class="button-shine" style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent); transform: rotate(45deg); animation: buttonShine 3s ease-in-out infinite 0.3s;"></div>
-                </button>
+                <!-- Connect Wallet Button - REMOVED FOR PERFORMANCE -->
                 
                 <!-- Marketplace Button -->
                 <button id="marketplaceBtn" class="home-button marketplace-btn" style="background: linear-gradient(135deg, #2196F3, #1976D2, #2196F3); background-size: 200% 200%; color: #FFFFFF; border: 3px solid #2196F3; padding: 18px 35px; border-radius: 30px; font-size: clamp(18px, 3vw, 24px); font-weight: bold; cursor: pointer; box-shadow: 0 0 40px rgba(33,150,243,0.6), 0 8px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.3); transition: all 0.3s ease; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); position: relative; overflow: hidden; animation: buttonGlow 2s ease-in-out infinite 0.5s; font-family: 'SuperMario', 'Orbitron', 'Arial Black', sans-serif;">
@@ -2046,11 +2035,7 @@
                 <div style="flex: 1; height: 1px; background: #3a3a3a;"></div>
             </div>
             
-            <!-- Connect Wallet Button -->
-            <button id="connectWalletFromModal" style="width: 100%; padding: 14px 16px; background: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 8px; color: #ffffff; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.2s; margin-bottom: 24px;" onmouseover="this.style.background='#333'" onmouseout="this.style.background='#2a2a2a'">
-                <span style="color: #4a9eff; font-size: 18px;">💼</span>
-                <span>CONNECT A WALLET</span>
-            </button>
+            <!-- Connect Wallet Button - REMOVED FOR PERFORMANCE -->
             
             <!-- Powered By -->
             <div style="text-align: center; margin-top: 24px; padding-top: 24px; border-top: 1px solid #3a3a3a;">
@@ -2777,7 +2762,7 @@
             <button id="statsTabBtn" class="tab-btn active" onclick="switchProfileTab('stats')" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #FF6B35, #F7931E); color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease;">📊 Stats</button>
             <button id="achievementsTabBtn" class="tab-btn" onclick="switchProfileTab('achievements')" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #FFD700, #FFA500); color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease;">🏆 Achievements</button>
             <button id="customizationTabBtn" class="tab-btn" onclick="switchProfileTab('customization')" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease;">🎨 Customization</button>
-            <button id="walletTabBtn" class="tab-btn" onclick="switchProfileTab('wallet')" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease;">🔗 Wallet</button>
+            <!-- Wallet Tab Button - REMOVED FOR PERFORMANCE -->
         </div>
         
         <!-- Stats Tab -->
@@ -3046,7 +3031,14 @@
             </div>
         </div>
         
-        <!-- Wallet Tab -->
+        <!-- Wallet Tab - REMOVED FOR PERFORMANCE -->
+        <div id="walletTab" class="profile-content" style="display: none;">
+            <div style="text-align: center; padding: 40px; color: #FFD700;">
+                <h3>Wallet/Staking System Removed</h3>
+                <p>This feature has been removed for performance optimization.</p>
+            </div>
+        </div>
+        <!--
         <div id="walletTab" class="profile-content" style="display: none;">
             <!-- Wallet Connection Status -->
             <div style="background: rgba(102,126,234,0.1); padding: 20px; border-radius: 20px; border: 2px solid #667eea; margin-bottom: 25px;">
@@ -3297,7 +3289,9 @@
 
 
     <script>
-        // OtterfulWallet Integration - Define this first!
+        // WALLET/STAKING SYSTEM REMOVED FOR PERFORMANCE
+        // OtterfulWallet class removed - entire wallet/staking system disabled
+        /*
         class OtterfulWallet {
             constructor() {
                 // In-memory storage object (replaces localStorage)
@@ -6237,9 +6231,10 @@
                 });
             }
         }
+        */
 
-        // Initialize the wallet integration globally
-        let otterWallet;
+        // Wallet system removed - no initialization needed
+        // let otterWallet;
         
         // Global variables
         let aiOwlBotEnabled = true;
@@ -6360,14 +6355,8 @@
         function initializeGame() {
             console.log('🎮 Initializing game...');
             
-            // Initialize the wallet integration
-            try {
-                otterWallet = new OtterfulWallet();
-                console.log('🔗 OtterfulWallet initialized successfully');
-            } catch (error) {
-                console.error('❌ Failed to initialize OtterfulWallet:', error);
-                otterWallet = null;
-            }
+            // Wallet integration removed for performance
+            // Wallet system disabled
 
             // Initialize canvas
             canvas = document.getElementById('gameCanvas');
@@ -7369,8 +7358,7 @@
                     
                     // Special cloud properties
                     if (Math.random() < 0.2) {
-                        platform.isRainCloud = true; // 20% chance for rain cloud
-                        platform.rainIntensity = 0.5 + Math.random() * 0.5;
+                        // Rain cloud removed for performance
                     }
                     if (Math.random() < 0.15) {
                         platform.isThunderCloud = true; // 15% chance for thunder cloud
@@ -7598,8 +7586,7 @@
                 
                 // Special cloud properties
                 if (Math.random() < 0.2) {
-                    cloudPlatform.isRainCloud = true; // 20% chance for rain cloud
-                    cloudPlatform.rainIntensity = 0.5 + Math.random() * 0.5;
+                    // Rain cloud removed for performance
                 }
                 if (Math.random() < 0.15) {
                     cloudPlatform.isThunderCloud = true; // 15% chance for thunder cloud
@@ -8492,8 +8479,8 @@
         function generateRandomCoins(platforms, levelNum) {
             const coins = [];
             
-            // Generate exactly 100 coins per level
-            const coinCount = 100;
+            // Generate level-based coin count: base 50 + (level * 10), minimum 50, maximum 200
+            const coinCount = Math.min(200, Math.max(50, 50 + (levelNum * 10)));
             
             // Filter out platforms in lava areas and ensure platforms are wide enough
             const safePlatforms = platforms.filter(p => {
@@ -13045,19 +13032,12 @@
                 ctx.fillStyle = currentLevel.platformColor;
                 ctx.fillRect(x, y, platform.width, drawHeight);
                 
-                // Grass/surface on top
+                // Grass/surface on top - STATIC (no animation for performance)
                 ctx.fillStyle = currentLevel.groundColor;
                 ctx.fillRect(x, y - 12, platform.width, 12); // Scaled from 5 (5*2.4=12)
                 
-                // Surface details
-                ctx.strokeStyle = currentLevel.groundColor;
-                ctx.lineWidth = 5; // Scaled from 2 (2*2.4=4.8, rounded to 5)
-                for(let i = 0; i < platform.width; i += 19) { // Scaled from 8 (8*2.4=19.2, rounded to 19)
-                    ctx.beginPath();
-                    ctx.moveTo(x + i, y - 12); // Scaled from 5 (5*2.4=12)
-                    ctx.lineTo(x + i, y - 19); // Scaled from 8 (8*2.4=19.2, rounded to 19)
-                    ctx.stroke();
-                }
+                // Surface details - STATIC (no moving grass animation)
+                // Moving grass animation removed to reduce lag
                 
                 // Visual indicators for moving platforms
 
@@ -13115,9 +13095,8 @@
             
             // Determine cloud color based on special properties
             let cloudColor = platform.cloudColor || '#FFFFFF';
-            if (platform.isRainCloud) {
-                cloudColor = '#87CEEB'; // Light blue for rain clouds
-            } else if (platform.isThunderCloud) {
+            // Rain cloud color removed for performance
+            if (platform.isThunderCloud) {
                 cloudColor = '#4A4A4A'; // Dark gray for thunder clouds
             } else if (platform.isGoldenCloud) {
                 cloudColor = '#FFD700'; // Gold for golden clouds
@@ -13191,20 +13170,8 @@
             
 
             
-            // Special cloud effects
-            if (platform.isRainCloud) {
-                // Draw rain drops
-                ctx.strokeStyle = 'rgba(135, 206, 235, 0.6)';
-                ctx.lineWidth = 2;
-                for (let i = 0; i < 8; i++) {
-                    const rainX = x + Math.random() * platform.width;
-                    const rainY = y + platform.height + Math.random() * 20;
-                    ctx.beginPath();
-                    ctx.moveTo(rainX, rainY);
-                    ctx.lineTo(rainX, rainY + 15);
-                    ctx.stroke();
-                }
-            }
+            // Special cloud effects - RAIN REMOVED FOR PERFORMANCE
+            // Rain effects removed to reduce lag
             
             if (platform.isThunderCloud) {
                 // Draw lightning effect
