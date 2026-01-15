@@ -297,12 +297,14 @@
             }
             
             .xp-text {
-                font-size: 8px !important;
+                font-size: 6px !important; /* Shrink XP text on mobile */
                 padding: 0 !important;
                 text-shadow: 1px 1px 2px rgba(0,0,0,0.8) !important;
+                line-height: 1.2 !important;
             }
             
             .xp-text span {
+                font-size: 6px !important; /* Shrink XP text span on mobile */
                 text-shadow: 1px 1px 2px rgba(0,0,0,0.8) !important;
             }
             
@@ -351,12 +353,13 @@
                 display: block !important;
             }
             
-            /* Make settings button smaller - swap with D-pad */
+            /* Make settings button smaller on mobile */
             #settingsBtn {
                 bottom: 10px !important;
                 left: 10px !important;
-                padding: 8px 12px !important;
-                font-size: 10px !important;
+                padding: 6px 10px !important;
+                font-size: 9px !important;
+                border-width: 2px !important;
             }
             
             /* Health/Armor bars - make much smaller on mobile */
@@ -377,6 +380,7 @@
             .health-bar-container #livesDisplay {
                 order: 0 !important; /* Lives first */
                 margin-top: 0 !important;
+                margin-bottom: 5px !important; /* Raise lives by 5px */
                 padding: 2px 4px !important;
                 gap: 2px !important;
                 border-width: 1px !important;
