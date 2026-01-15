@@ -219,6 +219,88 @@
                 font-size: 10px !important;
             }
             
+            /* Health/Armor bars - make much smaller on mobile */
+            .health-bar-container {
+                bottom: 100px !important;
+                right: 5px !important;
+                gap: 4px !important;
+            }
+            
+            .health-bar, .armor-bar {
+                width: 120px !important;
+                height: 12px !important;
+                border-width: 1px !important;
+                border-radius: 6px !important;
+            }
+            
+            .health-text, .armor-text {
+                font-size: 8px !important;
+                padding: 2px 4px !important;
+                border-width: 1px !important;
+                border-radius: 4px !important;
+            }
+            
+            .bar-group {
+                gap: 2px !important;
+            }
+            
+            /* Lives display - make much smaller */
+            .lives-display {
+                padding: 4px 6px !important;
+                gap: 2px !important;
+                border-width: 1px !important;
+                border-radius: 6px !important;
+            }
+            
+            .lives-icon {
+                font-size: 12px !important;
+            }
+            
+            .lives-text {
+                font-size: 8px !important;
+            }
+            
+            /* Abilities display - make much smaller */
+            .abilities-display {
+                top: 5px !important;
+                right: 5px !important;
+                gap: 4px !important;
+            }
+            
+            .abilities-title {
+                font-size: 8px !important;
+                padding: 2px 4px !important;
+                border-width: 1px !important;
+            }
+            
+            .abilities-grid {
+                gap: 4px !important;
+            }
+            
+            .ability-item {
+                width: 30px !important;
+                height: 30px !important;
+                font-size: 12px !important;
+                border-width: 1px !important;
+            }
+            
+            .ability-label {
+                font-size: 6px !important;
+            }
+            
+            /* Remove animations and effects on mobile for performance */
+            .health-bar-container,
+            .health-bar,
+            .health-text,
+            .armor-bar,
+            .armor-text,
+            .lives-display,
+            .abilities-display {
+                animation: none !important;
+                backdrop-filter: none !important;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.5) !important;
+            }
+            
             #leaderboardPanel {
                 max-width: 95vw;
                 max-height: 90vh;
