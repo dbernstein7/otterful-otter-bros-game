@@ -184,23 +184,8 @@
                 display: none !important; /* Hide title on mobile to save space */
             }
             
+            /* Hide score-row (Score, Coins, XP) on mobile */
             #ui .score-row {
-                position: fixed !important;
-                top: 5px !important;
-                left: 5px !important;
-                right: auto !important;
-                flex-wrap: wrap !important;
-                gap: 4px !important;
-                z-index: 10 !important;
-            }
-            
-            #ui .score-item {
-                font-size: 8px !important;
-                padding: 2px 4px !important;
-            }
-            
-            /* Hide XP bar group on mobile - moved to settings */
-            #ui .score-row .score-item:last-child {
                 display: none !important;
             }
             
@@ -612,11 +597,6 @@
             flex-wrap: wrap;
         }
         
-        /* Hide XP bar group on all screens - moved to settings on mobile */
-        .score-row .score-item:last-child {
-            display: none;
-        }
-        
         .score-item {
             margin: 0;
             padding: clamp(2px, 0.5vw, 4px) clamp(6px, 1vw, 10px);
@@ -833,6 +813,10 @@
             border: 3px solid #00FFFF;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 25px rgba(0,255,255,0.2), 0 0 35px rgba(0,255,255,0.6), 0 0 60px rgba(0,255,255,0.4);
             backdrop-filter: blur(15px);
+            position: fixed;
+            top: 22px;
+            right: 2vw;
+            z-index: 10;
         }
         
         .xp-bar {
@@ -1825,14 +1809,6 @@
             <div class="score-item"><span class="label">Score:</span> <span id="score">0</span></div>
             <div class="score-item"><span class="label">Coins:</span> <span id="coins">0</span></div>
             <div class="score-item"><span class="label">XP:</span> <span id="xp">0</span></div>
-            <div class="score-item">
-                <div class="xp-bar-container">
-                    <div class="xp-bar">
-                        <div class="xp-bar-fill" id="xpBarFill"></div>
-                    </div>
-                    <div class="xp-text" id="xpText">Level 1 <span id="xpProgress">(0/1000 XP)</span></div>
-                </div>
-            </div>
         </div>
             <div id="giantIndicator" style="display: none; color: #FF00FF; font-weight: bold; text-shadow: 0 0 10px #FF00FF;">🍄 GIANT MODE: 10s</div>
     </div>
@@ -1840,6 +1816,14 @@
     
     
             <div id="levelDisplay" class="corner-display top-left" style="top: 22px; left: 4vw;">Level: <span id="level">1</span></div>
+    
+    <!-- XP Bar - Top Right Corner -->
+    <div class="xp-bar-container" style="position: fixed; top: 22px; right: 2vw; z-index: 10;">
+        <div class="xp-bar">
+            <div class="xp-bar-fill" id="xpBarFill"></div>
+        </div>
+        <div class="xp-text" id="xpText">Level 1 <span id="xpProgress">(0/1000 XP)</span></div>
+    </div>
     
     <!-- Real-time Collectibles Counter - Horizontal -->
             <div id="collectiblesCounter" class="corner-display top-left" style="top: 2vh; left: 11vw; display: flex; flex-direction: row; gap: 15px;">
@@ -11766,19 +11750,24 @@
             if (selectedImage && selectedImage.complete) {
                 // Draw selected otter sprite
                 ctx.save();
+                
+                // Mobile scale factor - make otter smaller on mobile
+                const isMobile = game.isMobile || window.innerWidth < 768;
+                const mobileScale = isMobile ? 0.75 : 1.0; // 25% smaller on mobile
+                
                 ctx.translate(x + player.collisionOffsetX + player.collisionWidth/2, y + player.collisionOffsetY + player.collisionHeight/2);
                 ctx.scale(player.direction, 1);
                 
                                 // Draw swimming otter with giant mode scaling
                 if (player.inWater && selectedImage !== otterImages[game.selectedOtter]) {
-                    // Swimming assets: 93x64 (landscape orientation) with giant mode scaling
-                    const swimWidth = 93 * (player.isGiant ? 1.5 : 1.0);
-                    const swimHeight = 64 * (player.isGiant ? 1.5 : 1.0);
+                    // Swimming assets: 93x64 (landscape orientation) with giant mode and mobile scaling
+                    const swimWidth = 93 * (player.isGiant ? 1.5 : 1.0) * mobileScale;
+                    const swimHeight = 64 * (player.isGiant ? 1.5 : 1.0) * mobileScale;
                     ctx.drawImage(selectedImage, -swimWidth/2, -swimHeight/2, swimWidth, swimHeight);
                 } else {
-                    // Normal otter: 64x93 (portrait orientation) with giant mode scaling
-                    const normalWidth = player.collisionWidth * (player.isGiant ? 1.5 : 1.0);
-                    const normalHeight = player.collisionHeight * (player.isGiant ? 1.5 : 1.0);
+                    // Normal otter: 64x93 (portrait orientation) with giant mode and mobile scaling
+                    const normalWidth = player.collisionWidth * (player.isGiant ? 1.5 : 1.0) * mobileScale;
+                    const normalHeight = player.collisionHeight * (player.isGiant ? 1.5 : 1.0) * mobileScale;
                     ctx.drawImage(selectedImage, -normalWidth/2, -normalHeight/2, normalWidth, normalHeight);
                 }
                 
@@ -11787,20 +11776,25 @@
                 // Fallback to default drawn otter if image not loaded
                 // Draw default otter - sized to match collision box
                 ctx.save();
+                
+                // Mobile scale factor - make otter smaller on mobile
+                const isMobile = game.isMobile || window.innerWidth < 768;
+                const mobileScale = isMobile ? 0.75 : 1.0; // 25% smaller on mobile
+                
                 ctx.translate(x + player.collisionOffsetX + player.collisionWidth/2, y + player.collisionOffsetY + player.collisionHeight/2);
                 ctx.scale(player.direction, 1);
                 
-                // Calculate scaled dimensions based on collision box for realistic otter
-                const bodyWidth = player.collisionWidth * 0.7;
-                const bodyHeight = player.collisionHeight * 0.4;
-                const headWidth = player.collisionWidth * 0.25;
-                const headHeight = player.collisionHeight * 0.3;
-                const eyeRadius = player.collisionWidth * 0.03;
-                const noseRadius = player.collisionWidth * 0.015;
-                const earRadius = player.collisionWidth * 0.04;
-                const tailLength = player.collisionWidth * 0.4;
-                const tailWidth = player.collisionHeight * 0.15;
-                const pawRadius = player.collisionWidth * 0.04;
+                // Calculate scaled dimensions based on collision box for realistic otter with mobile scaling
+                const bodyWidth = player.collisionWidth * 0.7 * mobileScale;
+                const bodyHeight = player.collisionHeight * 0.4 * mobileScale;
+                const headWidth = player.collisionWidth * 0.25 * mobileScale;
+                const headHeight = player.collisionHeight * 0.3 * mobileScale;
+                const eyeRadius = player.collisionWidth * 0.03 * mobileScale;
+                const noseRadius = player.collisionWidth * 0.015 * mobileScale;
+                const earRadius = player.collisionWidth * 0.04 * mobileScale;
+                const tailLength = player.collisionWidth * 0.4 * mobileScale;
+                const tailWidth = player.collisionHeight * 0.15 * mobileScale;
+                const pawRadius = player.collisionWidth * 0.04 * mobileScale;
                 
                 // Main body (more elongated like real otter)
                 ctx.fillStyle = '#654321';
