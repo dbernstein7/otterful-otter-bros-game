@@ -8290,11 +8290,17 @@
             // Generate level-based coin count: base 50 + (level * 10), minimum 50, maximum 200
             const coinCount = Math.min(200, Math.max(50, 50 + (levelNum * 10)));
             
-            // Filter out platforms in lava areas and ensure platforms are wide enough
+            // Calculate level boundaries from platforms
+            const levelMinX = Math.min(...platforms.map(p => p.x));
+            const levelMaxX = Math.max(...platforms.map(p => p.x + p.width));
+            const levelWidth = levelMaxX - levelMinX;
+            
+            // Filter out platforms in lava areas, ensure platforms are wide enough, and within level bounds
             const safePlatforms = platforms.filter(p => {
                 const isSafe = !game.bossActive || p.y < game.lavaLevel - 100;
                 const isWideEnough = p.width >= 50; // Ensure platform is wide enough for coin placement
-                return isSafe && isWideEnough;
+                const isWithinBounds = p.x >= levelMinX && (p.x + p.width) <= levelMaxX;
+                return isSafe && isWideEnough && isWithinBounds;
             });
             
             if (safePlatforms.length === 0) {
@@ -8323,7 +8329,10 @@
                     const coinX = platform.x + spacing * (j + 1) + (Math.random() - 0.5) * spacing * 0.4; // Add slight randomness
                     
                     // Ensure coin is within platform bounds
-                    const clampedX = Math.max(platform.x + 20, Math.min(platform.x + platform.width - 20, coinX));
+                    let clampedX = Math.max(platform.x + 20, Math.min(platform.x + platform.width - 20, coinX));
+                    
+                    // Ensure coin is within level boundaries
+                    clampedX = Math.max(levelMinX + 20, Math.min(levelMaxX - 20, clampedX));
                     
                     // Place coin above platform with some variation
                     const coinY = platform.y - 36 - Math.random() * 48; // Scaled from 15, 20 (15*2.4=36, 20*2.4=48)
@@ -8333,12 +8342,27 @@
                     const minHeight = platform.y - 100;
                     const clampedY = Math.max(minHeight, Math.min(maxHeight, coinY));
                     
-                    coins.push({
-                        x: clampedX,
-                        y: clampedY,
-                        collected: false,
-                        type: 'coin'
-                    });
+                    // Final boundary check - ensure coin is within playable area
+                    if (clampedX >= levelMinX && clampedX <= levelMaxX && clampedY >= 0 && clampedY <= 2500) {
+                        coins.push({
+                            x: clampedX,
+                            y: clampedY,
+                            collected: false,
+                            type: 'coin'
+                        });
+                    } else {
+                        // If coin is outside bounds, try again with a safer position
+                        const safeX = platform.x + platform.width / 2;
+                        const safeY = platform.y - 40;
+                        if (safeX >= levelMinX && safeX <= levelMaxX) {
+                            coins.push({
+                                x: safeX,
+                                y: safeY,
+                                collected: false,
+                                type: 'coin'
+                            });
+                        }
+                    }
                     
                     coinIndex++;
                 }
@@ -8347,21 +8371,36 @@
             // If we still haven't placed all coins (shouldn't happen, but safety check)
             while (coinIndex < coinCount && safePlatforms.length > 0) {
                 const platform = safePlatforms[Math.floor(Math.random() * safePlatforms.length)];
-                const coinX = platform.x + 20 + Math.random() * (platform.width - 40);
+                let coinX = platform.x + 20 + Math.random() * (platform.width - 40);
+                
+                // Ensure coin is within level boundaries
+                coinX = Math.max(levelMinX + 20, Math.min(levelMaxX - 20, coinX));
+                
                 const coinY = platform.y - 36 - Math.random() * 48;
                 
-                coins.push({
-                    x: coinX,
-                    y: coinY,
-                    collected: false,
-                    type: 'coin'
-                });
-                
-                coinIndex++;
+                // Final boundary check
+                if (coinX >= levelMinX && coinX <= levelMaxX && coinY >= 0 && coinY <= 2500) {
+                    coins.push({
+                        x: coinX,
+                        y: coinY,
+                        collected: false,
+                        type: 'coin'
+                    });
+                    coinIndex++;
+                }
             }
             
-            console.log(`💰 Generated ${coins.length} coins for level ${levelNum} (lava-protected, distributed across ${safePlatforms.length} platforms)`);
-            return coins;
+            // Final validation: ensure all coins are within boundaries
+            const validCoins = coins.filter(coin => {
+                return coin.x >= levelMinX && coin.x <= levelMaxX && coin.y >= 0 && coin.y <= 2500;
+            });
+            
+            if (validCoins.length !== coins.length) {
+                console.warn(`⚠️ Removed ${coins.length - validCoins.length} coins outside boundaries in level ${levelNum}`);
+            }
+            
+            console.log(`💰 Generated ${validCoins.length} coins for level ${levelNum} (lava-protected, distributed across ${safePlatforms.length} platforms, boundaries: ${levelMinX} to ${levelMaxX})`);
+            return validCoins;
         }
         
         function generateRandomHealth(platforms, levelNum) {
