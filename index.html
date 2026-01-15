@@ -13158,7 +13158,7 @@
             player.velY += gravityStrength;
 
             // 📉 Cap maximum fall velocity for better feel
-            let maxFallVelocity = 6.65; // Consistent fall velocity for all movement
+            let maxFallVelocity = 8.5; // Increased fall velocity to match higher gravity
             
             if (player.velY > maxFallVelocity) {
                 player.velY = maxFallVelocity;
