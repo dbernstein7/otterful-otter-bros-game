@@ -14915,11 +14915,17 @@
                     const isFalling = player.velY > 0;
                     
                     // 🔽 DOWN JUMP CHECK - Only skip collision with the platform you're actively dropping through
-                    // Must be: holding down key, this is the last platform you were on, and you're still near it
+                    // Check if player is on this platform and holding down key
+                    const isOnThisPlatform = player.lastPlatform === platform || 
+                                           (player.x + player.collisionOffsetX + player.collisionWidth > platform.x &&
+                                            player.x + player.collisionOffsetX < platform.x + platform.width &&
+                                            player.y + player.collisionOffsetY + player.collisionHeight >= platform.y - 10 &&
+                                            player.y + player.collisionOffsetY + player.collisionHeight <= platform.y + 20);
+                    
                     const isActivelyDropping = (game.keys['ArrowDown'] || game.keys['KeyS']) && 
-                                              player.lastPlatform === platform &&
-                                              player.y >= player.lastPlatform.y - 30 && // Still above or just below (more forgiving)
-                                              player.y < player.lastPlatform.y + 80; // Not too far below (increased range)
+                                              isOnThisPlatform &&
+                                              player.y >= platform.y - 40 && // Still above or just below (more forgiving)
+                                              player.y < platform.y + 100; // Not too far below (increased range)
                     
                     // Reset down jump flag once you've passed the platform or released the key
                     if (game.keys['downJumpPressed']) {
