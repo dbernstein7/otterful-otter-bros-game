@@ -15197,411 +15197,258 @@
                 }
             }
             
-            // Update enemies
+            // Update enemies - OPTIMIZED VERSION
+            // Cache time once per frame instead of calling Date.now() for each enemy
+            const currentTime = Date.now();
+            const frameTime = currentTime * 0.003; // Cache for sin/cos calculations
+            const frameTime001 = currentTime * 0.001; // For goldfish
+            
+            // Only update enemies that are on-screen or near player (within 600px)
+            const updateRadius = 600; // Only update enemies within this distance
+            
             enemies.forEach((enemy, enemyIndex) => {
-                // Enemy type-specific AI
+                // PERFORMANCE: Skip enemies that are far off-screen
+                const enemyScreenX = enemy.x - game.camera.x;
+                const enemyScreenY = enemy.y - game.camera.y;
+                const distanceToPlayer = Math.abs(enemy.x - player.x);
+                const distanceToCamera = Math.sqrt(
+                    Math.pow(enemyScreenX, 2) + Math.pow(enemyScreenY, 2)
+                );
+                
+                // Skip enemy if too far from both player and camera
+                if (distanceToPlayer > updateRadius && distanceToCamera > updateRadius) {
+                    return; // Skip this enemy
+                }
+                
+                // Enemy type-specific AI (simplified)
                 if (enemy.type === 'eagle') {
-                    // Simple Eagle AI: natural chase and attack
-                    const distanceToPlayer = Math.abs(enemy.x - player.x);
+                    // Simplified Eagle AI - removed complex retreat logic
                     const verticalDistance = Math.abs(enemy.y - player.y);
                     
-                    // Check if player is in range for targeting (400px range)
+                    // Only check targeting if near player
                     if (distanceToPlayer < 400 && verticalDistance < 200 && !enemy.targetPlayer) {
                         enemy.targetPlayer = true;
-                        enemy.chaseStartTime = Date.now();
-                        console.log('🦅 Eagle spotted player! Starting chase');
+                        enemy.chaseStartTime = currentTime; // Use cached time
                     }
 
                     if (enemy.targetPlayer) {
-                        // Simple chase behavior
                         const playerDirection = player.x > enemy.x ? 1 : -1;
                         enemy.direction = playerDirection;
-                        
-                        // Move toward player
                         enemy.x += enemy.velX * playerDirection;
                         
-                        // Follow player's height with some offset
-                        const targetHeight = player.y - 80; // Stay above player
+                        const targetHeight = player.y - 80;
                         const heightDiff = targetHeight - enemy.y;
-                        
                         if (Math.abs(heightDiff) > 10) {
-                            if (heightDiff > 0) {
-                                enemy.y += 3; // Fly down
-                        } else {
-                                enemy.y -= 3; // Fly up
-                            }
+                            enemy.y += heightDiff > 0 ? 3 : -3;
                         }
                         
-                        // Simple attack when close
+                        // Simplified attack
                         if (distanceToPlayer < 200 && !enemy.isAttacking) {
                             enemy.isAttacking = true;
-                            enemy.attackStartTime = Date.now();
-                            console.log('🦅 Eagle attacking!');
+                            enemy.attackStartTime = currentTime;
                         }
                         
-                        // Execute attack
                         if (enemy.isAttacking) {
-                            const attackTime = Date.now() - enemy.attackStartTime;
-                            if (attackTime < 1000) { // 1 second attack
-                                // Dive toward player
-                                const attackSpeed = 3; // Reduced from 5 to 3 for slower attack
-                                if (player.y > enemy.y) {
-                                    enemy.y += attackSpeed;
-                                } else {
-                                    enemy.y -= attackSpeed;
-                                }
+                            const attackTime = currentTime - enemy.attackStartTime;
+                            if (attackTime < 1000) {
+                                enemy.y += player.y > enemy.y ? 3 : -3;
                             } else {
-                                // Attack complete
                                 enemy.isAttacking = false;
-                                console.log('🦅 Eagle attack complete');
                             }
                         }
                         
-                        // Return to patrol if player is too far or chase too long
-                        const chaseTime = Date.now() - enemy.chaseStartTime;
-                        if (distanceToPlayer > 500 || chaseTime > 8000) { // 8 seconds max chase
+                        // Simplified retreat check
+                        const chaseTime = currentTime - enemy.chaseStartTime;
+                        if (distanceToPlayer > 500 || chaseTime > 8000) {
                             enemy.targetPlayer = false;
                             enemy.isAttacking = false;
-                            enemy.isRetreating = true;
-                            enemy.retreatStartTime = Date.now();
-                            console.log('🦅 Eagle starting retreat to patrol');
                         }
-                        
-                    } else if (enemy.isRetreating) {
-                        // Natural retreat behavior - fly back to original position
-                        const retreatTime = Date.now() - enemy.retreatStartTime;
-                        const retreatDuration = 4000; // 4 seconds to retreat
-                        
-                        if (retreatTime < retreatDuration) {
-                            // Gradually move back to original spawn area
-                            const retreatProgress = retreatTime / retreatDuration;
-                            
-                            // Move slowly back toward original position
-                            const originalX = enemy.originalSpawnX || enemy.x;
-                            const originalY = enemy.originalSpawnY || enemy.originalY || enemy.y;
-                            
-                            // Smooth movement back to original position
-                            const xDiff = originalX - enemy.x;
-                            const yDiff = originalY - enemy.y;
-                            
-                            enemy.x += xDiff * 0.02; // Gradual X movement
-                            enemy.y += yDiff * 0.02; // Gradual Y movement
-                            
-                            // Set direction based on movement
-                            if (xDiff > 0) {
-                                enemy.direction = 1;
-                            } else if (xDiff < 0) {
-                                enemy.direction = -1;
-                            }
-                            
-                            console.log('🦅 Eagle retreating - Progress:', (retreatProgress * 100).toFixed(0) + '%');
-                        } else {
-                            // Retreat complete - return to normal patrol
-                            enemy.isRetreating = false;
-                            enemy.retreatStartTime = undefined;
-                            console.log('🦅 Eagle retreat complete - back to patrol');
-                        }
-                        
                     } else {
-                        // Simple patrol behavior
+                        // Simple patrol - use cached frameTime
                         enemy.x += enemy.velX * enemy.direction;
+                        const baseY = enemy.originalSpawnY || enemy.originalY || enemy.y;
+                        enemy.y = baseY + Math.sin(frameTime + (enemy.sineOffset || 0)) * 15;
                         
-                        // Gentle up and down movement
-                        const time = Date.now() * 0.003;
-                        enemy.y = (enemy.originalSpawnY || enemy.originalY || enemy.y) + Math.sin(time + (enemy.sineOffset || 0)) * 15;
-                        
-                        // Turn around at screen edges
                         if (enemy.x < game.camera.x - 100 || enemy.x > game.camera.x + game.canvasWidth + 100) {
                             enemy.direction *= -1;
                         }
                     }
                     
                 } else if (enemy.type === 'shark') {
-                    // Shark AI: underwater hunting with swooping attacks
-                    const time = Date.now() * 0.003;
-                    const distanceToPlayer = Math.abs(enemy.x - player.x);
+                    // Simplified Shark AI - removed complex dive/back-away states
                     const verticalDistance = Math.abs(enemy.y - player.y);
-                    
-                    // Define underwater swimming depths
                     const waterSurface = game.waterLevel;
-                    const maxDepth = waterSurface + 400; // Maximum swimming depth
-                    const minDepth = waterSurface + 50;  // Minimum swimming depth
-                    const attackDepth = waterSurface + 100; // Depth during attack
-                    const patrolDepth = waterSurface + 200; // Normal patrol depth
+                    const patrolDepth = waterSurface + 200;
                     
-                    // Check if player is in range for targeting (400px range underwater)
+                    // Only check targeting if near player and in water
                     if (distanceToPlayer < 400 && verticalDistance < 200 && !enemy.targetPlayer && player.inWater) {
                         enemy.targetPlayer = true;
-                        enemy.isAttacking = true;
-                        enemy.followStartX = enemy.x;
-                        enemy.followStartTime = Date.now();
-                        enemy.totalFollowDistance = 0;
-                        enemy.lastX = enemy.x;
-                        console.log('🦈 Shark has detected player! Starting hunt from X:', enemy.x.toFixed(0));
+                        enemy.followStartTime = currentTime;
                     }
 
                     if (enemy.targetPlayer) {
-                        // Shark is targeting the player
                         const playerDirection = player.x > enemy.x ? 1 : -1;
                         enemy.direction = playerDirection;
+                        enemy.x += Math.abs(enemy.velX) * 1.5 * playerDirection;
                         
-                        // Move toward player horizontally
-                        const moveSpeed = Math.abs(enemy.velX) * 1.5; // Faster than eagle
-                        const oldX = enemy.x;
-                        enemy.x += moveSpeed * playerDirection;
-                        
-                        // Track cumulative distance traveled
-                        if (enemy.lastX !== undefined) {
-                            enemy.totalFollowDistance += Math.abs(enemy.x - enemy.lastX);
-                        }
-                        enemy.lastX = enemy.x;
-                        
-                        // Calculate how long shark has been following
-                        const followTime = Date.now() - enemy.followStartTime;
-                        
-                        // Calculate target depth - follow player underwater
-                        let targetDepth;
-                        if (enemy.isDiving) {
-                            // During attack, get closer to player
-                            targetDepth = player.y + 20;
-                        } else {
-                            // Normal following - stay slightly below player
-                            targetDepth = player.y + 50;
+                        // Simplified depth following
+                        const targetDepth = Math.max(waterSurface + 50, Math.min(waterSurface + 400, player.y + 50));
+                        const depthDiff = targetDepth - enemy.y;
+                        if (Math.abs(depthDiff) > 5) {
+                            enemy.y += depthDiff > 0 ? 5 : -5;
                         }
                         
-                        // Clamp target depth to underwater bounds
-                        targetDepth = Math.max(minDepth, Math.min(maxDepth, targetDepth));
-                        
-                        const depthDifference = targetDepth - enemy.y;
-                        
-                        // Adjust depth to follow player
-                        const depthSpeed = enemy.isDiving ? 8 : 5;
-                        if (Math.abs(depthDifference) > 5) {
-                            if (depthDifference > 0) {
-                                enemy.y += depthSpeed; // Swim down
-                            } else {
-                                enemy.y -= depthSpeed; // Swim up
-                            }
-                        }
-                        
-                        // Set stable original Y if not set
-                        if (!enemy.originalYSet) {
-                            enemy.originalY = Math.max(patrolDepth, enemy.y);
-                            enemy.originalYSet = true;
-                        }
-                        
-                        // Only attack if very close, not already attacking, not backing away, and not in cooldown
-                        if (distanceToPlayer < 100 && !enemy.isDiving && !enemy.isBackingAway && 
-                            !enemy.attackCooldown && Math.abs(enemy.y - player.y) < 80) {
-                            enemy.isDiving = true;
-                            enemy.diveStartY = enemy.y;
-                            enemy.diveStartTime = Date.now();
-                            enemy.attackCooldown = true; // Start cooldown
-                            console.log('🦈 Shark attacking from depth:', enemy.y);
-                        }
-                        
-                        // Attack cooldown timer (3 seconds)
-                        if (enemy.attackCooldown && !enemy.isDiving && !enemy.isBackingAway) {
-                            const timeSinceAttack = Date.now() - (enemy.diveStartTime || Date.now());
-                            if (timeSinceAttack > 3000) {
-                                enemy.attackCooldown = false;
-                                console.log('🦈 Shark attack cooldown complete');
-                            }
-                        }
-                        
-                        // Prevent getting too close to player (minimum 50px distance)
-                        if (distanceToPlayer < 50 && !enemy.isDiving && !enemy.isBackingAway) {
-                            const backDirection = player.x > enemy.x ? -1 : 1;
-                            enemy.x += enemy.velX * 0.8 * backDirection;
-                            console.log('🦈 Shark maintaining distance from player');
-                        }
-                        
-                        // Execute attack - underwater swoop
-                        if (enemy.isDiving) {
-                            const diveTime = Date.now() - enemy.diveStartTime;
-                            const diveProgress = diveTime / 800; // 0.8 second attack
-                            
-                            if (diveProgress < 0.5) {
-                                // First half: swim toward player
-                                const diveAmount = diveProgress * 60; // Max 60px movement
-                                const newY = enemy.diveStartY + diveAmount;
-                                enemy.y = Math.min(newY, attackDepth);
-                            } else if (diveProgress < 1.0) {
-                                // Second half: swim back up
-                                const pullUpProgress = (diveProgress - 0.5) / 0.5;
-                                const pullUpY = attackDepth - (pullUpProgress * 40);
-                                enemy.y = Math.max(pullUpY, patrolDepth);
-                            } else {
-                                // Attack complete - start backing away
-                                enemy.isDiving = false;
-                                enemy.isBackingAway = true;
-                                enemy.backAwayStartTime = Date.now();
-                                enemy.backAwayDirection = player.x > enemy.x ? -1 : 1; // Back away from player
-                                console.log('🦈 Shark attack complete, backing away from player');
-                            }
-                        }
-                        
-                        // Back away behavior after attack
-                        if (enemy.isBackingAway) {
-                            const backAwayTime = Date.now() - enemy.backAwayStartTime;
-                            const backAwayDuration = 1500; // 1.5 seconds to back away
-                            
-                            if (backAwayTime < backAwayDuration) {
-                                // Move away from player
-                                enemy.x += enemy.velX * 1.2 * enemy.backAwayDirection;
-                                
-                                // Swim back to patrol depth
-                                const currentDepth = enemy.y;
-                                const targetDepth = enemy.originalPatrolY || patrolDepth;
-                                const depthDiff = targetDepth - currentDepth;
-                                enemy.y += depthDiff * 0.05;
-                                
-                                console.log('🦈 Shark backing away - Progress:', (backAwayTime / backAwayDuration * 100).toFixed(0) + '%');
-                            } else {
-                                // Back away complete - return to normal hunting
-                                enemy.isBackingAway = false;
-                                enemy.backAwayStartTime = undefined;
-                                enemy.backAwayDirection = undefined;
-                                console.log('🦈 Shark back away complete, resuming hunt');
-                            }
-                        }
-                        
-                        // Retreat conditions
-                        const shouldRetreat = (
-                            distanceToPlayer > 250 ||                    // Player too far
-                            enemy.totalFollowDistance > 300 ||           // Followed too far
-                            followTime > 3000 ||                         // Followed too long (3 seconds)
-                            Math.abs(enemy.x - enemy.followStartX) > 250 // Too far from starting position
-                        );
-                        
-                        if (shouldRetreat) {
+                        // Simplified retreat
+                        const followTime = currentTime - enemy.followStartTime;
+                        if (distanceToPlayer > 250 || followTime > 3000) {
                             enemy.targetPlayer = false;
-                            enemy.isAttacking = false;
-                            enemy.isDiving = false;
-                            enemy.originalYSet = false;
-                            enemy.isRetreating = true;
-                            enemy.retreatStartTime = Date.now();
-                            
-                            if (!enemy.originalPatrolY) {
-                                enemy.originalPatrolY = enemy.originalY || patrolDepth;
-                            }
-                            
-                            console.log('🦈 Shark retreating!');
-                            
-                            // Reset tracking variables
-                            enemy.followStartX = undefined;
-                            enemy.followStartTime = undefined;
-                            enemy.totalFollowDistance = 0;
-                            enemy.lastX = undefined;
-                        }
-                        
-                    } else if (enemy.isRetreating) {
-                        // Retreat behavior - slowly swim back to patrol area
-                        const retreatTime = Date.now() - enemy.retreatStartTime;
-                        const retreatDuration = 2000; // 2 seconds to retreat
-                        
-                        if (retreatTime < retreatDuration) {
-                            const retreatProgress = retreatTime / retreatDuration;
-                            
-                            // Move slowly in the opposite direction of player
-                            const retreatDirection = player.x > enemy.x ? -1 : 1;
-                            enemy.x += enemy.velX * 0.6 * retreatDirection;
-                            
-                            // Gradually return to original patrol depth
-                            const currentDepth = enemy.y;
-                            const targetDepth = enemy.originalPatrolY || patrolDepth;
-                            const depthDiff = targetDepth - currentDepth;
-                            enemy.y += depthDiff * 0.03;
-                            
-                            console.log('🦈 Shark retreating - Progress:', (retreatProgress * 100).toFixed(0) + '%');
-                        } else {
-                            // Retreat complete - return to normal patrol
-                            enemy.isRetreating = false;
-                            enemy.retreatStartTime = undefined;
-                            console.log('🦈 Shark retreat complete - returning to patrol');
-                        }
-                        
-                        // Turn around at screen edges during retreat
-                        if (enemy.x < game.camera.x - 100 || enemy.x > game.camera.x + game.canvasWidth + 100) {
-                            enemy.direction *= -1;
                         }
                     } else {
-                        // Normal patrol behavior - swim at patrol depth
-                        const safePatrolY = Math.min(patrolDepth, enemy.originalY || patrolDepth);
+                        // Simple patrol - use cached frameTime
                         enemy.x += enemy.velX * enemy.direction;
-                        enemy.y = safePatrolY + Math.sin(time + enemy.sineOffset) * 30; // Larger oscillation underwater
+                        const baseY = enemy.originalY || patrolDepth;
+                        enemy.y = baseY + Math.sin(frameTime + enemy.sineOffset) * 30;
                         
-                        // Keep within underwater bounds
-                        if (enemy.y < minDepth) {
-                            enemy.y = minDepth;
-                        }
-                        if (enemy.y > maxDepth) {
-                            enemy.y = maxDepth;
-                        }
-                        
-                        // Turn around at screen edges
                         if (enemy.x < game.camera.x - 100 || enemy.x > game.camera.x + game.canvasWidth + 100) {
                             enemy.direction *= -1;
                         }
                     }
                     
-                    // Final safety check - keep shark underwater
                     if (enemy.y < waterSurface + 30) {
                         enemy.y = waterSurface + 30;
                     }
                     
-                    // Debug logging
-                    if (enemy.targetPlayer && Date.now() % 500 < 50) {
-                        console.log('🦈 Shark hunting - Distance:', distanceToPlayer.toFixed(0), 
-                                   'FollowDist:', (enemy.totalFollowDistance || 0).toFixed(0),
-                                   'Y:', enemy.y.toFixed(1));
-                    }
-                    
                 } else if (enemy.type === 'charger') {
-                    // Charger AI: patrol + charge attack
-                    const distanceToPlayer = Math.abs(enemy.x - player.x);
+                    // Simplified Charger AI
                     const canSeePlayer = distanceToPlayer < 300 && Math.abs(enemy.y - player.y) < 100;
                     
-                    if (canSeePlayer && !enemy.isCharging && Date.now() - enemy.lastChargeTime > enemy.chargeCooldown) {
-                        // Start charge attack
+                    if (canSeePlayer && !enemy.isCharging && currentTime - (enemy.lastChargeTime || 0) > enemy.chargeCooldown) {
                         enemy.isCharging = true;
-                        enemy.chargeStartTime = Date.now();
+                        enemy.chargeStartTime = currentTime;
                         enemy.chargeDirection = player.x > enemy.x ? 1 : -1;
                     }
                     
                     if (enemy.isCharging) {
-                        const chargeProgress = (Date.now() - enemy.chargeStartTime) / enemy.chargeWindup;
+                        const chargeProgress = (currentTime - enemy.chargeStartTime) / enemy.chargeWindup;
                         if (chargeProgress < 1) {
-                            // Windup phase - slow movement
                             enemy.x += enemy.velX * 0.3 * enemy.chargeDirection;
                         } else {
-                            // Charge phase - fast movement
                             enemy.x += enemy.chargeSpeed * enemy.chargeDirection;
-                            
-                            // End charge if hit wall or went too far
                             if (enemy.x < game.camera.x - 100 || enemy.x > game.camera.x + game.canvasWidth + 100) {
                                 enemy.isCharging = false;
-                                enemy.lastChargeTime = Date.now();
+                                enemy.lastChargeTime = currentTime;
                             }
                         }
                     } else {
-                        // Normal patrol movement
                         enemy.x += enemy.velX * enemy.direction;
                         
-                        // Turn around at platform edges with improved collision
-                        let onPlatform = false;
+                        // Simplified platform check - only check if near camera
+                        if (distanceToCamera < 300) {
+                            for (const platform of platforms) {
+                                if (platform.isVisible === false) continue;
+                                if (enemy.x >= platform.x && enemy.x <= platform.x + platform.width &&
+                                    enemy.y >= platform.y - enemy.height - 5 && enemy.y <= platform.y + 5) {
+                                    if (enemy.y > platform.y - enemy.height) {
+                                        enemy.y = platform.y - enemy.height;
+                                    }
+                                    if ((enemy.direction === 1 && enemy.x >= platform.x + platform.width - 48) ||
+                                        (enemy.direction === -1 && enemy.x <= platform.x + 48)) {
+                                        enemy.direction *= -1;
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
+                } else if (enemy.type === 'goldfish') {
+                    // Simplified Goldfish AI - use cached frameTime001
+                    enemy.x += 0.8 * enemy.direction;
+                    enemy.y += Math.sin(frameTime001 + enemy.x * 0.01) * 0.3;
+                    
+                    if (enemy.y < game.waterLevel + 50) enemy.y = game.waterLevel + 50;
+                    if (enemy.y > game.waterLevel + 400) enemy.y = game.waterLevel + 400;
+                    
+                    if (enemy.x < game.camera.x - 100 || enemy.x > game.camera.x + game.canvasWidth + 100) {
+                        enemy.direction *= -1;
+                    }
+                    
+                    if (Math.random() < 0.003) {
+                        enemy.direction *= -1;
+                    }
+                    
+                } else if (enemy.type === 'gator' || enemy.type === 'wizgator') {
+                    // Simplified Gator/Wizgator AI
+                    const playerInWater = player.inWater;
+                    const playerInLava = game.bossActive && player.y > game.waterLevel;
+                    
+                    if (distanceToPlayer < enemy.chaseRange && (playerInWater || playerInLava) && !enemy.isChasing) {
+                        enemy.isChasing = true;
+                        enemy.chaseStartTime = currentTime;
+                    }
+                    
+                    if (enemy.isChasing) {
+                        const playerDirection = player.x > enemy.x ? 1 : -1;
+                        enemy.direction = playerDirection;
+                        enemy.x += enemy.chaseSpeed * playerDirection;
+                        enemy.y = game.waterLevel - enemy.height + 20;
+                        
+                        const chaseTime = currentTime - enemy.chaseStartTime;
+                        if (chaseTime > enemy.chaseDuration || distanceToPlayer > enemy.chaseRange * 1.5) {
+                            enemy.isChasing = false;
+                            enemy.chaseStartTime = 0;
+                        }
+                    } else {
+                        enemy.x += enemy.velX * enemy.patrolDirection;
+                        enemy.y = game.waterLevel - enemy.height + 20;
+                        
+                        const patrolRange = 200;
+                        if (Math.abs(enemy.x - enemy.originalX) > patrolRange) {
+                            enemy.patrolDirection *= -1;
+                        }
+                        
+                        if (enemy.x < game.camera.x - 100 || enemy.x > game.camera.x + game.canvasWidth + 100) {
+                            enemy.patrolDirection *= -1;
+                        }
+                    }
+                    
+                    // Wizgator shooting (only if near player)
+                    if (enemy.type === 'wizgator' && enemy.canShoot && distanceToPlayer < 400 && 
+                        currentTime - (enemy.lastShot || 0) > enemy.shotCooldown) {
+                        const mouthX = enemy.x + (enemy.direction === 1 ? enemy.width - 10 : 10);
+                        const mouthY = enemy.y + enemy.height / 2;
+                        const dx = player.x - enemy.x;
+                        const dy = player.y - enemy.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        lasers.push({
+                            x: mouthX,
+                            y: mouthY,
+                            velX: (dx / distance) * 5,
+                            velY: (dy / distance) * 5,
+                            width: 32,
+                            height: 32,
+                            active: true,
+                            color: '#FF6600',
+                            type: 'fireball'
+                        });
+                        
+                        enemy.lastShot = currentTime;
+                    }
+                    
+                } else {
+                    // Basic enemy AI - simplified platform check
+                    enemy.x += enemy.velX * enemy.direction;
+                    
+                    // Only check platforms if near camera
+                    if (distanceToCamera < 300) {
                         for (const platform of platforms) {
                             if (platform.isVisible === false) continue;
-                            
                             if (enemy.x >= platform.x && enemy.x <= platform.x + platform.width &&
                                 enemy.y >= platform.y - enemy.height - 5 && enemy.y <= platform.y + 5) {
-                                onPlatform = true;
-                                
-                                // Snap enemy to platform if they're slightly off
                                 if (enemy.y > platform.y - enemy.height) {
                                     enemy.y = platform.y - enemy.height;
                                 }
-                                
                                 if ((enemy.direction === 1 && enemy.x >= platform.x + platform.width - 48) ||
                                     (enemy.direction === -1 && enemy.x <= platform.x + 48)) {
                                     enemy.direction *= -1;
@@ -15610,283 +15457,59 @@
                             }
                         }
                     }
-                    
-                } else if (enemy.type === 'goldfish') {
-                    // Goldfish AI: swim underwater with natural movement
-                    const time = Date.now() * 0.001;
-                    
-                    // Constant, reasonable speed - no level scaling
-                    const goldfishSpeed = 0.8; // Fixed slow speed
-                    const directionChangeChance = 0.003; // Low chance for direction changes
-                    const verticalMovementIntensity = 0.3; // Gentle vertical movement
-                    
-                    // Horizontal swimming movement - constant speed
-                    enemy.x += goldfishSpeed * enemy.direction;
-                    
-                    // Vertical swimming movement (sine wave pattern) - more intense in higher levels
-                    enemy.y += Math.sin(time + enemy.x * 0.01) * verticalMovementIntensity;
-                    
-                    // Keep goldfish within water bounds
-                    if (enemy.y < game.waterLevel + 50) {
-                        enemy.y = game.waterLevel + 50;
-                    }
-                    if (enemy.y > game.waterLevel + 400) {
-                        enemy.y = game.waterLevel + 400;
-                    }
-                    
-                    // Turn around at screen edges
-                    if (enemy.x < game.camera.x - 100 || enemy.x > game.camera.x + game.canvasWidth + 100) {
-                        enemy.direction *= -1;
-                    }
-                    
-                    // Random direction changes - more frequent in higher levels
-                    if (Math.random() < directionChangeChance) {
-                        enemy.direction *= -1;
-                    }
-                    
-                } else if (enemy.type === 'gator') {
-                    // Gator AI: sit on water surface and chase player when in range
-                    const distanceToPlayer = Math.abs(enemy.x - player.x);
-                    const playerInWater = player.inWater;
-                    
-                    // Check if player is in range and in water
-                    if (distanceToPlayer < enemy.chaseRange && playerInWater && !enemy.isChasing) {
-                        enemy.isChasing = true;
-                        enemy.chaseStartTime = Date.now();
-                        console.log('🐊 Gator spotted player! Starting chase from X:', enemy.x.toFixed(0));
-                    }
-                    
-                    if (enemy.isChasing) {
-                        // Chase the player
-                        const playerDirection = player.x > enemy.x ? 1 : -1;
-                        enemy.direction = playerDirection;
-                        
-                        // Move toward player at chase speed
-                        enemy.x += enemy.chaseSpeed * playerDirection;
-                        
-                        // Keep gator on water surface
-                        enemy.y = game.waterLevel - enemy.height + 20;
-                        
-                        // Check if chase should end
-                        const chaseTime = Date.now() - enemy.chaseStartTime;
-                        if (chaseTime > enemy.chaseDuration || distanceToPlayer > enemy.chaseRange * 1.5) {
-                            enemy.isChasing = false;
-                            enemy.chaseStartTime = 0; // Reset chase timer
-                            console.log('🐊 Gator chase ended - returning to patrol at X:', enemy.x.toFixed(0), 'Original X:', enemy.originalX.toFixed(0));
-                        }
-                    } else {
-                        // Normal patrol behavior on water surface
-                        enemy.x += enemy.velX * enemy.patrolDirection;
-                        enemy.y = game.waterLevel - enemy.height + 20; // Stay on water surface
-                        
-                        // Turn around at patrol boundaries
-                        const patrolRange = 200; // How far from original position to patrol
-                        if (Math.abs(enemy.x - enemy.originalX) > patrolRange) {
-                            enemy.patrolDirection *= -1;
-                        }
-                        
-                        // Turn around at screen edges
-                        if (enemy.x < game.camera.x - 100 || enemy.x > game.camera.x + game.canvasWidth + 100) {
-                            enemy.patrolDirection *= -1;
-                        }
-                    }
-                } else if (enemy.type === 'wizgator') {
-                    // Wizgator AI: sit on water/lava surface and chase player when in range
-                    const distanceToPlayer = Math.abs(enemy.x - player.x);
-                    const playerInWater = player.inWater;
-                    const playerInLava = game.bossActive && player.y > game.waterLevel;
-                    
-                    // Check if player is in range and in water/lava
-                    if (distanceToPlayer < enemy.chaseRange && (playerInWater || playerInLava) && !enemy.isChasing) {
-                        enemy.isChasing = true;
-                        enemy.chaseStartTime = Date.now();
-                        console.log('🔮 Wizgator spotted player! Starting chase from X:', enemy.x.toFixed(0));
-                    }
-                    
-                    if (enemy.isChasing) {
-                        // Chase the player
-                        const playerDirection = player.x > enemy.x ? 1 : -1;
-                        enemy.direction = playerDirection;
-                        
-                        // Move toward player at chase speed
-                        enemy.x += enemy.chaseSpeed * playerDirection;
-                        
-                        // Keep wizgator on water/lava surface
-                        enemy.y = game.waterLevel - enemy.height + 20;
-                        
-                        // Check if chase should end
-                        const chaseTime = Date.now() - enemy.chaseStartTime;
-                        if (chaseTime > enemy.chaseDuration || distanceToPlayer > enemy.chaseRange * 1.5) {
-                            enemy.isChasing = false;
-                            enemy.chaseStartTime = 0; // Reset chase timer
-                            console.log('🔮 Wizgator chase ended - returning to patrol at X:', enemy.x.toFixed(0), 'Original X:', enemy.originalX.toFixed(0));
-                        }
-                    } else {
-                        // Normal patrol behavior on water/lava surface
-                        enemy.x += enemy.velX * enemy.patrolDirection;
-                        enemy.y = game.waterLevel - enemy.height + 20; // Stay on water/lava surface
-                        
-                        // Turn around at patrol boundaries
-                        const patrolRange = 200; // How far from original position to patrol
-                        if (Math.abs(enemy.x - enemy.originalX) > patrolRange) {
-                            enemy.patrolDirection *= -1;
-                        }
-                        
-                        // Turn around at screen edges
-                        if (enemy.x < game.camera.x - 100 || enemy.x > game.camera.x + game.canvasWidth + 100) {
-                            enemy.patrolDirection *= -1;
-                        }
-                    }
-                    
-
-                    
-                    // Wizgator fireball shooting logic
-                    if (enemy.type === 'wizgator' && enemy.canShoot && Date.now() - enemy.lastShot > enemy.shotCooldown) {
-                        
-                        // Shoot fireball from mouth
-                        const mouthX = enemy.x + (enemy.direction === 1 ? enemy.width - 10 : 10);
-                        const mouthY = enemy.y + enemy.height / 2;
-                        
-                        // Calculate direction to player for accurate shooting
-                        const dx = player.x - enemy.x;
-                        const dy = player.y - enemy.y;
-                        const distance = Math.sqrt(dx * dx + dy * dy);
-                        const velX = (dx / distance) * 5; // Slightly slower than lasers
-                        const velY = (dy / distance) * 5;
-                        
-                        lasers.push({
-                            x: mouthX,
-                            y: mouthY,
-                            velX: velX,
-                            velY: velY,
-                            width: 32, // Increased from 20
-                            height: 32, // Increased from 20
-                            active: true,
-                            color: '#FF6600', // Orange fireball
-                            type: 'fireball'
-                        });
-                        
-                        enemy.lastShot = Date.now();
-                    }
-                    
-                } else {
-                    // Basic enemy AI: patrol platforms with improved collision
-                    enemy.x += enemy.velX * enemy.direction;
-                    
-                    // Improved AI: turn around at platform edges with better collision detection
-                    let onPlatform = false;
-                    let currentPlatform = null;
-                    
-                    for (const platform of platforms) {
-                        if (platform.isVisible === false) continue; // Skip invisible platforms
-                        
-                        // Check if enemy is on this platform
-                        if (enemy.x >= platform.x && enemy.x <= platform.x + platform.width &&
-                            enemy.y >= platform.y - enemy.height - 5 && enemy.y <= platform.y + 5) {
-                            onPlatform = true;
-                            currentPlatform = platform;
-                            
-                            // Snap enemy to platform if they're slightly off
-                            if (enemy.y > platform.y - enemy.height) {
-                                enemy.y = platform.y - enemy.height;
-                            }
-                            
-                            // Turn around at platform edges
-                            if ((enemy.direction === 1 && enemy.x >= platform.x + platform.width - 48) ||
-                                (enemy.direction === -1 && enemy.x <= platform.x + 48)) {
-                                enemy.direction *= -1;
-                            }
-                            break;
-                        }
-                    }
-                    
-                    // If enemy is not on any platform, try to find the closest one and move towards it
-                    if (!onPlatform) {
-                        let closestPlatform = null;
-                        let closestDistance = Infinity;
-                        
-                        for (const platform of platforms) {
-                            if (platform.isVisible === false) continue;
-                            
-                            const distance = Math.abs(enemy.x - (platform.x + platform.width/2));
-                            if (distance < closestDistance) {
-                                closestDistance = distance;
-                                closestPlatform = platform;
-                            }
-                        }
-                        
-                        // Move towards the closest platform
-                        if (closestPlatform && closestDistance < 200) {
-                            if (enemy.x < closestPlatform.x + closestPlatform.width/2) {
-                                enemy.direction = 1;
-                            } else {
-                                enemy.direction = -1;
-                            }
-                        }
-                    }
                 }
                 
-                // Shooting logic for level 5+ crabs
-                if (enemy.canShoot && enemy.type === 'crab' && Date.now() - enemy.lastShot > enemy.shotCooldown) {
-                    console.log('🔫 Shooter crab firing! Enemy:', enemy.x, enemy.y, 'Player:', player.x, player.y);
-                    // Shoot from both claws
-                    const leftClawX = enemy.x + (enemy.direction === 1 ? 29 : -10); // Scaled from 12, 4 (12*2.4=28.8, 4*2.4=9.6)
-                    const rightClawX = enemy.x + (enemy.direction === 1 ? 38 : -19); // Scaled from 16, 8 (16*2.4=38.4, 8*2.4=19.2)
-                    const clawY = enemy.y + 5; // Scaled from 2 (2*2.4=4.8, rounded to 5)
+                // Shooting logic for level 5+ crabs (only if near player)
+                if (enemy.canShoot && enemy.type === 'crab' && distanceToPlayer < 400 &&
+                    currentTime - (enemy.lastShot || 0) > enemy.shotCooldown) {
+                    const leftClawX = enemy.x + (enemy.direction === 1 ? 29 : -10);
+                    const rightClawX = enemy.x + (enemy.direction === 1 ? 38 : -19);
+                    const clawY = enemy.y + 5;
                     
-                    // Left claw laser
                     lasers.push({
                         x: leftClawX,
                         y: clawY,
-                        velX: enemy.direction * 7, // Scaled from 3 (3*2.4=7.2, rounded to 7)
+                        velX: enemy.direction * 7,
                         velY: 0,
-                        width: 19, // Scaled from 8 (8*2.4=19.2, rounded to 19)
-                        height: 5, // Scaled from 2 (2*2.4=4.8, rounded to 5)
+                        width: 19,
+                        height: 5,
                         active: true
                     });
                     
-                    // Right claw laser
                     lasers.push({
                         x: rightClawX,
                         y: clawY,
-                        velX: enemy.direction * 7, // Scaled from 3 (3*2.4=7.2, rounded to 7)
+                        velX: enemy.direction * 7,
                         velY: 0,
-                        width: 19, // Scaled from 8 (8*2.4=19.2, rounded to 19)
-                        height: 5, // Scaled from 2 (2*2.4=4.8, rounded to 5)
+                        width: 19,
+                        height: 5,
                         active: true
                     });
                     
-                    enemy.lastShot = Date.now();
+                    enemy.lastShot = currentTime;
                 }
                 
-                
-                
-                // Shooting logic for level 5+ goldfish
-                if (enemy.canShoot && enemy.type === 'goldfish' && Date.now() - enemy.lastShot > enemy.shotCooldown) {
-                    console.log('🔫 Shooting goldfish firing! Enemy:', enemy.x, enemy.y, 'Player:', player.x, player.y);
-                    // Shoot from mouth
+                // Shooting logic for level 5+ goldfish (only if near player)
+                if (enemy.canShoot && enemy.type === 'goldfish' && distanceToPlayer < 400 &&
+                    currentTime - (enemy.lastShot || 0) > enemy.shotCooldown) {
                     const mouthX = enemy.x + (enemy.direction === 1 ? enemy.width - 5 : 5);
                     const mouthY = enemy.y + enemy.height / 2;
-                    
-                    // Calculate direction to player for more accurate shooting
                     const dx = player.x - enemy.x;
                     const dy = player.y - enemy.y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
-                    const velX = (dx / distance) * 5;
-                    const velY = (dy / distance) * 5;
                     
                     lasers.push({
                         x: mouthX,
                         y: mouthY,
-                        velX: velX,
-                        velY: velY,
-                        width: 16, // Medium laser for goldfish
+                        velX: (dx / distance) * 5,
+                        velY: (dy / distance) * 5,
+                        width: 16,
                         height: 6,
                         active: true,
-                        color: '#FFD700' // Gold laser for goldfish
+                        color: '#FFD700'
                     });
                     
-                    enemy.lastShot = Date.now();
+                    enemy.lastShot = currentTime;
                 }
                 
                 // Enemy collision with player - use player's collision box for more accurate detection
