@@ -28,7 +28,7 @@
         body {
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #87CEEB; /* Match game sky color to fill white space */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -77,7 +77,7 @@
             border: 6px solid #FFD700;
             border-radius: 20px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.4), 0 0 30px rgba(255,215,0,0.3);
-            background: linear-gradient(45deg, #1a1a2e, #16213e);
+            background: #87CEEB; /* Match game sky color */
             padding: 10px;
             animation: glow 3s ease-in-out infinite alternate;
             overflow: hidden;
@@ -86,6 +86,10 @@
         
         /* Mobile responsive container */
         @media (max-width: 768px) {
+            body {
+                background: #87CEEB; /* Match game sky color on mobile */
+            }
+            
             #gameContainer {
                 width: 100vw;
                 height: 100vh;
@@ -94,6 +98,7 @@
                 border-radius: 0;
                 padding: 0;
                 border: none;
+                background: #87CEEB; /* Match game sky color */
             }
             
             /* Scale down UI elements significantly on mobile */
@@ -129,8 +134,8 @@
             display: block;
             width: 100% !important;
             height: 100% !important;
-            object-fit: contain;
-            background: linear-gradient(135deg, #87CEEB, #98FB98);
+            object-fit: fill; /* Fill entire container instead of contain */
+            background: #87CEEB; /* Match game sky color */
         }
         
         @keyframes glow {
@@ -6439,30 +6444,13 @@
             
             let newWidth, newHeight;
             if (isMobile) {
-                // Mobile: use more of the screen to show more of the game
-                // Use 90% of viewport width (instead of limiting to 600px)
+                // Mobile: fill entire viewport to eliminate white space
                 const viewportWidth = window.innerWidth;
                 const viewportHeight = window.innerHeight;
                 
-                // Use most of the screen, leaving room for controls at bottom
-                newWidth = Math.floor(viewportWidth * 0.95); // 95% of screen width
-                newHeight = Math.floor((viewportHeight - 100) * 0.9); // Leave 100px for controls, use 90% of remaining
-                
-                // Maintain 16:9 aspect ratio, but prioritize showing more width
-                const aspectRatio = 16 / 9;
-                const widthBasedHeight = newWidth / aspectRatio;
-                const heightBasedWidth = newHeight * aspectRatio;
-                
-                // Use whichever gives us more visible area
-                if (widthBasedHeight <= newHeight) {
-                    newHeight = widthBasedHeight;
-                } else {
-                    newWidth = heightBasedWidth;
-                }
-                
-                // Ensure minimum sizes for playability
-                newWidth = Math.max(newWidth, 300);
-                newHeight = Math.max(newHeight, 169);
+                // Use full viewport dimensions
+                newWidth = viewportWidth;
+                newHeight = viewportHeight;
             } else {
                 // Desktop: use fixed 1920x1080 or container size
                 newWidth = Math.min(1920, containerRect.width - 20);
