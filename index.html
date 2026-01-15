@@ -237,10 +237,11 @@
                 display: block !important; /* Ensure it's visible */
             }
             
-            /* XP bar on mobile - match level display size, keep transitions for smooth updates */
+            /* XP bar on mobile - match level display size, positioned in top right, hide any duplicates */
             .xp-bar-container {
                 top: 5px !important;
                 right: 5px !important;
+                left: auto !important;
                 font-size: 8px !important;
                 padding: 2px 4px !important;
                 border-width: 1px !important;
@@ -248,7 +249,16 @@
                 animation: none !important;
                 backdrop-filter: none !important;
                 box-shadow: 0 1px 3px rgba(0,0,0,0.5) !important;
-                display: block !important; /* Ensure it's visible */
+                display: block !important;
+                position: fixed !important;
+            }
+            
+            /* Hide XP bar containers in score-row or other wrong locations */
+            .score-item .xp-bar-container,
+            #ui .xp-bar-container,
+            .score-row .xp-bar-container {
+                display: none !important;
+                visibility: hidden !important;
             }
             
             .xp-bar-container:hover {
@@ -1889,14 +1899,7 @@
             <div class="score-item"><span class="label">Score:</span> <span id="score">0</span></div>
             <div class="score-item"><span class="label">Coins:</span> <span id="coins">0</span></div>
             <div class="score-item"><span class="label">XP:</span> <span id="xp">0</span></div>
-            <div class="score-item">
-                <div class="xp-bar-container">
-                    <div class="xp-bar">
-                        <div class="xp-bar-fill" id="xpBarFill"></div>
-                    </div>
-                    <div class="xp-text" id="xpText">Level 1 <span id="xpProgress">(0/1000 XP)</span></div>
-                </div>
-            </div>
+            <!-- XP bar removed from score-row - now in top right corner -->
         </div>
             <div id="giantIndicator" style="display: none; color: #FF00FF; font-weight: bold; text-shadow: 0 0 10px #FF00FF;">🍄 GIANT MODE: 10s</div>
     </div>
@@ -6436,9 +6439,8 @@
             const scaleY = canvas.height / baseHeight;
             const scale = Math.min(scaleX, scaleY);
             
-            // Mobile: zoom out 20% to show more of the game world, desktop: zoom in 10%
-            // Mobile: zoom out more to see more of the game (0.5 = zoomed out, 0.8 was too zoomed in)
-            const zoomedScale = isMobile ? scale * 0.5 : scale * 1.1;
+            // Mobile: zoom out significantly to see much more of the game world
+            const zoomedScale = isMobile ? scale * 0.1 : scale * 1.1;
             
             // Store scale for use in game logic
             game.scale = zoomedScale;
