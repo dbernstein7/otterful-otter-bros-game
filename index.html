@@ -237,7 +237,7 @@
                 display: block !important; /* Ensure it's visible */
             }
             
-            /* XP bar on mobile - match level display size, disable animations for performance */
+            /* XP bar on mobile - match level display size, keep transitions for smooth updates */
             .xp-bar-container {
                 top: 5px !important;
                 right: 5px !important;
@@ -246,9 +246,9 @@
                 border-width: 1px !important;
                 gap: 2px !important;
                 animation: none !important;
-                transition: none !important;
                 backdrop-filter: none !important;
                 box-shadow: 0 1px 3px rgba(0,0,0,0.5) !important;
+                display: block !important; /* Ensure it's visible */
             }
             
             .xp-bar-container:hover {
@@ -265,7 +265,8 @@
             }
             
             .xp-bar-fill {
-                transition: none !important;
+                /* Keep transition for smooth XP bar updates */
+                transition: width 0.3s ease-out !important;
                 animation: none !important;
             }
             
@@ -418,17 +419,6 @@
             
             /* Hide any ability items that might show as empty circles */
             .ability-item {
-                display: none !important;
-            }
-            
-            /* Hide mobile action buttons (Laser/Fireball) - moved to settings */
-            #mobileActions {
-                display: none !important;
-                visibility: hidden !important;
-            }
-            
-            #mobileLaser,
-            #mobileFireball {
                 display: none !important;
             }
             
@@ -2144,7 +2134,7 @@
         <!-- Mobile Touch Controls -->
         <div id="mobileControls" style="display: none; position: absolute; bottom: 0; left: 0; right: 0; z-index: 2000; pointer-events: none; touch-action: none;">
             <!-- Circular Touchpad Joystick -->
-            <div id="mobileJoystick" style="position: absolute; bottom: 80px; left: 10px; width: 120px; height: 120px; pointer-events: auto; touch-action: none;">
+            <div id="mobileJoystick" style="position: absolute; bottom: 140px; left: 10px; width: 120px; height: 120px; pointer-events: auto; touch-action: none;">
                 <div id="joystickBase" style="position: absolute; width: 100%; height: 100%; border-radius: 50%; background: rgba(255,255,255,0.2); border: 3px solid rgba(255,255,255,0.5); pointer-events: none;"></div>
                 <div id="joystickHandle" style="position: absolute; width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,0.6); border: 2px solid rgba(255,255,255,0.9); left: 50%; top: 50%; transform: translate(-50%, -50%); pointer-events: none; transition: none;"></div>
             </div>
@@ -2155,8 +2145,8 @@
             <!-- Jetpack Button -->
             <button id="mobileJetpack" class="mobile-btn" style="display: none; position: absolute; bottom: 170px; right: 5px; width: 60px; height: 60px; border-radius: 50%; background: rgba(255,165,0,0.5); border: 2px solid rgba(255,165,0,0.8); font-size: 12px; color: white; font-weight: bold; pointer-events: auto; touch-action: manipulation;">JET</button>
             
-            <!-- Action Buttons (Laser/Fireball) - Hidden on mobile, abilities moved to settings -->
-            <div id="mobileActions" style="display: none !important; position: absolute; bottom: 240px; right: 10px; pointer-events: none;">
+            <!-- Action Buttons (Laser/Fireball) -->
+            <div id="mobileActions" style="position: absolute; bottom: 240px; right: 10px; pointer-events: auto;">
                 <button id="mobileLaser" class="mobile-btn" style="display: none; width: 50px; height: 50px; border-radius: 50%; background: rgba(0,150,255,0.5); border: 2px solid rgba(0,150,255,0.8); font-size: 12px; color: white; font-weight: bold; margin-bottom: 8px; touch-action: manipulation;">L</button>
                 <button id="mobileFireball" class="mobile-btn" style="display: none; width: 50px; height: 50px; border-radius: 50%; background: rgba(255,100,0,0.5); border: 2px solid rgba(255,100,0,0.8); font-size: 12px; color: white; font-weight: bold; touch-action: manipulation;">F</button>
             </div>
@@ -6447,7 +6437,8 @@
             const scale = Math.min(scaleX, scaleY);
             
             // Mobile: zoom out 20% to show more of the game world, desktop: zoom in 10%
-            const zoomedScale = isMobile ? scale * 0.8 : scale * 1.1;
+            // Mobile: zoom out more to see more of the game (0.5 = zoomed out, 0.8 was too zoomed in)
+            const zoomedScale = isMobile ? scale * 0.5 : scale * 1.1;
             
             // Store scale for use in game logic
             game.scale = zoomedScale;
@@ -10401,10 +10392,8 @@
             
             // Update action button visibility based on player abilities
             function updateMobileActionButtons() {
-                // Mobile action buttons are now hidden - abilities moved to settings
-                // Keep this function to prevent errors but don't show buttons
                 if (mobileLaser) {
-                    mobileLaser.style.display = 'none'; // Always hidden on mobile
+                    mobileLaser.style.display = player.hasLaser ? 'block' : 'none';
                 }
                 if (mobileFireball) {
                     mobileFireball.style.display = player.hasFireball ? 'block' : 'none';
