@@ -10279,21 +10279,17 @@
                         // Quick shoot
                         const touch = e.touches[0];
                         const rect = canvas.getBoundingClientRect();
-                        // Convert touch coordinates to canvas coordinates
+                        // Convert touch coordinates to canvas coordinates (screen space)
                         const touchX = touch.clientX - rect.left;
                         const touchY = touch.clientY - rect.top;
                         
-                        // Convert canvas coordinates to game world coordinates
-                        // Account for canvas scale and camera position
-                        const gameWorldX = touchX + game.camera.x;
-                        const gameWorldY = touchY + game.camera.y;
+                        // Calculate player position in screen/canvas space
+                        const playerScreenX = player.x + player.collisionOffsetX + player.collisionWidth / 2 - game.camera.x;
+                        const playerScreenY = player.y + player.collisionOffsetY + player.collisionHeight * 0.15 - game.camera.y;
                         
-                        // Calculate direction from player to touch point in game world
-                        const playerX = player.x + player.collisionOffsetX + player.collisionWidth / 2;
-                        const playerY = player.y + player.collisionOffsetY + player.collisionHeight * 0.15;
-                        
-                        const deltaX = gameWorldX - playerX;
-                        const deltaY = gameWorldY - playerY;
+                        // Calculate direction from player to touch point in screen space
+                        const deltaX = touchX - playerScreenX;
+                        const deltaY = touchY - playerScreenY;
                         const distance = Math.max(1, Math.sqrt(deltaX * deltaX + deltaY * deltaY));
                         const normalizedX = deltaX / distance;
                         const normalizedY = deltaY / distance;
@@ -10328,20 +10324,19 @@
                     if (player.hasFireball && player.fireballCooldown <= 0) {
                         const touch = e.touches[0];
                         const rect = canvas.getBoundingClientRect();
-                        // Convert touch coordinates to canvas coordinates
+                        // Convert touch coordinates to canvas coordinates (screen space)
                         const touchX = touch.clientX - rect.left;
                         const touchY = touch.clientY - rect.top;
                         
-                        // Convert canvas coordinates to game world coordinates
-                        const gameWorldX = touchX + game.camera.x;
-                        const gameWorldY = touchY + game.camera.y;
-                        
+                        // Calculate spawn position in screen/canvas space
                         const spawnX = player.x + player.collisionOffsetX + player.collisionWidth / 2;
                         const spawnY = player.y + player.collisionOffsetY + player.collisionHeight * 0.4;
+                        const spawnScreenX = spawnX - game.camera.x;
+                        const spawnScreenY = spawnY - game.camera.y;
                         
-                        // Calculate direction from spawn point to touch point in game world
-                        const deltaX = gameWorldX - spawnX;
-                        const deltaY = gameWorldY - spawnY;
+                        // Calculate direction from spawn point to touch point in screen space
+                        const deltaX = touchX - spawnScreenX;
+                        const deltaY = touchY - spawnScreenY;
                         const distance = Math.max(1, Math.sqrt(deltaX * deltaX + deltaY * deltaY));
                         const normalizedX = deltaX / distance;
                         const normalizedY = deltaY / distance;
