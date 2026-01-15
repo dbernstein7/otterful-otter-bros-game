@@ -211,18 +211,18 @@
                 display: block !important;
             }
             
-            /* Make settings button smaller */
+            /* Make settings button smaller - swap with D-pad */
             #settingsBtn {
-                bottom: 80px !important;
+                bottom: 10px !important;
                 left: 10px !important;
                 padding: 8px 12px !important;
                 font-size: 10px !important;
             }
             
-            /* Health/Armor bars - make much smaller on mobile */
+            /* Health/Armor bars - make much smaller on mobile - swap with jump button */
             .health-bar-container {
-                bottom: 100px !important;
-                right: 5px !important;
+                bottom: 10px !important;
+                right: 10px !important;
                 gap: 4px !important;
             }
             
@@ -2187,7 +2187,7 @@
         <!-- Mobile Touch Controls -->
         <div id="mobileControls" style="display: none; position: absolute; bottom: 0; left: 0; right: 0; z-index: 2000; pointer-events: none; touch-action: none;">
             <!-- Movement D-Pad -->
-            <div id="mobileDPad" style="position: absolute; bottom: 10px; left: 10px; width: 120px; height: 120px; pointer-events: auto;">
+            <div id="mobileDPad" style="position: absolute; bottom: 80px; left: 10px; width: 120px; height: 120px; pointer-events: auto;">
                 <div style="position: relative; width: 100%; height: 100%;">
                     <button id="mobileLeft" class="mobile-btn" style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.3); border: 2px solid rgba(255,255,255,0.6); font-size: 18px; color: white; touch-action: manipulation;">←</button>
                     <button id="mobileRight" class="mobile-btn" style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.3); border: 2px solid rgba(255,255,255,0.6); font-size: 18px; color: white; touch-action: manipulation;">→</button>
@@ -2196,10 +2196,10 @@
             </div>
             
             <!-- Jump Button -->
-            <button id="mobileJump" class="mobile-btn" style="position: absolute; bottom: 10px; right: 10px; width: 60px; height: 60px; border-radius: 50%; background: rgba(0,255,0,0.5); border: 2px solid rgba(0,255,0,0.8); font-size: 14px; color: white; font-weight: bold; pointer-events: auto; touch-action: manipulation;">JUMP</button>
+            <button id="mobileJump" class="mobile-btn" style="position: absolute; bottom: 100px; right: 5px; width: 60px; height: 60px; border-radius: 50%; background: rgba(0,255,0,0.5); border: 2px solid rgba(0,255,0,0.8); font-size: 14px; color: white; font-weight: bold; pointer-events: auto; touch-action: manipulation;">JUMP</button>
             
             <!-- Action Buttons (Laser/Fireball) -->
-            <div id="mobileActions" style="position: absolute; bottom: 80px; right: 10px; pointer-events: auto;">
+            <div id="mobileActions" style="position: absolute; bottom: 170px; right: 10px; pointer-events: auto;">
                 <button id="mobileLaser" class="mobile-btn" style="display: none; width: 50px; height: 50px; border-radius: 50%; background: rgba(0,150,255,0.5); border: 2px solid rgba(0,150,255,0.8); font-size: 12px; color: white; font-weight: bold; margin-bottom: 8px; touch-action: manipulation;">L</button>
                 <button id="mobileFireball" class="mobile-btn" style="display: none; width: 50px; height: 50px; border-radius: 50%; background: rgba(255,100,0,0.5); border: 2px solid rgba(255,100,0,0.8); font-size: 12px; color: white; font-weight: bold; touch-action: manipulation;">F</button>
             </div>
