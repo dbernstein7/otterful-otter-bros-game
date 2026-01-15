@@ -8144,27 +8144,33 @@
             }
             } // Close the if (!game.bossActive) block for goldfish
             
-            // 🦀 UNDERWATER CRAB GENERATION - Spawn extra crabs on underwater platforms (skip on boss levels)
+            // 🦀 UNDERWATER CRAB GENERATION - Spawn extra crabs on platforms ABOVE water (skip on boss levels)
             if (!game.bossActive) {
-                const underwaterCrabCount = Math.min(6 + Math.floor(levelNum * 2), 20); // 6-20 underwater crabs per level
-                console.log('🦀 Generating', underwaterCrabCount, 'underwater crabs for level', levelNum);
+                const underwaterCrabCount = Math.min(6 + Math.floor(levelNum * 2), 20); // 6-20 crabs per level
+                console.log('🦀 Generating', underwaterCrabCount, 'extra crabs for level', levelNum);
                 
                 for (let i = 0; i < underwaterCrabCount; i++) {
-                // Find underwater platforms
-                const underwaterPlatforms = platforms.filter(p => p.type === 'underwater');
+                // Find platforms that are ABOVE water level (not underwater platforms)
+                // Crabs should spawn on regular platforms, not floating in water
+                const validPlatforms = platforms.filter(p => 
+                    p.type !== 'underwater' && // Not underwater platforms
+                    p.y < game.waterLevel - 50 && // Above water level with margin
+                    p.isVisible !== false && // Platform is visible
+                    p.width >= 100 // Platform is wide enough
+                );
                 
-                if (underwaterPlatforms.length > 0) {
-                    // Pick a random underwater platform
-                    const underwaterPlatform = underwaterPlatforms[Math.floor(Math.random() * underwaterPlatforms.length)];
+                if (validPlatforms.length > 0) {
+                    // Pick a random valid platform
+                    const platform = validPlatforms[Math.floor(Math.random() * validPlatforms.length)];
                     
                     // Choose crab type (basic or shooter)
                     const isShooter = levelNum >= 5 && Math.random() < 0.4; // 40% chance for shooter crabs at level 5+
                     const crabType = isShooter ? 'shooter' : 'basic';
                     const crabConfig = enemyTypes[crabType];
                     
-                    const underwaterCrab = {
-                        x: underwaterPlatform.x + 72 + Math.random() * (underwaterPlatform.width - 144),
-                        y: underwaterPlatform.y - crabConfig.height, // Position on top of underwater platform
+                    const crab = {
+                        x: platform.x + 72 + Math.random() * (platform.width - 144),
+                        y: platform.y - crabConfig.height, // Position on top of platform
                         width: crabConfig.width,
                         height: crabConfig.height,
                         velX: crabConfig.speed,
@@ -8174,29 +8180,26 @@
                         collisionWidth: crabConfig.collisionWidth,
                         collisionHeight: crabConfig.collisionHeight,
                         collisionOffsetX: crabConfig.collisionOffsetX,
-                        collisionOffsetY: crabConfig.collisionOffsetY,
-                        isUnderwater: true
+                        collisionOffsetY: crabConfig.collisionOffsetY
                     };
                     
                     // Add shooter properties if it's a shooter crab
                     if (isShooter) {
-                        underwaterCrab.canShoot = true;
-                        underwaterCrab.lastShot = 0;
-                        underwaterCrab.shotCooldown = 2000 + Math.random() * 1000;
-                        console.log('🔫 UNDERWATER SHOOTER CRAB SPAWNED! Position:', underwaterCrab.x, underwaterCrab.y, 'Level:', levelNum);
+                        crab.canShoot = true;
+                        crab.lastShot = 0;
+                        crab.shotCooldown = 2000 + Math.random() * 1000;
                     }
                     
-                    enemies.push(underwaterCrab);
-                    console.log('🦀 UNDERWATER CRAB SPAWNED! Position:', underwaterCrab.x, underwaterCrab.y, 'Platform Y:', underwaterPlatform.y, 'Level:', levelNum);
+                    enemies.push(crab);
                 }
             }
-            } // Close the if (!game.bossActive) block for underwater crabs
+            } // Close the if (!game.bossActive) block for crabs
             
-            // Count eagles for debugging
+            // Count enemies for debugging
             const eagleCount = enemies.filter(e => e.type === 'eagle').length;
             const totalGoldfishCount = enemies.filter(e => e.type === 'goldfish').length;
-            const totalUnderwaterCrabCount = enemies.filter(e => e.type === 'crab' && e.isUnderwater).length;
-            console.log(`🦅 Enemy generation complete: ${enemies.length} total enemies, ${eagleCount} eagles, ${totalGoldfishCount} goldfish, ${totalUnderwaterCrabCount} underwater crabs`);
+            const totalCrabCount = enemies.filter(e => e.type === 'crab').length;
+            console.log(`🦅 Enemy generation complete: ${enemies.length} total enemies, ${eagleCount} eagles, ${totalGoldfishCount} goldfish, ${totalCrabCount} crabs`);
             
             return enemies;
         }
