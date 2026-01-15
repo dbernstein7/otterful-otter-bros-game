@@ -237,8 +237,8 @@
                 display: block !important; /* Ensure it's visible */
             }
             
-            /* XP bar on mobile - match level display size, positioned in top right, hide any duplicates */
-            .xp-bar-container {
+            /* XP bar on mobile - match level display size, positioned in top right ONLY */
+            #mainXpBarContainer {
                 top: 5px !important;
                 right: 5px !important;
                 left: auto !important;
@@ -251,9 +251,13 @@
                 box-shadow: 0 1px 3px rgba(0,0,0,0.5) !important;
                 display: block !important;
                 position: fixed !important;
+                width: auto !important;
+                min-width: auto !important;
+                max-width: 100px !important;
             }
             
-            /* Hide XP bar containers in score-row or other wrong locations */
+            /* Hide ALL other XP bar containers on mobile - only show the main one */
+            .xp-bar-container:not(#mainXpBarContainer),
             .score-item .xp-bar-container,
             #ui .xp-bar-container,
             .score-row .xp-bar-container {
@@ -430,29 +434,6 @@
             /* Hide any ability items that might show as empty circles */
             .ability-item {
                 display: none !important;
-            }
-            
-            /* Ensure only one laser button shows - hide any duplicates */
-            #mobileActions {
-                display: none !important;
-                visibility: hidden !important;
-                pointer-events: none !important;
-            }
-            
-            /* Ensure laser button is positioned correctly in bottom right */
-            #mobileLaser {
-                position: absolute !important;
-                bottom: 170px !important;
-                right: 5px !important;
-                width: 60px !important;
-                height: 60px !important;
-                display: none !important; /* Will be shown by updateMobileActionButtons() if player has laser */
-            }
-            
-            /* Hide fireball button completely on mobile */
-            #mobileFireball {
-                display: none !important;
-                visibility: hidden !important;
             }
             
             /* XP bar group remains hidden in landscape too */
@@ -1932,7 +1913,7 @@
             <div id="levelDisplay" class="corner-display top-left" style="top: 22px; left: 4vw;">Level: <span id="level">1</span></div>
     
     <!-- XP Bar - Top Right Corner -->
-    <div class="xp-bar-container" style="position: fixed; top: 1vh; right: 8vw; z-index: 10;">
+    <div class="xp-bar-container" id="mainXpBarContainer" style="position: fixed; top: 1vh; right: 8vw; z-index: 10;">
         <div class="xp-bar">
             <div class="xp-bar-fill" id="xpBarFill"></div>
         </div>
@@ -2165,17 +2146,15 @@
                 <div id="joystickHandle" style="position: absolute; width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,0.6); border: 2px solid rgba(255,255,255,0.9); left: 50%; top: 50%; transform: translate(-50%, -50%); pointer-events: none; transition: none;"></div>
             </div>
             
-            <!-- Laser Button - Single button in bottom right -->
-            <button id="mobileLaser" class="mobile-btn" style="display: none; position: absolute; bottom: 170px; right: 5px; width: 60px; height: 60px; border-radius: 50%; background: rgba(0,150,255,0.5); border: 2px solid rgba(0,150,255,0.8); font-size: 14px; color: white; font-weight: bold; pointer-events: auto; touch-action: manipulation;">L</button>
-            
             <!-- Jump Button -->
             <button id="mobileJump" class="mobile-btn" style="position: absolute; bottom: 100px; right: 5px; width: 60px; height: 60px; border-radius: 50%; background: rgba(0,255,0,0.5); border: 2px solid rgba(0,255,0,0.8); font-size: 14px; color: white; font-weight: bold; pointer-events: auto; touch-action: manipulation;">JUMP</button>
             
             <!-- Jetpack Button -->
-            <button id="mobileJetpack" class="mobile-btn" style="display: none; position: absolute; bottom: 240px; right: 5px; width: 60px; height: 60px; border-radius: 50%; background: rgba(255,165,0,0.5); border: 2px solid rgba(255,165,0,0.8); font-size: 12px; color: white; font-weight: bold; pointer-events: auto; touch-action: manipulation;">JET</button>
+            <button id="mobileJetpack" class="mobile-btn" style="display: none; position: absolute; bottom: 170px; right: 5px; width: 60px; height: 60px; border-radius: 50%; background: rgba(255,165,0,0.5); border: 2px solid rgba(255,165,0,0.8); font-size: 12px; color: white; font-weight: bold; pointer-events: auto; touch-action: manipulation;">JET</button>
             
-            <!-- Hide mobileActions container - only using single laser button now -->
-            <div id="mobileActions" style="display: none !important; visibility: hidden !important; pointer-events: none !important;">
+            <!-- Action Buttons (Laser/Fireball) -->
+            <div id="mobileActions" style="position: absolute; bottom: 240px; right: 10px; pointer-events: auto;">
+                <button id="mobileLaser" class="mobile-btn" style="display: none; width: 50px; height: 50px; border-radius: 50%; background: rgba(0,150,255,0.5); border: 2px solid rgba(0,150,255,0.8); font-size: 12px; color: white; font-weight: bold; margin-bottom: 8px; touch-action: manipulation;">L</button>
                 <button id="mobileFireball" class="mobile-btn" style="display: none; width: 50px; height: 50px; border-radius: 50%; background: rgba(255,100,0,0.5); border: 2px solid rgba(255,100,0,0.8); font-size: 12px; color: white; font-weight: bold; touch-action: manipulation;">F</button>
             </div>
         </div>
@@ -10419,24 +10398,14 @@
             
             // Update action button visibility based on player abilities
             function updateMobileActionButtons() {
-                // Only show laser button if player has laser ability
                 if (mobileLaser) {
                     mobileLaser.style.display = player.hasLaser ? 'block' : 'none';
                 }
-                // Hide fireball button - not using it on mobile
                 if (mobileFireball) {
-                    mobileFireball.style.display = 'none';
+                    mobileFireball.style.display = player.hasFireball ? 'block' : 'none';
                 }
-                // Show jetpack button if player has jetpack
                 if (mobileJetpack) {
                     mobileJetpack.style.display = player.hasJetpack ? 'block' : 'none';
-                }
-                // Hide mobileActions container completely
-                const mobileActions = document.getElementById('mobileActions');
-                if (mobileActions) {
-                    mobileActions.style.display = 'none';
-                    mobileActions.style.visibility = 'hidden';
-                    mobileActions.style.pointerEvents = 'none';
                 }
             }
             
