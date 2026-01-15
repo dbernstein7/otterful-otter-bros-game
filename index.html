@@ -411,6 +411,14 @@
             div.abilities-display,
             .abilities-display {
                 display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+                pointer-events: none !important;
+            }
+            
+            /* Hide any ability items that might show as empty circles */
+            .ability-item {
+                display: none !important;
             }
             
             /* XP bar group remains hidden in landscape too */
