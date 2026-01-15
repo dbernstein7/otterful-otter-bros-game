@@ -6479,8 +6479,8 @@
             const scaleY = canvas.height / baseHeight;
             const scale = Math.min(scaleX, scaleY);
             
-            // Mobile: no zoom, desktop: zoom in 10%
-            const zoomedScale = isMobile ? scale : scale * 1.1;
+            // Mobile: zoom out 20% to show more of the game world, desktop: zoom in 10%
+            const zoomedScale = isMobile ? scale * 0.8 : scale * 1.1;
             
             // Store scale for use in game logic
             game.scale = zoomedScale;
