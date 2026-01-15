@@ -10276,20 +10276,18 @@
                 mobileLaser.addEventListener('touchstart', (e) => {
                     e.preventDefault();
                     if (player.hasLaser && player.laserCooldown <= 0) {
-                        // Quick shoot
-                        const touch = e.touches[0];
-                        const rect = canvas.getBoundingClientRect();
-                        // Convert touch coordinates to canvas coordinates (screen space)
-                        const touchX = touch.clientX - rect.left;
-                        const touchY = touch.clientY - rect.top;
+                        // Shoot towards crosshair position (game.mouseX, game.mouseY)
+                        if (game.mouseX === undefined || game.mouseY === undefined) {
+                            return; // No aim point set yet
+                        }
                         
                         // Calculate player position in screen/canvas space
                         const playerScreenX = player.x + player.collisionOffsetX + player.collisionWidth / 2 - game.camera.x;
                         const playerScreenY = player.y + player.collisionOffsetY + player.collisionHeight * 0.15 - game.camera.y;
                         
-                        // Calculate direction from player to touch point in screen space
-                        const deltaX = touchX - playerScreenX;
-                        const deltaY = touchY - playerScreenY;
+                        // Calculate direction from player to crosshair position in screen space
+                        const deltaX = game.mouseX - playerScreenX;
+                        const deltaY = game.mouseY - playerScreenY;
                         const distance = Math.max(1, Math.sqrt(deltaX * deltaX + deltaY * deltaY));
                         const normalizedX = deltaX / distance;
                         const normalizedY = deltaY / distance;
@@ -10322,11 +10320,10 @@
                 mobileFireball.addEventListener('touchstart', (e) => {
                     e.preventDefault();
                     if (player.hasFireball && player.fireballCooldown <= 0) {
-                        const touch = e.touches[0];
-                        const rect = canvas.getBoundingClientRect();
-                        // Convert touch coordinates to canvas coordinates (screen space)
-                        const touchX = touch.clientX - rect.left;
-                        const touchY = touch.clientY - rect.top;
+                        // Shoot towards crosshair position (game.mouseX, game.mouseY)
+                        if (game.mouseX === undefined || game.mouseY === undefined) {
+                            return; // No aim point set yet
+                        }
                         
                         // Calculate spawn position in screen/canvas space
                         const spawnX = player.x + player.collisionOffsetX + player.collisionWidth / 2;
@@ -10334,9 +10331,9 @@
                         const spawnScreenX = spawnX - game.camera.x;
                         const spawnScreenY = spawnY - game.camera.y;
                         
-                        // Calculate direction from spawn point to touch point in screen space
-                        const deltaX = touchX - spawnScreenX;
-                        const deltaY = touchY - spawnScreenY;
+                        // Calculate direction from spawn point to crosshair position in screen space
+                        const deltaX = game.mouseX - spawnScreenX;
+                        const deltaY = game.mouseY - spawnScreenY;
                         const distance = Math.max(1, Math.sqrt(deltaX * deltaX + deltaY * deltaY));
                         const normalizedX = deltaX / distance;
                         const normalizedY = deltaY / distance;
