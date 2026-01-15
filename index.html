@@ -14380,14 +14380,26 @@
             }
             
             // Move collectibles and enemies with their platforms
+            // IMPORTANT: This must run BEFORE enemy AI to keep enemies fixed to moving platforms
             platforms.forEach(platform => {
                 if (platform.type === 'linear' && platform.deltaX !== undefined && platform.deltaY !== undefined) {
-                    // Move enemies on this platform
+                    // Move enemies on this platform - use wider tolerance to catch all enemies
                     enemies.forEach(enemy => {
-                        if (enemy.x >= platform.x && enemy.x <= platform.x + platform.width &&
-                            enemy.y >= platform.y - enemy.height - 5 && enemy.y <= platform.y + 5) {
+                        // Check if enemy is on this platform (wider Y tolerance for moving platforms)
+                        const isOnPlatform = enemy.x >= platform.x - 10 && enemy.x <= platform.x + platform.width + 10 &&
+                            enemy.y >= platform.y - enemy.height - 20 && enemy.y <= platform.y + 20;
+                        
+                        if (isOnPlatform) {
+                            // Move enemy with platform
                             enemy.x += platform.deltaX;
                             enemy.y += platform.deltaY;
+                            // Store reference to platform for enemy AI
+                            enemy.currentPlatform = platform;
+                            // Keep enemy properly positioned on platform
+                            enemy.y = platform.y - enemy.height;
+                        } else if (enemy.currentPlatform === platform) {
+                            // Enemy was on this platform but fell off - clear reference
+                            enemy.currentPlatform = null;
                         }
                     });
                     
@@ -15318,16 +15330,32 @@
                 } else if (enemy.type === 'charger') {
                     // Charger AI - strictly on platforms, only charges when player is close on same platform
                     
-                    // First, find which platform the charger is on (if any)
-                    let currentPlatform = null;
-                    for (const platform of platforms) {
-                        if (platform.isVisible === false) continue;
-                        if (enemy.x >= platform.x && enemy.x <= platform.x + platform.width &&
-                            enemy.y >= platform.y - enemy.height - 5 && enemy.y <= platform.y + 5) {
-                            currentPlatform = platform;
-                            // Keep charger on platform
-                            enemy.y = platform.y - enemy.height;
-                            break;
+                    // First, check if enemy already has a platform reference (from moving platform code)
+                    let currentPlatform = enemy.currentPlatform || null;
+                    
+                    // If no platform reference, find which platform the charger is on
+                    if (!currentPlatform) {
+                        for (const platform of platforms) {
+                            if (platform.isVisible === false) continue;
+                            if (enemy.x >= platform.x && enemy.x <= platform.x + platform.width &&
+                                enemy.y >= platform.y - enemy.height - 5 && enemy.y <= platform.y + 5) {
+                                currentPlatform = platform;
+                                enemy.currentPlatform = platform; // Store reference
+                                // Keep charger on platform
+                                enemy.y = platform.y - enemy.height;
+                                break;
+                            }
+                        }
+                    } else {
+                        // Enemy is on a moving platform - verify it's still on it
+                        if (enemy.x >= currentPlatform.x && enemy.x <= currentPlatform.x + currentPlatform.width &&
+                            enemy.y >= currentPlatform.y - enemy.height - 5 && enemy.y <= currentPlatform.y + 5) {
+                            // Still on platform - keep it fixed
+                            enemy.y = currentPlatform.y - enemy.height;
+                        } else {
+                            // Fell off - clear reference and find new platform
+                            enemy.currentPlatform = null;
+                            currentPlatform = null;
                         }
                     }
                     
@@ -15500,25 +15528,59 @@
                     }
                     
                 } else {
-                    // Basic enemy AI - simplified platform check
-                    enemy.x += enemy.velX * enemy.direction;
+                    // Basic enemy AI (crabs) - must stay on platforms, including moving ones
+                    // Check if enemy already has a platform reference (from moving platform code)
+                    let currentPlatform = enemy.currentPlatform || null;
                     
-                    // Only check platforms if near camera
-                    if (distanceToCamera < 300) {
+                    // If no platform reference, find which platform the enemy is on
+                    if (!currentPlatform) {
                         for (const platform of platforms) {
                             if (platform.isVisible === false) continue;
                             if (enemy.x >= platform.x && enemy.x <= platform.x + platform.width &&
                                 enemy.y >= platform.y - enemy.height - 5 && enemy.y <= platform.y + 5) {
-                                if (enemy.y > platform.y - enemy.height) {
-                                    enemy.y = platform.y - enemy.height;
-                                }
-                                if ((enemy.direction === 1 && enemy.x >= platform.x + platform.width - 48) ||
-                                    (enemy.direction === -1 && enemy.x <= platform.x + 48)) {
-                                    enemy.direction *= -1;
-                                }
+                                currentPlatform = platform;
+                                enemy.currentPlatform = platform; // Store reference
+                                enemy.y = platform.y - enemy.height;
                                 break;
                             }
                         }
+                    } else {
+                        // Enemy is on a moving platform - verify it's still on it
+                        if (enemy.x >= currentPlatform.x && enemy.x <= currentPlatform.x + currentPlatform.width &&
+                            enemy.y >= currentPlatform.y - enemy.height - 5 && enemy.y <= currentPlatform.y + 5) {
+                            // Still on platform - keep it fixed
+                            enemy.y = currentPlatform.y - enemy.height;
+                        } else {
+                            // Fell off - clear reference and find new platform
+                            enemy.currentPlatform = null;
+                            currentPlatform = null;
+                            // Try to find a new platform
+                            for (const platform of platforms) {
+                                if (platform.isVisible === false) continue;
+                                if (enemy.x >= platform.x && enemy.x <= platform.x + platform.width &&
+                                    enemy.y >= platform.y - enemy.height - 5 && enemy.y <= platform.y + 5) {
+                                    currentPlatform = platform;
+                                    enemy.currentPlatform = platform;
+                                    enemy.y = platform.y - enemy.height;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Only move if on a platform
+                    if (currentPlatform) {
+                        enemy.x += enemy.velX * enemy.direction;
+                        
+                        // Turn around at platform edges
+                        if (enemy.x <= currentPlatform.x || enemy.x >= currentPlatform.x + currentPlatform.width) {
+                            enemy.direction *= -1;
+                            // Clamp to platform bounds
+                            enemy.x = Math.max(currentPlatform.x, Math.min(currentPlatform.x + currentPlatform.width, enemy.x));
+                        }
+                        
+                        // Keep enemy on platform (especially important for moving platforms)
+                        enemy.y = currentPlatform.y - enemy.height;
                     }
                 }
                 
