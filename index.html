@@ -17754,29 +17754,6 @@
                         }, 2000);
                     }
                 }, 50);
-                
-                // Option 2: Word by word typing (uncomment to use instead)
-                /*
-                const words = text.split(' ');
-                let wordIndex = 0;
-                game.typewriterInterval = setInterval(() => {
-                    if (wordIndex < words.length) {
-                        textElement.textContent += (wordIndex > 0 ? ' ' : '') + words[wordIndex];
-                        wordIndex++;
-                    } else {
-                        clearInterval(game.typewriterInterval);
-                        game.typewriterInterval = null;
-                        setTimeout(() => {
-                            game.cutsceneIndex++;
-                            if (game.cutsceneIndex < cutsceneTexts.length) {
-                                displayCutsceneText();
-                            } else {
-                                endCutscene();
-                            }
-                        }, 2000);
-                    }
-                }, 200);
-                */
             }
         }
         
