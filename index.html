@@ -67,8 +67,10 @@
         
         #gameContainer {
             position: relative;
-            width: 100vw;
-            height: 100vh;
+            width: 1920px;
+            height: 1080px;
+            max-width: 1920px;
+            max-height: 1080px;
             border: 6px solid #FFD700;
             border-radius: 20px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.4), 0 0 30px rgba(255,215,0,0.3);
@@ -76,8 +78,7 @@
             padding: 10px;
             animation: glow 3s ease-in-out infinite alternate;
             overflow: hidden;
-            min-height: 400px;
-            min-width: 600px;
+            margin: 0 auto;
         }
         
         #gameCanvas {
@@ -6220,21 +6221,14 @@
                 return;
             }
         function resizeCanvas() {
-            const container = document.getElementById('gameContainer');
-            const containerRect = container.getBoundingClientRect();
+            // Fixed size: 1920x1080
+            const fixedWidth = 1920;
+            const fixedHeight = 1080;
             
-            // Set canvas size to container size with fallback
-            let newWidth = containerRect.width - 20; // Account for padding
-            let newHeight = containerRect.height - 20; // Account for padding
+            canvas.width = fixedWidth;
+            canvas.height = fixedHeight;
             
-            // Ensure minimum dimensions
-            if (newWidth < 400) newWidth = 400;
-            if (newHeight < 300) newHeight = 300;
-            
-            canvas.width = newWidth;
-            canvas.height = newHeight;
-            
-            // Calculate scale factors
+            // Calculate scale factors (1:1 since we're using base resolution)
             const baseWidth = 1920;
             const baseHeight = 1080;
             const scaleX = canvas.width / baseWidth;
