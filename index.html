@@ -14118,10 +14118,15 @@
                         const collisionY = player.y + player.collisionOffsetY;
                         
                         // Check if player is over this platform
+                        // Allow landing on underwater platforms even when in water if platform is above water level
+                        const platformAboveWater = platform.y < game.waterLevel - 50;
+                        const canLand = !player.inWater || platformAboveWater || platform.type === 'underwater';
+                        
                         if (collisionX + player.collisionWidth > platform.x && 
                             collisionX < platform.x + platform.width &&
                             collisionY + player.collisionHeight >= platform.y - 10 &&
-                            collisionY + player.collisionHeight <= platform.y + 10) {
+                            collisionY + player.collisionHeight <= platform.y + 10 &&
+                            canLand) {
                             
                             // Snap player to this platform
                             player.y = platform.y - player.collisionHeight - player.collisionOffsetY;
