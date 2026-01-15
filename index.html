@@ -9439,7 +9439,14 @@
             game.camera.x = 0;
             // Safety check for canvas height
             if (canvas && canvas.height) {
-                game.camera.y = player.y - canvas.height / 2; // Position camera to show player
+                // On mobile, position camera to show more area (farther away)
+                const isMobile = game.isMobile || window.innerWidth < 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                if (isMobile) {
+                    // Use larger offset on mobile to show more of the game world
+                    game.camera.y = player.y - canvas.height / 1.5; // Show more area above and below
+                } else {
+                    game.camera.y = player.y - canvas.height / 2; // Position camera to show player
+                }
             } else {
                 game.camera.y = player.y - 540; // Default to half of 1080p
                 console.log('⚠️ Using default camera height - canvas not ready');
