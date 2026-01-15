@@ -6439,19 +6439,30 @@
             
             let newWidth, newHeight;
             if (isMobile) {
-                // Mobile: use much smaller size for better performance (max 600px width)
-                const maxMobileWidth = 600;
-                const maxMobileHeight = 338; // 16:9 ratio
-                newWidth = Math.min(window.innerWidth - 10, maxMobileWidth);
-                newHeight = Math.min(window.innerHeight - 120, maxMobileHeight); // Leave room for controls
+                // Mobile: use more of the screen to show more of the game
+                // Use 90% of viewport width (instead of limiting to 600px)
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
                 
-                // Maintain 16:9 aspect ratio
+                // Use most of the screen, leaving room for controls at bottom
+                newWidth = Math.floor(viewportWidth * 0.95); // 95% of screen width
+                newHeight = Math.floor((viewportHeight - 100) * 0.9); // Leave 100px for controls, use 90% of remaining
+                
+                // Maintain 16:9 aspect ratio, but prioritize showing more width
                 const aspectRatio = 16 / 9;
-                if (newWidth / newHeight > aspectRatio) {
-                    newWidth = newHeight * aspectRatio;
+                const widthBasedHeight = newWidth / aspectRatio;
+                const heightBasedWidth = newHeight * aspectRatio;
+                
+                // Use whichever gives us more visible area
+                if (widthBasedHeight <= newHeight) {
+                    newHeight = widthBasedHeight;
                 } else {
-                    newHeight = newWidth / aspectRatio;
+                    newWidth = heightBasedWidth;
                 }
+                
+                // Ensure minimum sizes for playability
+                newWidth = Math.max(newWidth, 300);
+                newHeight = Math.max(newHeight, 169);
             } else {
                 // Desktop: use fixed 1920x1080 or container size
                 newWidth = Math.min(1920, containerRect.width - 20);
