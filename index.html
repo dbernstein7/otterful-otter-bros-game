@@ -164,35 +164,46 @@
         
         /* Mobile responsive adjustments */
         @media (max-width: 768px) {
-            .score-row {
-                flex-direction: column;
-                gap: 4px;
-            }
-            
-            .score-item {
-                font-size: 12px;
-                padding: 6px 10px;
-            }
-            
-            .game-title {
-                font-size: 16px;
-                padding: 8px 12px;
+            /* Hide most UI elements on mobile - too cluttered */
+            #ui {
+                display: none !important;
             }
             
             .corner-display {
-                font-size: 12px;
-                padding: 8px 12px;
+                font-size: 8px !important;
+                padding: 2px 4px !important;
+                border-width: 1px !important;
+                backdrop-filter: none !important;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.5) !important;
+                animation: none !important;
             }
             
-            #ui {
-                max-width: 95vw;
-                padding: 12px;
+            #levelDisplay {
+                top: 5px !important;
+                left: 5px !important;
+                font-size: 8px !important;
+                padding: 2px 4px !important;
             }
             
-            #leaderboardPanel {
-                max-width: 95vw;
-                max-height: 90vh;
-                padding: 15px;
+            #collectiblesCounter {
+                top: 5px !important;
+                left: 60px !important;
+                font-size: 8px !important;
+                gap: 4px !important;
+                min-width: auto !important;
+            }
+            
+            .counter-item {
+                padding: 2px 4px !important;
+                font-size: 8px !important;
+            }
+            
+            .counter-icon {
+                font-size: 10px !important;
+            }
+            
+            .counter-label, .counter-value {
+                font-size: 8px !important;
             }
             
             /* Show mobile controls on mobile */
@@ -200,10 +211,18 @@
                 display: block !important;
             }
             
-            /* Hide desktop buttons on mobile */
+            /* Make settings button smaller */
             #settingsBtn {
-                bottom: 120px !important;
-                left: 20px !important;
+                bottom: 80px !important;
+                left: 10px !important;
+                padding: 8px 12px !important;
+                font-size: 10px !important;
+            }
+            
+            #leaderboardPanel {
+                max-width: 95vw;
+                max-height: 90vh;
+                padding: 15px;
             }
         }
         
@@ -6365,6 +6384,7 @@
             
             // Store scale for use in game logic
             game.scale = zoomedScale;
+            game.isMobile = isMobile;
             game.canvasWidth = canvas.width;
             game.canvasHeight = canvas.height;
             game.isMobile = isMobile;
@@ -13535,6 +13555,10 @@
                     player.velY = -player.jumpPower;
                     player.onGround = false;
                     player.onMovingPlatform = false; // Reset moving platform state when jumping
+                    // Force player slightly above platform to prevent immediate collision
+                    if (player.lastPlatform) {
+                        player.y = player.lastPlatform.y - player.collisionHeight - player.collisionOffsetY - 5;
+                    }
                     game.sessionStats.jumpsMade++;
                 } else if (player.canDoubleJump) {
                     // ⭐ DOUBLE JUMP - From air (always works regardless of velocity)
@@ -14634,7 +14658,9 @@
                     const verticalCollision = playerBottom >= platformTop - tolerance && 
                                              playerBottom <= platformTop + tolerance * 2;
                     const isAbovePlatform = collisionY < platformBottom - 5;
-                    const isFalling = player.velY >= -2; // More forgiving - allows small upward velocity
+                    // Only consider falling if velocity is positive (actually moving down)
+                    // This prevents the player from being stuck on ground immediately after jumping
+                    const isFalling = player.velY > 0;
                     
                     // 🔽 DOWN JUMP CHECK - Skip collision if player just dropped through this platform
                     const justDroppedThrough = game.keys['downJumpPressed'] && player.lastPlatform === platform;
