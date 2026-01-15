@@ -2763,6 +2763,7 @@
             <button id="achievementsTabBtn" class="tab-btn" onclick="switchProfileTab('achievements')" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #FFD700, #FFA500); color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease;">🏆 Achievements</button>
             <button id="customizationTabBtn" class="tab-btn" onclick="switchProfileTab('customization')" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease;">🎨 Customization</button>
             <!-- Wallet Tab Button - REMOVED FOR PERFORMANCE -->
+            <!-- Button removed - wallet system disabled -->
         </div>
         
         <!-- Stats Tab -->
@@ -3058,11 +3059,7 @@
                             <button onclick="selectNFTsToStake()" style="background: linear-gradient(135deg, #9C27B0, #7B1FA2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease; margin-left: 10px;">🎯 Select NFTs</button>
                         </div>
                     </div>
-                    <div id="walletDisconnectedStatus">
-                        <div style="font-size: 24px; margin-bottom: 10px;">🔌</div>
-                        <div style="font-size: 18px; font-weight: bold; color: #FF4444; margin-bottom: 10px;">Wallet Not Connected</div>
-                        <button onclick="connectWalletFromProfile()" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease;">🔗 Connect Wallet</button>
-                    </div>
+                    <!-- Wallet buttons removed for performance -->
                 </div>
             </div>
             
@@ -3168,6 +3165,7 @@
                 </div>
             </div>
         </div>
+        -->
         
         <div style="text-align: center; margin-top: 20px;">
             <button onclick="toggleProfile()" style="background: linear-gradient(135deg, #FF4444, #CC0000); color: white; border: none; padding: 12px 25px; border-radius: 15px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease;">Back to Menu</button>
@@ -19266,7 +19264,10 @@
             console.log(`📊 Profile XP Updated: Level ${currentLevel}, XP: ${currentXP}, Current Level XP: ${currentLevelXP}, XP for Next: ${xpForNextLevel}, Progress: ${progressPercentage.toFixed(1)}%`);
         }
         
+        // Wallet functions removed for performance
         function updateWalletProfile() {
+            // Wallet system disabled - function disabled
+            return;
             console.log('🔗 Updating wallet profile...');
             
             if (!otterWallet) {
@@ -19528,41 +19529,13 @@
             return colors[rarity] || '#888';
         }
         
+        // Wallet functions removed for performance
         function connectWalletFromProfile() {
-            console.log('🔗 Connecting wallet from profile...');
-            console.log('🔍 otterWallet exists:', !!otterWallet);
-            console.log('🔍 window.ethereum exists:', !!window.ethereum);
-            
-            if (otterWallet) {
-                console.log('✅ OtterWallet found, attempting connection...');
-                otterWallet.connect().then(() => {
-                    console.log('✅ Wallet connected from profile');
-                    updateWalletProfile();
-                }).catch(error => {
-                    console.error('❌ Failed to connect wallet from profile:', error);
-                });
-            } else {
-                console.error('❌ OtterWallet not initialized');
-                console.log('💡 Trying to reinitialize OtterWallet...');
-                try {
-                    otterWallet = new OtterfulWallet();
-                    console.log('✅ OtterWallet reinitialized');
-                    connectWalletFromProfile(); // Try again
-                } catch (error) {
-                    console.error('❌ Failed to reinitialize OtterWallet:', error);
-                }
-            }
+            alert('Wallet/Staking system has been removed for performance optimization.');
         }
 
         function disconnectWalletFromProfile() {
-            console.log('🔌 Disconnecting wallet from profile...');
-            if (otterWallet) {
-                otterWallet.disconnect();
-                updateWalletProfile();
-                console.log('✅ Wallet disconnected from profile');
-            } else {
-                console.error('❌ OtterWallet not initialized');
-            }
+            // Wallet system disabled
         }
 
         function refreshMetadata() {
@@ -19584,7 +19557,10 @@
             }
         }
 
+        // Wallet functions removed for performance
         function checkNFTs() {
+            alert('Wallet/Staking system has been removed for performance optimization.');
+            return;
             console.log('🔍 Checking NFTs...');
             console.log('🔍 otterWallet exists:', !!otterWallet);
             console.log('🔍 otterWallet.isConnected:', otterWallet?.isConnected);
@@ -19989,7 +19965,10 @@
         }
 
         // Function to stake all NFTs (simulated for now)
+        // Wallet functions removed for performance
         async function stakeAllNFTs() {
+            alert('Wallet/Staking system has been removed for performance optimization.');
+            return;
             console.log('🔒 Staking all NFTs (simulated)...');
             
             if (!otterWallet || !otterWallet.isConnected) {
@@ -20027,7 +20006,10 @@
         }
 
         // Function to claim all staking rewards
+        // Wallet functions removed for performance
         async function claimAllRewards() {
+            alert('Wallet/Staking system has been removed for performance optimization.');
+            return;
             console.log('💰 Claiming all staking rewards...');
             
             if (!otterWallet || !otterWallet.isConnected) {
@@ -20063,7 +20045,10 @@
         }
 
         // Function to convert in-game coins to $FISH
+        // Wallet functions removed for performance
         function convertCoinsToFish() {
+            alert('Wallet/Staking system has been removed for performance optimization.');
+            return;
             console.log('🪙 CONVERTING COINS TO $FISH - Starting...');
             
             if (!otterWallet || !otterWallet.isConnected) {
@@ -20110,7 +20095,10 @@
         }
 
         // Function to unstake all NFTs (easy unlock button - simulated)
+        // Wallet functions removed for performance
         async function unstakeAllNFTs() {
+            alert('Wallet/Staking system has been removed for performance optimization.');
+            return;
             console.log('🔓 Unstaking all NFTs (simulated)...');
             
             if (!otterWallet || !otterWallet.isConnected) {
@@ -20196,7 +20184,10 @@
         }
 
         // Function to select specific NFTs to stake
+        // Wallet functions removed for performance
         function selectNFTsToStake() {
+            alert('Wallet/Staking system has been removed for performance optimization.');
+            return;
             console.log('🎯 Opening NFT selection interface...');
             
             if (!otterWallet || !otterWallet.isConnected) {
@@ -21711,9 +21702,10 @@
                 customizationTab.style.display = 'block';
                 customizationBtn.classList.add('active');
             } else if (tab === 'wallet') {
-                walletTab.style.display = 'block';
-                walletBtn.classList.add('active');
-                updateWalletProfile(); // Update wallet data when tab is opened
+                // Wallet tab disabled - show message instead
+                if (walletTab) walletTab.style.display = 'block';
+                if (walletBtn) walletBtn.classList.add('active');
+                // updateWalletProfile(); // Removed - wallet system disabled
             }
         }
         
