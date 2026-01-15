@@ -13763,6 +13763,25 @@
             }
 
             // ========================================
+            // 🔽 DOWN JUMP - Drop through platforms (Mobile & Desktop)
+            // ========================================
+            // Check if down key is pressed (from keyboard or mobile joystick)
+            if ((game.keys['ArrowDown'] || game.keys['KeyS']) && player.onGround && !game.keys['downJumpPressed']) {
+                game.keys['downJumpPressed'] = true;
+                player.onGround = false;
+                player.velY = 2; // Small downward push to start falling
+                console.log('🔽 Down jump activated - dropping through platform', player.isGiant ? '(Giant Mode)' : '');
+            }
+            
+            // Reset down jump flag when key is released (for mobile joystick)
+            if (!game.keys['ArrowDown'] && !game.keys['KeyS'] && game.keys['downJumpPressed']) {
+                // Only reset if player has successfully dropped through (is falling and below platform)
+                if (player.velY > 0 && player.lastPlatform && player.y > player.lastPlatform.y + 50) {
+                    game.keys['downJumpPressed'] = false;
+                }
+            }
+            
+            // ========================================
             // 🚀 ROBUST DOUBLE JUMP SYSTEM
             // ========================================
             if (game.keys['jumpJustPressed']) {
