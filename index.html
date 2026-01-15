@@ -23817,23 +23817,34 @@
             const spawnX = 240; // Player spawn position (from player.x)
             const spawnY = 1200; // Ground level (from player starting y)
             
-            // Ensure spawn is within level bounds
-            const safeSpawnX = Math.max(levelMinX + 50, Math.min(levelMaxX - 50, spawnX));
+            // Left boundary is 40px left of spawn (from game code: leftBoundaryX = 240 - 200 = 40)
+            const leftBoundaryX = 40;
+            const rightBoundaryX = levelMaxX;
             
-            // Create 20 chests equally spaced, but ensure they're all within bounds
-            const chestSpacing = 60; // Space between chests
-            const totalWidth = 19 * chestSpacing; // 20 chests = 19 spaces
-            let startX = safeSpawnX - totalWidth / 2; // Center the chests around spawn
+            // Create 10 chests (reduced from 20) - place them in a tight, reachable group
+            const chestCount = 10;
+            const chestSpacing = 50; // Closer spacing for 10 chests
+            const totalWidth = (chestCount - 1) * chestSpacing; // 9 spaces for 10 chests
+            let startX = spawnX - totalWidth / 2; // Center the chests around spawn
             
-            // Ensure startX is within level bounds
-            startX = Math.max(levelMinX + 20, Math.min(levelMaxX - (totalWidth + 20), startX));
+            // Ensure startX is within reachable bounds (left boundary + margin)
+            startX = Math.max(leftBoundaryX + 30, Math.min(rightBoundaryX - (totalWidth + 30), startX));
             
-            for (let i = 0; i < 20; i++) {
+            // Find a platform near spawn to place chests on (more reliable than ground)
+            const spawnPlatform = platforms.find(p => 
+                p.x <= spawnX + 100 && 
+                p.x + p.width >= spawnX - 100 && 
+                p.y >= spawnY - 100 && 
+                p.y <= spawnY + 100
+            ) || platforms.find(p => p.x === 0 && p.y === 1320); // Fallback to starting platform
+            
+            const chestY = spawnPlatform ? spawnPlatform.y - 50 : spawnY - 50; // Above platform or ground
+            
+            for (let i = 0; i < chestCount; i++) {
                 let chestX = startX + (i * chestSpacing);
-                const chestY = spawnY - 50; // Slightly above ground
                 
-                // Clamp chest X position to level boundaries
-                chestX = Math.max(levelMinX + 20, Math.min(levelMaxX - 20, chestX));
+                // Clamp chest X position to reachable boundaries
+                chestX = Math.max(leftBoundaryX + 30, Math.min(rightBoundaryX - 30, chestX));
                 
                 // Ensure chest Y is within reasonable bounds
                 const safeChestY = Math.max(0, Math.min(2500, chestY));
@@ -23855,7 +23866,7 @@
                 treasures.push(secretChest);
             }
             
-            console.log(`🎁 Spawned 20 secret chests at spawn (${safeSpawnX}, ${spawnY}), boundaries: ${levelMinX} to ${levelMaxX}`);
+            console.log(`🎁 Spawned ${chestCount} secret chests at spawn (${spawnX}, ${chestY}), boundaries: ${leftBoundaryX} to ${rightBoundaryX}`);
             
             // Show special notification
             showSecretChestNotification();
