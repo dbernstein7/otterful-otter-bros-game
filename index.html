@@ -4992,7 +4992,7 @@
                         <div style="font-size: 10px; color: #FFA500;">${nft.traits.slice(0, 3).join(', ')}${nft.traits.length > 3 ? '...' : ''}</div>
                     </div>
                     <div>
-                        <button onclick="otterWallet.simulateStakeNFT(${nft.tokenId})" style="background: linear-gradient(135deg, #00FF00, #008000); color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold;">Stake NFT</button>
+                        <!-- Wallet staking button removed -->
                     </div>
                 `;
                 
@@ -6231,8 +6231,8 @@
         }
         */
 
-        // Wallet system removed - no initialization needed
-        // let otterWallet;
+        // Wallet system removed - set to null to prevent errors
+        let otterWallet = null;
         
         // Global variables
         let aiOwlBotEnabled = true;
@@ -6423,10 +6423,7 @@
             // Initialize the first level after canvas is fully set up
             loadLevel(1);
             
-            // Setup wallet event listeners after DOM is fully ready
-            if (otterWallet) {
-                otterWallet.setupEventListeners();
-            }
+            // Wallet event listeners removed - wallet system disabled
         }, 100);
         
         // Resize on window resize
@@ -11018,16 +11015,9 @@
         }
         
         function addScoreWithXP(baseScore, source = 'unknown') {
-            // Apply wallet bonuses if connected
+            // Apply wallet bonuses if connected (wallet system disabled)
             let scoreMultiplier = 1;
-            if (otterWallet && otterWallet.isConnected) {
-                try {
-                    const multipliers = otterWallet.getGameMultipliers();
-                    scoreMultiplier = multipliers.points;
-                } catch (error) {
-                    console.warn('⚠️ Error getting wallet multipliers:', error);
-                }
-            }
+            // Wallet system removed - no score multipliers applied
             
             const finalScore = Math.floor(baseScore * scoreMultiplier);
             
@@ -13306,16 +13296,9 @@
             // ========================================
             // 🎮 PLAYER MOVEMENT LOGIC
             // ========================================
-            // Apply wallet speed bonuses if connected
+            // Apply wallet speed bonuses if connected (wallet system disabled)
             let currentSpeed = player.speed;
-            if (otterWallet && otterWallet.isConnected) {
-                try {
-                    const multipliers = otterWallet.getGameMultipliers();
-                    currentSpeed = player.speed * multipliers.speed;
-                } catch (error) {
-                    console.warn('⚠️ Error getting wallet speed multipliers:', error);
-                }
-            }
+            // Wallet system removed - no speed bonuses applied
             
             if (game.keys['ArrowLeft'] || game.keys['KeyA']) {
                 player.velX = -currentSpeed;
@@ -13730,19 +13713,9 @@
                             }
                         }
                         
-                        // Apply wallet damage bonuses if connected
+                        // Wallet damage bonuses removed
                         let finalDamage = damage;
-                        if (otterWallet && otterWallet.isConnected) {
-                            try {
-                                const multipliers = otterWallet.getGameMultipliers();
-                                finalDamage = Math.floor(damage * multipliers.damage);
-                                if (finalDamage > damage) {
-                                    console.log(`⚔️ Wallet damage boost: ${damage} → ${finalDamage} (${multipliers.damage}x)`);
-                                }
-                            } catch (error) {
-                                console.warn('⚠️ Error getting wallet damage multipliers:', error);
-                            }
-                        }
+                        // Wallet system disabled - no damage multipliers
                         
                         console.log('🔫 BEFORE: Enemy health was:', enemy.health, 'Type:', enemy.type);
                         enemy.health -= finalDamage;
@@ -13796,14 +13769,14 @@
                         
                         // Remove laser if it's not a piercing laser or if it's a regular laser
                         if (!laser.pierce || laser.chargeLevel === 0) {
-                        playerLasers.splice(index, 1);
-                        return;
+                            playerLasers.splice(index, 1);
+                            return;
                         }
                     }
                 });
-                
-                // Check collision with breakable tiles
-                breakables.forEach((tile, tileIndex) => {
+            
+            // Check collision with breakable tiles
+            breakables.forEach((tile, tileIndex) => {
                     if (!tile.broken && checkLaserCollision(laser, tile)) {
                         console.log('🔫 Laser hit breakable tile! Health before:', tile.health);
                         tile.health--;
@@ -14807,20 +14780,7 @@
                     // Apply wallet bonuses if connected
                     let coinMultiplier = 1;
                     let bonusCoins = 0;
-                    if (otterWallet && otterWallet.isConnected) {
-                        try {
-                            const multipliers = otterWallet.getGameMultipliers();
-                            coinMultiplier = multipliers.points;
-                            
-                            // Apply luck bonus for extra coins
-                            if (multipliers.luck > 1.0 && Math.random() < 0.3) {
-                                bonusCoins = Math.floor(multipliers.luck);
-                                console.log(`🍀 Lucky! +${bonusCoins} bonus coins from wallet traits!`);
-                            }
-                        } catch (error) {
-                            console.warn('⚠️ Error getting wallet coin multipliers:', error);
-                        }
-                    }
+                    // Wallet system disabled - no coin multipliers
                     
                     game.coins += coinMultiplier + bonusCoins;
                     // Don't add to marketplace coins yet - only on level completion
@@ -18156,19 +18116,8 @@
                 return; // Player is invulnerable
             }
             
-            // Apply wallet defense bonuses if connected
-            if (otterWallet && otterWallet.isConnected) {
-                try {
-                    const multipliers = otterWallet.getGameMultipliers();
-                    if (multipliers.defense < 1.0) {
-                        const damageReduction = damageAmount * (1 - multipliers.defense);
-                        damageAmount = Math.max(1, damageAmount - damageReduction);
-                        console.log(`🛡️ Wallet defense reduced damage by ${Math.round((1 - multipliers.defense) * 100)}%! Damage: ${damageAmount + damageReduction} → ${damageAmount}`);
-                    }
-                } catch (error) {
-                    console.warn('⚠️ Error getting wallet defense multipliers:', error);
-                }
-            }
+            // Wallet defense bonuses removed
+            // Wallet system disabled - no defense multipliers
             
             // Apply armor boost if player has the ability
             if (player.hasArmorBoost && player.armorLevel > 0) {
@@ -19266,7 +19215,8 @@
         
         // Wallet functions removed for performance
         function updateWalletProfile() {
-            // Wallet system disabled - function disabled
+            // Wallet system completely disabled - function does nothing
+            console.log('⚠️ Wallet system has been removed');
             return;
             console.log('🔗 Updating wallet profile...');
             
@@ -19291,20 +19241,15 @@
                 return;
             }
             
-            console.log('📊 Current wallet state:', {
-                isConnected: otterWallet.isConnected,
-                account: otterWallet.account,
-                userNFTs: otterWallet.userNFTs.length,
-                stakedNFTs: otterWallet.stakedNFTs.length
-            });
+            // Wallet system disabled - no wallet state
+            // console.log('📊 Wallet system disabled');
             
-            // Update wallet connection status
-            
-            if (otterWallet.isConnected) {
+            // Update wallet connection status - always show disconnected
+            if (false) { // Wallet system disabled
                 connectedStatus.style.display = 'block';
                 disconnectedStatus.style.display = 'none';
-                if (otterWallet.account) {
-                    walletAddressDisplay.textContent = `${otterWallet.account.slice(0, 6)}...${otterWallet.account.slice(-4)}`;
+                if (false) { // Wallet system disabled
+                    // walletAddressDisplay.textContent = '';
                 }
             } else {
                 connectedStatus.style.display = 'none';
@@ -19312,10 +19257,10 @@
             }
             
             // Update NFT collection stats
-            const totalNFTs = otterWallet.userNFTs.length;
-            const stakedNFTs = otterWallet.stakedNFTs.length;
-            const legendaryNFTs = otterWallet.userNFTs.filter(nft => nft.rarity === 'legendary').length;
-            const epicNFTs = otterWallet.userNFTs.filter(nft => nft.rarity === 'epic').length;
+            const totalNFTs = 0; // Wallet system disabled
+            const stakedNFTs = 0; // Wallet system disabled
+            const legendaryNFTs = 0; // Wallet system disabled
+            const epicNFTs = 0; // Wallet system disabled
             
             document.getElementById('profileTotalNFTs').textContent = totalNFTs;
             document.getElementById('profileStakedNFTs').textContent = stakedNFTs;
@@ -19323,22 +19268,23 @@
             document.getElementById('profileEpicNFTs').textContent = epicNFTs;
             
             // Update staking rewards
-            let totalEarned = otterWallet.fishCoins;
+            let totalEarned = 0; // Wallet system disabled
             let avgMultiplier = 1.0;
             let stakingTime = 0;
             
             if (stakedNFTs > 0) {
-                const totalMultiplier = otterWallet.stakedNFTs.reduce((sum, nft) => sum + nft.multiplier, 0);
+                const totalMultiplier = 0; // Wallet system disabled
                 avgMultiplier = totalMultiplier / stakedNFTs;
                 
                 // Calculate total staking time
-                otterWallet.stakedNFTs.forEach(nft => {
-                    const stakingTime = Date.now() - otterWallet.stakingStartTimes[nft.tokenId];
+                // Wallet staking disabled
+                [].forEach(nft => {
+                    const stakingTime = 0; // Wallet system disabled
                     totalEarned += Math.floor(stakingTime / (1000 * 60 * 60) * nft.multiplier * 10 / 24);
                 });
                 
                 // Get average staking time
-                const stakingTimes = Object.values(otterWallet.stakingStartTimes);
+                const stakingTimes = []; // Wallet system disabled
                 if (stakingTimes.length > 0) {
                     const avgStakingTime = stakingTimes.reduce((sum, time) => sum + (Date.now() - time), 0) / stakingTimes.length;
                     stakingTime = Math.floor(avgStakingTime / (1000 * 60 * 60));
@@ -19350,8 +19296,8 @@
             document.getElementById('profileAvgMultiplier').textContent = `${avgMultiplier.toFixed(1)}x`;
             document.getElementById('profileStakingTime').textContent = `${stakingTime}h`;
             
-            // Update game multipliers
-            const multipliers = otterWallet.getGameMultipliers();
+            // Update game multipliers - wallet disabled, use defaults
+            const multipliers = { speed: 1.0, points: 1.0, damage: 1.0, defense: 1.0, luck: 1.0 };
             document.getElementById('profileSpeedMultiplier').textContent = `${multipliers.speed.toFixed(1)}x`;
             document.getElementById('profilePointsMultiplier').textContent = `${multipliers.points.toFixed(1)}x`;
             document.getElementById('profileDamageMultiplier').textContent = `${multipliers.damage.toFixed(1)}x`;
@@ -19364,8 +19310,8 @@
             // Update NFT gallery
             updateNFTGallery();
             
-            // **ADD MANUAL LOAD NFTS BUTTON if wallet is connected**
-            if (otterWallet.isConnected) {
+            // Wallet system disabled - no manual load button
+            if (false) { // Wallet system disabled
                 // Add load NFTs button to the profile
                 const profileActions = document.getElementById('profileActions');
                 if (profileActions) {
@@ -19388,9 +19334,10 @@
                         
                         loadNFTsBtn.addEventListener('click', () => {
                             console.log('🔄 Manual NFT load requested...');
-                            const loaded = otterWallet.manualLoadNFTs();
-                            if (loaded) {
-                                otterWallet.updateNFTDisplay();
+                            // Wallet loading disabled
+                            const loaded = false; // Wallet system disabled
+                                if (false) { // Wallet system disabled
+                                // otterWallet.updateNFTDisplay(); // Disabled
                                 updateWalletProfile(); // Refresh the profile display
                                 console.log('✅ Manual NFT load successful!');
                             } else {
@@ -19408,16 +19355,16 @@
             const container = document.getElementById('profileActiveTraits');
             container.innerHTML = '';
             
-            if (!otterWallet || !otterWallet.isConnected) {
-                const noTraitsDiv = document.createElement('div');
-                noTraitsDiv.style.cssText = 'text-align: center; padding: 20px; color: #888; font-style: italic;';
-                noTraitsDiv.textContent = 'Connect wallet to see active traits';
-                container.appendChild(noTraitsDiv);
-                return;
-            }
+            // Wallet system disabled - always show no traits
+            const noTraitsDiv = document.createElement('div');
+            noTraitsDiv.style.cssText = 'text-align: center; padding: 20px; color: #888; font-style: italic;';
+            noTraitsDiv.textContent = 'Wallet system has been removed';
+            container.appendChild(noTraitsDiv);
+            return;
             
-            const activeTraits = otterWallet.getActiveTraits();
-            
+            // const activeTraits = []; // Wallet system disabled
+            // All code below is unreachable due to return above
+            /*
             if (activeTraits.length === 0) {
                 const noTraitsDiv = document.createElement('div');
                 noTraitsDiv.style.cssText = 'text-align: center; padding: 20px; color: #888; font-style: italic;';
@@ -19430,8 +19377,8 @@
                 const traitDiv = document.createElement('div');
                 traitDiv.style.cssText = 'background: linear-gradient(135deg, rgba(255,107,53,0.15), rgba(255,107,53,0.05)); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,107,53,0.3); text-align: center;';
                 
-                const perk = otterWallet.gamePerks[trait];
-                const multiplier = otterWallet.traitMultipliers[trait] || 1.0;
+                const perk = null; // Wallet system disabled
+                const multiplier = 1.0; // Wallet system disabled
                 
                 traitDiv.innerHTML = `
                     <div style="font-size: 18px; margin-bottom: 8px;">${getTraitIcon(trait)}</div>
@@ -19447,9 +19394,8 @@
         function updateNFTGallery() {
             console.log('🖼️ Updating NFT gallery...');
             console.log('🔍 otterWallet exists:', !!otterWallet);
-            console.log('🔍 otterWallet.isConnected:', otterWallet?.isConnected);
-            console.log('🔍 userNFTs length:', otterWallet?.userNFTs?.length);
-            console.log('🔍 userNFTs:', otterWallet?.userNFTs);
+            // Wallet logging disabled
+            // console.log('🔍 Wallet system disabled');
             
             const container = document.getElementById('profileNFTGallery');
             if (!container) {
@@ -19458,29 +19404,20 @@
             }
             container.innerHTML = '';
             
-            if (!otterWallet || !otterWallet.isConnected) {
-                console.log('⚠️ Wallet not connected, showing connect message');
-                const noNFTsDiv = document.createElement('div');
-                noNFTsDiv.style.cssText = 'text-align: center; padding: 20px; color: #888; font-style: italic;';
-                noNFTsDiv.textContent = 'Connect wallet to see your NFTs';
-                container.appendChild(noNFTsDiv);
-                return;
-            }
+            // Wallet system disabled - always show no NFTs message
+            const noNFTsDiv = document.createElement('div');
+            noNFTsDiv.style.cssText = 'text-align: center; padding: 20px; color: #888; font-style: italic;';
+            noNFTsDiv.textContent = 'Wallet system has been removed';
+            container.appendChild(noNFTsDiv);
+            return;
             
-            if (otterWallet.userNFTs.length === 0) {
-                console.log('⚠️ No NFTs found in wallet, showing no NFTs message');
-                const noNFTsDiv = document.createElement('div');
-                noNFTsDiv.style.cssText = 'text-align: center; padding: 20px; color: #888; font-style: italic;';
-                noNFTsDiv.textContent = 'No NFTs found in wallet';
-                container.appendChild(noNFTsDiv);
-                return;
-            }
-            
-            otterWallet.userNFTs.forEach(nft => {
+            // Wallet NFT gallery disabled
+            /*
+            [].forEach(nft => { // Wallet system disabled
                 const nftCard = document.createElement('div');
                 nftCard.style.cssText = 'background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05)); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,215,0,0.3); text-align: center; position: relative;';
                 
-                const isStaked = otterWallet.stakedNFTs.some(staked => staked.tokenId === nft.tokenId);
+                const isStaked = false; // Wallet system disabled
                 const rarityColor = getRarityColor(nft.rarity);
                 
                 nftCard.innerHTML = `
