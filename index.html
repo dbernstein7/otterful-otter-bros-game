@@ -8323,7 +8323,7 @@
                 const platform = shuffledPlatforms[i];
                 const coinsForThisPlatform = coinsPerPlatform + (i < remainder ? 1 : 0);
                 
-                for (let j = 0; j < coinsForThisPlatform && coinIndex < coinCount; j++) {
+                for (let j = 0; j < coinsForThisPlatform && coins.length < coinCount; j++) {
                     // Distribute coins evenly across the platform width
                     const spacing = platform.width / (coinsForThisPlatform + 1);
                     const coinX = platform.x + spacing * (j + 1) + (Math.random() - 0.5) * spacing * 0.4; // Add slight randomness
@@ -8335,64 +8335,20 @@
                     clampedX = Math.max(levelMinX + 20, Math.min(levelMaxX - 20, clampedX));
                     
                     // Place coin above platform with some variation
-                    const coinY = platform.y - 36 - Math.random() * 48; // Scaled from 15, 20 (15*2.4=36, 20*2.4=48)
+                    const coinY = platform.y - 40; // Use safe Y position
                     
-                    // Ensure coin is not too high (within reasonable jump distance)
-                    const maxHeight = platform.y - 20;
-                    const minHeight = platform.y - 100;
-                    const clampedY = Math.max(minHeight, Math.min(maxHeight, coinY));
-                    
-                    // Final boundary check - ensure coin is within playable area
-                    if (clampedX >= levelMinX && clampedX <= levelMaxX && clampedY >= 0 && clampedY <= 2500) {
-                        coins.push({
-                            x: clampedX,
-                            y: clampedY,
-                            collected: false,
-                            type: 'coin'
-                        });
-                    } else {
-                        // If coin is outside bounds, try again with a safer position
-                        const safeX = platform.x + platform.width / 2;
-                        const safeY = platform.y - 40;
-                        if (safeX >= levelMinX && safeX <= levelMaxX) {
-                            coins.push({
-                                x: safeX,
-                                y: safeY,
-                                collected: false,
-                                type: 'coin'
-                            });
-                        }
-                    }
-                    
-                    coinIndex++;
-                }
-            }
-            
-            // If we still haven't placed all coins, keep trying until we have exactly 50
-            let attempts = 0;
-            const maxAttempts = coinCount * 3; // Allow up to 3x attempts to place each coin
-            while (coins.length < coinCount && safePlatforms.length > 0 && attempts < maxAttempts) {
-                const platform = safePlatforms[Math.floor(Math.random() * safePlatforms.length)];
-                let coinX = platform.x + 20 + Math.random() * (platform.width - 40);
-                
-                // Ensure coin is within level boundaries
-                coinX = Math.max(levelMinX + 20, Math.min(levelMaxX - 20, coinX));
-                
-                const coinY = platform.y - 40; // Use safe Y position
-                
-                // Final boundary check - only add if valid
-                if (coinX >= levelMinX && coinX <= levelMaxX && coinY >= 0 && coinY <= 2500) {
+                    // Always add coin - we've already clamped it to safe bounds
                     coins.push({
-                        x: coinX,
+                        x: clampedX,
                         y: coinY,
                         collected: false,
                         type: 'coin'
                     });
                 }
-                attempts++;
             }
             
-            // If we still don't have 50 coins, fill remaining with safe positions
+            // If we still don't have exactly 50 coins, fill remaining with safe positions
+            // This ensures we ALWAYS have exactly 50 coins
             while (coins.length < coinCount && safePlatforms.length > 0) {
                 const platform = safePlatforms[Math.floor(Math.random() * safePlatforms.length)];
                 const safeX = Math.max(levelMinX + 20, Math.min(levelMaxX - 20, platform.x + platform.width / 2));
@@ -8406,14 +8362,28 @@
                 });
             }
             
-            // Final validation: ensure all coins are within boundaries (should all be valid now)
+            // If we somehow have more than 50 (shouldn't happen), trim to exactly 50
+            if (coins.length > coinCount) {
+                coins = coins.slice(0, coinCount);
+            }
+            
+            // All coins should be valid since we clamped positions, but verify
             const validCoins = coins.filter(coin => {
                 return coin.x >= levelMinX && coin.x <= levelMaxX && coin.y >= 0 && coin.y <= 2500;
             });
             
-            // If we still don't have 50, log a warning but return what we have
-            if (validCoins.length !== coinCount) {
-                console.warn(`⚠️ Only generated ${validCoins.length} valid coins out of ${coinCount} requested for level ${levelNum}`);
+            // If validation removed any coins, replace them
+            while (validCoins.length < coinCount && safePlatforms.length > 0) {
+                const platform = safePlatforms[Math.floor(Math.random() * safePlatforms.length)];
+                const safeX = Math.max(levelMinX + 20, Math.min(levelMaxX - 20, platform.x + platform.width / 2));
+                const safeY = platform.y - 40;
+                
+                validCoins.push({
+                    x: safeX,
+                    y: safeY,
+                    collected: false,
+                    type: 'coin'
+                });
             }
             
             console.log(`💰 Generated ${validCoins.length} coins for level ${levelNum} (target: ${coinCount}, lava-protected, distributed across ${safePlatforms.length} platforms, boundaries: ${levelMinX} to ${levelMaxX})`);
