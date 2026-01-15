@@ -8368,17 +8368,19 @@
                 }
             }
             
-            // If we still haven't placed all coins (shouldn't happen, but safety check)
-            while (coinIndex < coinCount && safePlatforms.length > 0) {
+            // If we still haven't placed all coins, keep trying until we have exactly 50
+            let attempts = 0;
+            const maxAttempts = coinCount * 3; // Allow up to 3x attempts to place each coin
+            while (coins.length < coinCount && safePlatforms.length > 0 && attempts < maxAttempts) {
                 const platform = safePlatforms[Math.floor(Math.random() * safePlatforms.length)];
                 let coinX = platform.x + 20 + Math.random() * (platform.width - 40);
                 
                 // Ensure coin is within level boundaries
                 coinX = Math.max(levelMinX + 20, Math.min(levelMaxX - 20, coinX));
                 
-                const coinY = platform.y - 36 - Math.random() * 48;
+                const coinY = platform.y - 40; // Use safe Y position
                 
-                // Final boundary check
+                // Final boundary check - only add if valid
                 if (coinX >= levelMinX && coinX <= levelMaxX && coinY >= 0 && coinY <= 2500) {
                     coins.push({
                         x: coinX,
@@ -8386,20 +8388,35 @@
                         collected: false,
                         type: 'coin'
                     });
-                    coinIndex++;
                 }
+                attempts++;
             }
             
-            // Final validation: ensure all coins are within boundaries
+            // If we still don't have 50 coins, fill remaining with safe positions
+            while (coins.length < coinCount && safePlatforms.length > 0) {
+                const platform = safePlatforms[Math.floor(Math.random() * safePlatforms.length)];
+                const safeX = Math.max(levelMinX + 20, Math.min(levelMaxX - 20, platform.x + platform.width / 2));
+                const safeY = platform.y - 40;
+                
+                coins.push({
+                    x: safeX,
+                    y: safeY,
+                    collected: false,
+                    type: 'coin'
+                });
+            }
+            
+            // Final validation: ensure all coins are within boundaries (should all be valid now)
             const validCoins = coins.filter(coin => {
                 return coin.x >= levelMinX && coin.x <= levelMaxX && coin.y >= 0 && coin.y <= 2500;
             });
             
-            if (validCoins.length !== coins.length) {
-                console.warn(`⚠️ Removed ${coins.length - validCoins.length} coins outside boundaries in level ${levelNum}`);
+            // If we still don't have 50, log a warning but return what we have
+            if (validCoins.length !== coinCount) {
+                console.warn(`⚠️ Only generated ${validCoins.length} valid coins out of ${coinCount} requested for level ${levelNum}`);
             }
             
-            console.log(`💰 Generated ${validCoins.length} coins for level ${levelNum} (lava-protected, distributed across ${safePlatforms.length} platforms, boundaries: ${levelMinX} to ${levelMaxX})`);
+            console.log(`💰 Generated ${validCoins.length} coins for level ${levelNum} (target: ${coinCount}, lava-protected, distributed across ${safePlatforms.length} platforms, boundaries: ${levelMinX} to ${levelMaxX})`);
             return validCoins;
         }
         
