@@ -169,9 +169,29 @@
         
         /* Mobile responsive adjustments */
         @media (max-width: 768px) {
-            /* Hide most UI elements on mobile - too cluttered */
+            /* Show UI elements on mobile but make them smaller */
             #ui {
-                display: none !important;
+                display: block !important;
+                font-size: 8px !important;
+            }
+            
+            #ui .game-title {
+                display: none !important; /* Hide title on mobile to save space */
+            }
+            
+            #ui .score-row {
+                position: fixed !important;
+                top: 5px !important;
+                left: 5px !important;
+                right: auto !important;
+                flex-wrap: wrap !important;
+                gap: 4px !important;
+                z-index: 10 !important;
+            }
+            
+            #ui .score-item {
+                font-size: 8px !important;
+                padding: 2px 4px !important;
             }
             
             .corner-display {
@@ -188,14 +208,34 @@
                 left: 5px !important;
                 font-size: 8px !important;
                 padding: 2px 4px !important;
+                display: block !important; /* Ensure it's visible */
             }
             
             #collectiblesCounter {
-                top: 5px !important;
-                left: 60px !important;
+                top: 30px !important; /* Position below level display */
+                left: 5px !important;
                 font-size: 8px !important;
                 gap: 4px !important;
                 min-width: auto !important;
+                display: flex !important; /* Ensure it's visible */
+            }
+            
+            /* Adjust for landscape/horizontal mode */
+            @media (orientation: landscape) and (max-width: 768px) {
+                #levelDisplay {
+                    top: 5px !important;
+                    left: 5px !important;
+                }
+                
+                #collectiblesCounter {
+                    top: 25px !important;
+                    left: 5px !important;
+                }
+                
+                #ui .score-row {
+                    top: 5px !important;
+                    left: 200px !important; /* Move to the right to avoid overlap */
+                }
             }
             
             .counter-item {
@@ -224,17 +264,50 @@
                 font-size: 10px !important;
             }
             
-            /* Health/Armor bars - side by side on mobile */
+            /* Health/Armor bars - make much smaller on mobile */
+            #health-bar-container,
             .health-bar-container {
                 bottom: 10px !important;
                 right: 10px !important;
-                gap: 4px !important;
-                flex-direction: row !important; /* Side by side */
-                align-items: flex-end !important;
+                gap: 8px !important;
+                flex-direction: row !important; /* Horizontal layout */
+                flex-wrap: wrap !important; /* Allow wrapping */
+                align-items: flex-start !important;
+                justify-content: flex-end !important;
+            }
+            
+            /* Lives display - next to health bar, lowered position */
+            #livesDisplay,
+            .health-bar-container .lives-display,
+            .health-bar-container #livesDisplay {
+                order: 2 !important; /* Lives comes after health and armor bars */
+                margin-top: 0 !important;
+                padding: 4px 6px !important;
+                gap: 2px !important;
+                border-width: 1px !important;
+                border-radius: 6px !important;
+                margin-bottom: -20px !important; /* Lower the lives image */
+            }
+            
+            /* Health bar group - first, appears on same row as armor bar */
+            .health-bar-container .bar-group:first-of-type {
+                order: 0 !important;
+            }
+            
+            /* Armor bar - on same row as health bar */
+            .health-bar-container .bar-group:last-of-type {
+                order: 1 !important;
+                flex-basis: auto !important; /* Don't force to new line */
+                width: auto !important;
+            }
+            
+            .health-bar-container .bar-group {
+                flex-direction: column !important;
+                gap: 2px !important;
             }
             
             .health-bar, .armor-bar {
-                width: 80px !important; /* Narrower for side by side */
+                width: 120px !important;
                 height: 12px !important;
                 border-width: 1px !important;
                 border-radius: 6px !important;
@@ -251,54 +324,40 @@
                 gap: 2px !important;
             }
             
-            /* Lives display - make much smaller and lower */
-            .lives-display {
-                padding: 4px 6px !important;
-                gap: 2px !important;
-                border-width: 1px !important;
-                border-radius: 6px !important;
-                position: relative !important;
-                top: auto !important;
-                bottom: 50px !important; /* Lower on screen */
-            }
-            
             .lives-icon {
-                font-size: 10px !important; /* Smaller */
+                font-size: 12px !important;
             }
             
             .lives-text {
                 font-size: 8px !important;
             }
             
-            /* Abilities display - hide on mobile to reduce clutter */
+            /* Abilities display - position directly above armor bar */
+            /* IMPORTANT: Hard refresh browser (Ctrl+Shift+R or Cmd+Shift+R) to see changes */
+            #abilities-display,
+            div.abilities-display,
             .abilities-display {
-                display: none !important;
+                position: fixed !important;
+                bottom: 70px !important; /* Position above health-bar-container (which is at bottom: 10px) */
+                top: auto !important;
+                right: 10px !important;
+                left: auto !important;
+                gap: 4px !important;
+                transform: none !important; /* Remove any transforms that might interfere */
+                margin: 0 !important;
+                width: auto !important;
+                height: auto !important;
             }
             
-            /* Move all mobile buttons higher on vertical displays */
-            #mobileJoystick {
-                bottom: 150px !important; /* Higher */
-            }
-            
-            #mobileJump {
-                bottom: 200px !important; /* Higher */
-            }
-            
-            #mobileJetpack {
-                bottom: 270px !important; /* Higher */
-            }
-            
-            #mobileActions {
-                bottom: 340px !important; /* Higher */
-            }
-            
-            /* Hide top UI elements on mobile to reduce clutter */
-            #levelDisplay {
-                display: none !important;
-            }
-            
-            #collectiblesCounter {
-                display: none !important;
+            /* Adjust abilities position when in landscape/horizontal mode */
+            @media (orientation: landscape) and (max-width: 768px) {
+                #abilities-display,
+                div.abilities-display,
+                .abilities-display {
+                    bottom: 70px !important; /* Keep same position in landscape */
+                    top: auto !important;
+                    right: 10px !important;
+                }
             }
             
             .abilities-title {
@@ -2221,19 +2280,19 @@
         <!-- Mobile Touch Controls -->
         <div id="mobileControls" style="display: none; position: absolute; bottom: 0; left: 0; right: 0; z-index: 2000; pointer-events: none; touch-action: none;">
             <!-- Circular Touchpad Joystick -->
-            <div id="mobileJoystick" style="position: absolute; bottom: 150px; left: 10px; width: 120px; height: 120px; pointer-events: auto; touch-action: none;">
+            <div id="mobileJoystick" style="position: absolute; bottom: 80px; left: 10px; width: 120px; height: 120px; pointer-events: auto; touch-action: none;">
                 <div id="joystickBase" style="position: absolute; width: 100%; height: 100%; border-radius: 50%; background: rgba(255,255,255,0.2); border: 3px solid rgba(255,255,255,0.5); pointer-events: none;"></div>
                 <div id="joystickHandle" style="position: absolute; width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,0.6); border: 2px solid rgba(255,255,255,0.9); left: 50%; top: 50%; transform: translate(-50%, -50%); pointer-events: none; transition: none;"></div>
             </div>
             
             <!-- Jump Button -->
-            <button id="mobileJump" class="mobile-btn" style="position: absolute; bottom: 200px; right: 5px; width: 60px; height: 60px; border-radius: 50%; background: rgba(0,255,0,0.5); border: 2px solid rgba(0,255,0,0.8); font-size: 14px; color: white; font-weight: bold; pointer-events: auto; touch-action: manipulation;">JUMP</button>
+            <button id="mobileJump" class="mobile-btn" style="position: absolute; bottom: 100px; right: 5px; width: 60px; height: 60px; border-radius: 50%; background: rgba(0,255,0,0.5); border: 2px solid rgba(0,255,0,0.8); font-size: 14px; color: white; font-weight: bold; pointer-events: auto; touch-action: manipulation;">JUMP</button>
             
             <!-- Jetpack Button -->
-            <button id="mobileJetpack" class="mobile-btn" style="display: none; position: absolute; bottom: 270px; right: 5px; width: 60px; height: 60px; border-radius: 50%; background: rgba(255,165,0,0.5); border: 2px solid rgba(255,165,0,0.8); font-size: 12px; color: white; font-weight: bold; pointer-events: auto; touch-action: manipulation;">JET</button>
+            <button id="mobileJetpack" class="mobile-btn" style="display: none; position: absolute; bottom: 170px; right: 5px; width: 60px; height: 60px; border-radius: 50%; background: rgba(255,165,0,0.5); border: 2px solid rgba(255,165,0,0.8); font-size: 12px; color: white; font-weight: bold; pointer-events: auto; touch-action: manipulation;">JET</button>
             
             <!-- Action Buttons (Laser/Fireball) -->
-            <div id="mobileActions" style="position: absolute; bottom: 340px; right: 10px; pointer-events: auto;">
+            <div id="mobileActions" style="position: absolute; bottom: 240px; right: 10px; pointer-events: auto;">
                 <button id="mobileLaser" class="mobile-btn" style="display: none; width: 50px; height: 50px; border-radius: 50%; background: rgba(0,150,255,0.5); border: 2px solid rgba(0,150,255,0.8); font-size: 12px; color: white; font-weight: bold; margin-bottom: 8px; touch-action: manipulation;">L</button>
                 <button id="mobileFireball" class="mobile-btn" style="display: none; width: 50px; height: 50px; border-radius: 50%; background: rgba(255,100,0,0.5); border: 2px solid rgba(255,100,0,0.8); font-size: 12px; color: white; font-weight: bold; touch-action: manipulation;">F</button>
             </div>
@@ -10212,25 +10271,36 @@
                         game.keys['KeyD'] = false;
                     }
                     
-                    // Up movement (for jetpack) and jump when pointing up
+                    // Up/Down movement (up for jetpack/swimming up, down for downward movement)
+                    // Note: Jump (Space) works independently - joystick doesn't block it
+                    // Jump button and jet button work independently of joystick direction
                     if (normalizedY < -0.3) {
-                        game.keys['ArrowUp'] = true;
-                        game.keys['KeyW'] = true;
-                        // Trigger jump when joystick is pushed up
-                        if (!game.keys['jumpJustPressed']) {
-                            game.keys['Space'] = true;
-                            game.keys['jumpJustPressed'] = true;
+                        // Pointing up - for jetpack/swimming up
+                        // Set ArrowUp/KeyW for swimming in water, but don't interfere with jump button
+                        // Jump uses Space key, not ArrowUp, so this won't block jump
+                        if (player && player.inWater) {
+                            game.keys['ArrowUp'] = true;
+                            game.keys['KeyW'] = true;
+                        } else {
+                            // On land, don't set ArrowUp to avoid conflicts
+                            // Jet button handles jetpack activation separately
+                            game.keys['ArrowUp'] = false;
+                            game.keys['KeyW'] = false;
                         }
-                    } else {
-                        game.keys['ArrowUp'] = false;
-                        game.keys['KeyW'] = false;
-                    }
-                    
-                    // Down movement
-                    if (normalizedY > 0.3) {
+                        // Allow going down by moving joystick down - don't force ArrowDown to false here
+                        // It will be set to false when joystick moves to neutral or down
+                        game.keys['ArrowDown'] = false;
+                        game.keys['KeyS'] = false;
+                    } else if (normalizedY > 0.3) {
+                        // Pointing down - for downward movement
                         game.keys['ArrowDown'] = true;
                         game.keys['KeyS'] = true;
+                        game.keys['ArrowUp'] = false;
+                        game.keys['KeyW'] = false;
                     } else {
+                        // Neutral position - reset vertical movement keys
+                        game.keys['ArrowUp'] = false;
+                        game.keys['KeyW'] = false;
                         game.keys['ArrowDown'] = false;
                         game.keys['KeyS'] = false;
                     }
@@ -10270,17 +10340,23 @@
             if (mobileJump) {
                 mobileJump.addEventListener('touchstart', (e) => {
                     e.preventDefault();
+                    e.stopPropagation(); // Prevent event from bubbling to joystick
+                    e.stopImmediatePropagation(); // Also stop immediate propagation
                     // Allow jump in all situations: on ground, in air (double jump), or in water
+                    // Jump works independently of joystick direction
                     if (!game.keys['jumpJustPressed']) {
                         game.keys['Space'] = true;
                         game.keys['jumpJustPressed'] = true;
+                        console.log('Jump button pressed on mobile');
                     }
-                });
+                }, { capture: true }); // Use capture phase to get event first
                 mobileJump.addEventListener('touchend', (e) => {
                     e.preventDefault();
+                    e.stopPropagation(); // Prevent event from bubbling to joystick
+                    e.stopImmediatePropagation(); // Also stop immediate propagation
                     game.keys['Space'] = false;
                     // Don't reset jumpJustPressed here - let the game logic handle it
-                });
+                }, { capture: true }); // Use capture phase to get event first
             }
             
             // Laser button
@@ -10389,23 +10465,54 @@
             if (mobileJetpack) {
                 mobileJetpack.addEventListener('touchstart', (e) => {
                     e.preventDefault();
-                    if (player.hasJetpack) {
-                        // Activate jetpack - use the same key code as desktop
-                        const event = new KeyboardEvent('keydown', { code: 'ShiftLeft' });
-                        document.dispatchEvent(event);
-                        // Also set the key directly
+                    e.stopPropagation(); // Prevent event from bubbling to joystick
+                    e.stopImmediatePropagation(); // Also stop immediate propagation
+                    if (player && player.hasJetpack) {
                         game.keys['ShiftLeft'] = true;
-                        player.jetpackActive = true;
+                        game.keys['ShiftRight'] = true;
+                        
+                        // Manually trigger jetpack activation (since setting keys doesn't trigger keydown event)
+                        const currentTime = Date.now();
+                        const timeSinceLastBoost = currentTime - (player.jetpackTime || 0);
+                        
+                        // Allow boost every 200ms while jetpack is active
+                        if (!player.jetpackActive || timeSinceLastBoost > 200) {
+                            if (!player.jetpackActive) {
+                                // Start jetpack mode
+                                player.jetpackActive = true;
+                                player.jetpackTime = currentTime;
+                                if (game.sessionStats) {
+                                    game.sessionStats.jetpacksUsed++;
+                                }
+                                addScreenShake(2);
+                                console.log('Jetpack activated via mobile button!');
+                            }
+                            
+                            // Apply boost - horizontal in water, vertical on land
+                            if (player.inWater) {
+                                // Horizontal boost in water - much stronger
+                                player.velX = player.direction * player.waterJetpackPower;
+                                console.log('Water jetpack boost - horizontal! velX:', player.velX);
+                            } else {
+                                // Vertical boost on land
+                                player.velY = -player.jetpackPower;
+                            }
+                            
+                            player.jetpackTime = currentTime;
+                        }
                     }
-                });
+                }, { capture: true }); // Use capture phase to get event first
                 mobileJetpack.addEventListener('touchend', (e) => {
                     e.preventDefault();
-                    // Deactivate jetpack
-                    const event = new KeyboardEvent('keyup', { code: 'ShiftLeft' });
-                    document.dispatchEvent(event);
+                    e.stopPropagation(); // Prevent event from bubbling to joystick
+                    e.stopImmediatePropagation(); // Also stop immediate propagation
                     game.keys['ShiftLeft'] = false;
-                    player.jetpackActive = false;
-                });
+                    game.keys['ShiftRight'] = false;
+                    // Also deactivate jetpack when button is released
+                    if (player) {
+                        player.jetpackActive = false;
+                    }
+                }, { capture: true }); // Use capture phase to get event first
             }
             
             // Update action button visibility based on player abilities
