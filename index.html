@@ -211,8 +211,12 @@
                 font-size: 8px !important;
             }
             
-            #ui .game-title {
-                display: none !important; /* Hide title on mobile to save space */
+            #ui .game-title,
+            .game-title,
+            .game-title img {
+                display: none !important; /* Hide title/banner image on mobile to save space */
+                visibility: hidden !important;
+                opacity: 0 !important;
             }
             
             /* Hide score-row (Score, Coins, XP boxes) on mobile */
@@ -237,8 +241,8 @@
                 display: block !important; /* Ensure it's visible */
             }
             
-            /* XP bar on mobile - match level display size, positioned in top right ONLY */
-            #mainXpBarContainer {
+            /* XP bar on mobile - match level display size, positioned in top right, hide any duplicates */
+            .xp-bar-container {
                 top: 5px !important;
                 right: 5px !important;
                 left: auto !important;
@@ -251,40 +255,14 @@
                 box-shadow: 0 1px 3px rgba(0,0,0,0.5) !important;
                 display: block !important;
                 position: fixed !important;
-                width: auto !important;
-                min-width: auto !important;
-                max-width: 100px !important;
             }
             
-            /* Hide ALL other XP bar containers on mobile - only show the main one with ID */
-            .xp-bar-container:not(#mainXpBarContainer) {
-                display: none !important;
-                visibility: hidden !important;
-                opacity: 0 !important;
-                pointer-events: none !important;
-            }
-            
-            /* Also hide any XP bars in score-row, UI, or other containers */
+            /* Hide XP bar containers in score-row or other wrong locations */
             .score-item .xp-bar-container,
             #ui .xp-bar-container,
             .score-row .xp-bar-container {
                 display: none !important;
                 visibility: hidden !important;
-            }
-            
-            /* Hide floating coins and sparkles on mobile during gameplay */
-            .floating-coin,
-            .floating-sparkle {
-                display: none !important;
-                visibility: hidden !important;
-                opacity: 0 !important;
-            }
-            
-            /* Ensure XP bar content is visible */
-            #mainXpBarContainer .xp-bar,
-            #mainXpBarContainer .xp-text {
-                display: block !important;
-                visibility: visible !important;
             }
             
             .xp-bar-container:hover {
@@ -1935,7 +1913,7 @@
             <div id="levelDisplay" class="corner-display top-left" style="top: 22px; left: 4vw;">Level: <span id="level">1</span></div>
     
     <!-- XP Bar - Top Right Corner -->
-    <div class="xp-bar-container" id="mainXpBarContainer" style="position: fixed; top: 1vh; right: 8vw; z-index: 10;">
+    <div class="xp-bar-container" style="position: fixed; top: 1vh; right: 8vw; z-index: 10;">
         <div class="xp-bar">
             <div class="xp-bar-fill" id="xpBarFill"></div>
         </div>
