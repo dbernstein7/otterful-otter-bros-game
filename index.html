@@ -10899,6 +10899,8 @@
         
         // XP and Reward System Functions
         function addXP(amount) {
+            // NOTE: XP gaining logic is identical for mobile and desktop
+            // No platform-specific conditions - same XP rate for all devices
             player.xp += amount;
             player.totalScore += amount;
             
