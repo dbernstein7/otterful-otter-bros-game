@@ -2191,20 +2191,20 @@
         
         <!-- Mobile Touch Controls -->
         <div id="mobileControls" style="display: none; position: absolute; bottom: 0; left: 0; right: 0; z-index: 2000; pointer-events: none; touch-action: none;">
-            <!-- Movement D-Pad -->
-            <div id="mobileDPad" style="position: absolute; bottom: 80px; left: 10px; width: 120px; height: 120px; pointer-events: auto;">
-                <div style="position: relative; width: 100%; height: 100%;">
-                    <button id="mobileLeft" class="mobile-btn" style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.3); border: 2px solid rgba(255,255,255,0.6); font-size: 18px; color: white; touch-action: manipulation;">←</button>
-                    <button id="mobileRight" class="mobile-btn" style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.3); border: 2px solid rgba(255,255,255,0.6); font-size: 18px; color: white; touch-action: manipulation;">→</button>
-                    <button id="mobileUp" class="mobile-btn" style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.3); border: 2px solid rgba(255,255,255,0.6); font-size: 18px; color: white; touch-action: manipulation;">↑</button>
-                </div>
+            <!-- Circular Touchpad Joystick -->
+            <div id="mobileJoystick" style="position: absolute; bottom: 80px; left: 10px; width: 120px; height: 120px; pointer-events: auto; touch-action: none;">
+                <div id="joystickBase" style="position: absolute; width: 100%; height: 100%; border-radius: 50%; background: rgba(255,255,255,0.2); border: 3px solid rgba(255,255,255,0.5); pointer-events: none;"></div>
+                <div id="joystickHandle" style="position: absolute; width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,0.6); border: 2px solid rgba(255,255,255,0.9); left: 50%; top: 50%; transform: translate(-50%, -50%); pointer-events: none; transition: none;"></div>
             </div>
             
             <!-- Jump Button -->
             <button id="mobileJump" class="mobile-btn" style="position: absolute; bottom: 100px; right: 5px; width: 60px; height: 60px; border-radius: 50%; background: rgba(0,255,0,0.5); border: 2px solid rgba(0,255,0,0.8); font-size: 14px; color: white; font-weight: bold; pointer-events: auto; touch-action: manipulation;">JUMP</button>
             
+            <!-- Jetpack Button -->
+            <button id="mobileJetpack" class="mobile-btn" style="display: none; position: absolute; bottom: 170px; right: 5px; width: 60px; height: 60px; border-radius: 50%; background: rgba(255,165,0,0.5); border: 2px solid rgba(255,165,0,0.8); font-size: 12px; color: white; font-weight: bold; pointer-events: auto; touch-action: manipulation;">JET</button>
+            
             <!-- Action Buttons (Laser/Fireball) -->
-            <div id="mobileActions" style="position: absolute; bottom: 170px; right: 10px; pointer-events: auto;">
+            <div id="mobileActions" style="position: absolute; bottom: 240px; right: 10px; pointer-events: auto;">
                 <button id="mobileLaser" class="mobile-btn" style="display: none; width: 50px; height: 50px; border-radius: 50%; background: rgba(0,150,255,0.5); border: 2px solid rgba(0,150,255,0.8); font-size: 12px; color: white; font-weight: bold; margin-bottom: 8px; touch-action: manipulation;">L</button>
                 <button id="mobileFireball" class="mobile-btn" style="display: none; width: 50px; height: 50px; border-radius: 50%; background: rgba(255,100,0,0.5); border: 2px solid rgba(255,100,0,0.8); font-size: 12px; color: white; font-weight: bold; touch-action: manipulation;">F</button>
             </div>
@@ -10125,68 +10125,99 @@
             // Show mobile controls
             mobileControls.style.display = 'block';
             
-            // Movement buttons
-            const mobileLeft = document.getElementById('mobileLeft');
-            const mobileRight = document.getElementById('mobileRight');
-            const mobileUp = document.getElementById('mobileUp');
+            // Circular Joystick
+            const mobileJoystick = document.getElementById('mobileJoystick');
+            const joystickHandle = document.getElementById('joystickHandle');
+            const joystickBase = document.getElementById('joystickBase');
             const mobileJump = document.getElementById('mobileJump');
+            const mobileJetpack = document.getElementById('mobileJetpack');
             const mobileLaser = document.getElementById('mobileLaser');
             const mobileFireball = document.getElementById('mobileFireball');
             
-            // Track active touches
-            let activeTouches = new Set();
+            let joystickActive = false;
+            let joystickCenterX = 0;
+            let joystickCenterY = 0;
+            const joystickRadius = 50; // Max distance handle can move from center
             
-            // Left button
-            if (mobileLeft) {
-                mobileLeft.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    activeTouches.add('left');
-                    game.keys['ArrowLeft'] = true;
-                    game.keys['KeyA'] = true;
-                });
-                mobileLeft.addEventListener('touchend', (e) => {
-                    e.preventDefault();
-                    activeTouches.delete('left');
-                    if (!activeTouches.has('left')) {
+            if (mobileJoystick && joystickHandle) {
+                const updateJoystick = (touch) => {
+                    const rect = mobileJoystick.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    const touchX = touch.clientX;
+                    const touchY = touch.clientY;
+                    
+                    const deltaX = touchX - centerX;
+                    const deltaY = touchY - centerY;
+                    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                    
+                    // Clamp to joystick radius
+                    const clampedDistance = Math.min(distance, joystickRadius);
+                    const angle = Math.atan2(deltaY, deltaX);
+                    
+                    // Update handle position
+                    const handleX = Math.cos(angle) * clampedDistance;
+                    const handleY = Math.sin(angle) * clampedDistance;
+                    joystickHandle.style.transform = `translate(calc(-50% + ${handleX}px), calc(-50% + ${handleY}px))`;
+                    
+                    // Calculate normalized direction (-1 to 1)
+                    const normalizedX = clampedDistance > 0 ? Math.cos(angle) : 0;
+                    const normalizedY = clampedDistance > 0 ? Math.sin(angle) : 0;
+                    
+                    // Update movement keys based on joystick position
+                    // Left/Right movement
+                    if (normalizedX < -0.3) {
+                        game.keys['ArrowLeft'] = true;
+                        game.keys['KeyA'] = true;
+                        game.keys['ArrowRight'] = false;
+                        game.keys['KeyD'] = false;
+                    } else if (normalizedX > 0.3) {
+                        game.keys['ArrowRight'] = true;
+                        game.keys['KeyD'] = true;
                         game.keys['ArrowLeft'] = false;
                         game.keys['KeyA'] = false;
-                    }
-                });
-            }
-            
-            // Right button
-            if (mobileRight) {
-                mobileRight.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    activeTouches.add('right');
-                    game.keys['ArrowRight'] = true;
-                    game.keys['KeyD'] = true;
-                });
-                mobileRight.addEventListener('touchend', (e) => {
-                    e.preventDefault();
-                    activeTouches.delete('right');
-                    if (!activeTouches.has('right')) {
+                    } else {
+                        game.keys['ArrowLeft'] = false;
+                        game.keys['KeyA'] = false;
                         game.keys['ArrowRight'] = false;
                         game.keys['KeyD'] = false;
                     }
-                });
-            }
-            
-            // Up button (for jetpack/up movement)
-            if (mobileUp) {
-                mobileUp.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    activeTouches.add('up');
-                    game.keys['ArrowUp'] = true;
-                    game.keys['KeyW'] = true;
-                });
-                mobileUp.addEventListener('touchend', (e) => {
-                    e.preventDefault();
-                    activeTouches.delete('up');
-                    if (!activeTouches.has('up')) {
+                    
+                    // Up movement (for jetpack)
+                    if (normalizedY < -0.3) {
+                        game.keys['ArrowUp'] = true;
+                        game.keys['KeyW'] = true;
+                    } else {
                         game.keys['ArrowUp'] = false;
                         game.keys['KeyW'] = false;
                     }
+                };
+                
+                mobileJoystick.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    joystickActive = true;
+                    updateJoystick(e.touches[0]);
+                });
+                
+                mobileJoystick.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    if (joystickActive) {
+                        updateJoystick(e.touches[0]);
+                    }
+                });
+                
+                mobileJoystick.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    joystickActive = false;
+                    // Reset handle to center
+                    joystickHandle.style.transform = 'translate(-50%, -50%)';
+                    // Reset all movement keys
+                    game.keys['ArrowLeft'] = false;
+                    game.keys['KeyA'] = false;
+                    game.keys['ArrowRight'] = false;
+                    game.keys['KeyD'] = false;
+                    game.keys['ArrowUp'] = false;
+                    game.keys['KeyW'] = false;
                 });
             }
             
@@ -10194,7 +10225,8 @@
             if (mobileJump) {
                 mobileJump.addEventListener('touchstart', (e) => {
                     e.preventDefault();
-                    if (player.onGround && !game.keys['jumpJustPressed']) {
+                    // Allow jump in all situations: on ground, in air (double jump), or in water
+                    if (!game.keys['jumpJustPressed']) {
                         game.keys['Space'] = true;
                         game.keys['jumpJustPressed'] = true;
                     }
@@ -10202,7 +10234,7 @@
                 mobileJump.addEventListener('touchend', (e) => {
                     e.preventDefault();
                     game.keys['Space'] = false;
-                    game.keys['jumpJustPressed'] = false;
+                    // Don't reset jumpJustPressed here - let the game logic handle it
                 });
             }
             
@@ -10308,6 +10340,22 @@
                 game.mouseY = touch.clientY - rect.top;
             });
             
+            // Jetpack button
+            if (mobileJetpack) {
+                mobileJetpack.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    if (player.hasJetpack) {
+                        game.keys['ShiftLeft'] = true;
+                        game.keys['ShiftRight'] = true;
+                    }
+                });
+                mobileJetpack.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    game.keys['ShiftLeft'] = false;
+                    game.keys['ShiftRight'] = false;
+                });
+            }
+            
             // Update action button visibility based on player abilities
             function updateMobileActionButtons() {
                 if (mobileLaser) {
@@ -10315,6 +10363,9 @@
                 }
                 if (mobileFireball) {
                     mobileFireball.style.display = player.hasFireball ? 'block' : 'none';
+                }
+                if (mobileJetpack) {
+                    mobileJetpack.style.display = player.hasJetpack ? 'block' : 'none';
                 }
             }
             
