@@ -13819,8 +13819,8 @@
                      if (isBossLevel) {
                          console.log('🔥 Fireball hit lava - extinguishing!');
                          
-                         // Create lava splash effect
-                         for (let i = 0; i < 8; i++) {
+                         // Create lava splash effect (reduced for performance)
+                         for (let i = 0; i < 4; i++) { // Reduced from 8 to 4
                              const splashParticle = {
                                  x: fireball.x + fireball.width / 2,
                                  y: game.waterLevel,
@@ -13835,8 +13835,8 @@
                              game.particles.push(splashParticle);
                          }
                          
-                         // Create lava steam effect
-                         for (let i = 0; i < 5; i++) {
+                         // Create lava steam effect (reduced for performance)
+                         for (let i = 0; i < 3; i++) { // Reduced from 5 to 3
                              const steamParticle = {
                                  x: fireball.x + fireball.width / 2,
                                  y: game.waterLevel,
@@ -13853,8 +13853,8 @@
                      } else {
                          console.log('🔥 Fireball hit water - extinguishing!');
                          
-                         // Create water splash effect
-                         for (let i = 0; i < 8; i++) {
+                         // Create water splash effect (reduced for performance)
+                         for (let i = 0; i < 4; i++) { // Reduced from 8 to 4
                              const splashParticle = {
                                  x: fireball.x + fireball.width / 2,
                                  y: game.waterLevel,
@@ -13869,8 +13869,8 @@
                              game.particles.push(splashParticle);
                          }
                          
-                         // Create steam effect
-                         for (let i = 0; i < 5; i++) {
+                         // Create steam effect (reduced for performance)
+                         for (let i = 0; i < 3; i++) { // Reduced from 5 to 3
                              const steamParticle = {
                                  x: fireball.x + fireball.width / 2,
                                  y: game.waterLevel,
