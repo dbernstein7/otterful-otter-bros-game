@@ -11160,23 +11160,17 @@
             ctx.fillStyle = gradient;
             ctx.fillRect(x, y, platform.width, platform.height);
             
-            // Add underwater algae/seaweed effect
+            // Underwater algae/seaweed effect - STATIC (no animation for performance)
+            // Removed animated algae to reduce lag
             ctx.fillStyle = 'rgba(34, 139, 34, 0.6)'; // Sea green
+            // Static algae - use fixed positions instead of random
             for (let i = 0; i < platform.width; i += 30) {
-                const algaeHeight = 15 + Math.random() * 20;
+                const algaeHeight = 20; // Fixed height, no random
                 ctx.fillRect(x + i, y - algaeHeight, 8, algaeHeight);
             }
             
-            // Add some underwater bubbles around the platform
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-            for (let i = 0; i < 5; i++) {
-                const bubbleX = x + Math.random() * platform.width;
-                const bubbleY = y - 10 - Math.random() * 20;
-                const bubbleSize = 2 + Math.random() * 3;
-                ctx.beginPath();
-                ctx.arc(bubbleX, bubbleY, bubbleSize, 0, Math.PI * 2);
-                ctx.fill();
-            }
+            // Underwater bubbles - STATIC (no animation for performance)
+            // Removed animated bubbles to reduce lag
             
             ctx.restore();
         }
@@ -13156,7 +13150,7 @@
             // 🌍 PHYSICS & POSITION UPDATES
             // ========================================
                                         // Apply gravity (consistent for all movement)
-            let gravityStrength = 0.37; // Standard gravity strength
+            let gravityStrength = 0.65; // Increased gravity for better feel and performance
             
             // Keep gravity consistent even when jetpack is active
             // This prevents the "floaty" feeling when switching between walking and jetpack
