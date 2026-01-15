@@ -14283,9 +14283,12 @@
                     }
                     
                     // 🌊 SWIMMING CHECK - Skip collision if player is swimming up in water
+                    // BUT allow landing on platforms above water level even when in water
                     const isSwimmingUp = player.inWater && player.swimming && player.velY < 0;
+                    const platformAboveWater = platform.y < game.waterLevel - 50; // Platform is clearly above water
+                    const canLandOnPlatform = !isSwimmingUp || platformAboveWater; // Allow landing if platform is above water
                     
-                    if (horizontalOverlap && verticalCollision && isAbovePlatform && isFalling && !justDroppedThrough && !isSwimmingUp) {
+                    if (horizontalOverlap && verticalCollision && isAbovePlatform && isFalling && !justDroppedThrough && canLandOnPlatform) {
                         // 🎯 Player landed on platform - snap to exact position
                         player.y = platform.y - player.collisionHeight - player.collisionOffsetY;
                         player.velY = 0;
