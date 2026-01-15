@@ -14913,17 +14913,19 @@
                     // This prevents the player from being stuck on ground immediately after jumping
                     const isFalling = player.velY > 0;
                     
-                    // 🔽 DOWN JUMP CHECK - Skip collision only with the specific platform you dropped through
-                    // Allow landing on other (lower) platforms even if downJumpPressed is still active
-                    const justDroppedThrough = game.keys['downJumpPressed'] && 
-                                             player.lastPlatform === platform &&
-                                             player.y < player.lastPlatform.y + 100; // Only block if still near the original platform
+                    // 🔽 DOWN JUMP CHECK - Only skip collision with the platform you're actively dropping through
+                    // Must be: holding down key, this is the last platform you were on, and you're still near it
+                    const isActivelyDropping = (game.keys['ArrowDown'] || game.keys['KeyS']) && 
+                                              player.lastPlatform === platform &&
+                                              player.y >= player.lastPlatform.y - 20 && // Still above or just below
+                                              player.y < player.lastPlatform.y + 60; // Not too far below
                     
-                    // Reset down jump flag if player successfully dropped through a platform and is falling
-                    // Also reset if player is clearly below the original platform (allowing landing on lower platforms)
-                    if (game.keys['downJumpPressed'] && player.velY > 0) {
-                        if (player.lastPlatform && player.y > player.lastPlatform.y + 80) {
-                            // Player is clearly below the original platform - reset flag to allow landing
+                    // Reset down jump flag once you've passed the platform or released the key
+                    if (game.keys['downJumpPressed']) {
+                        // Reset if: key released, or clearly past the platform, or on a different platform
+                        if ((!game.keys['ArrowDown'] && !game.keys['KeyS']) ||
+                            (player.lastPlatform && player.y > player.lastPlatform.y + 60) ||
+                            (player.lastPlatform !== platform && player.y > platform.y - 20)) {
                             game.keys['downJumpPressed'] = false;
                         }
                     }
@@ -14934,7 +14936,7 @@
                     const platformAboveWater = platform.y < game.waterLevel - 50; // Platform is clearly above water
                     const canLandOnPlatform = !isSwimmingUp || platformAboveWater; // Allow landing if platform is above water
                     
-                    if (horizontalOverlap && verticalCollision && isAbovePlatform && isFalling && !justDroppedThrough && canLandOnPlatform) {
+                    if (horizontalOverlap && verticalCollision && isAbovePlatform && isFalling && !isActivelyDropping && canLandOnPlatform) {
                         // 🎯 Player landed on platform - snap to exact position
                         player.y = platform.y - player.collisionHeight - player.collisionOffsetY;
                         player.velY = 0;
