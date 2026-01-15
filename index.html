@@ -85,7 +85,7 @@
         }
         
         /* Mobile responsive container */
-        @media (max-width: 1920px) {
+        @media (max-width: 768px) {
             #gameContainer {
                 width: 100vw;
                 height: 100vh;
@@ -93,6 +93,35 @@
                 max-height: 100vh;
                 border-radius: 0;
                 padding: 0;
+                border: none;
+            }
+            
+            /* Scale down UI elements significantly on mobile */
+            .corner-display {
+                font-size: 10px !important;
+                padding: 4px 8px !important;
+                border-width: 1px !important;
+            }
+            
+            .game-title {
+                font-size: 10px !important;
+                padding: 3px 6px !important;
+            }
+            
+            .score-item {
+                font-size: 10px !important;
+                padding: 4px 8px !important;
+            }
+            
+            #ui {
+                font-size: 10px !important;
+            }
+            
+            /* Reduce visual effects on mobile */
+            .corner-display {
+                backdrop-filter: none !important;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.5) !important;
+                animation: none !important;
             }
         }
         
@@ -2050,21 +2079,21 @@
         <!-- Mobile Touch Controls -->
         <div id="mobileControls" style="display: none; position: absolute; bottom: 0; left: 0; right: 0; z-index: 2000; pointer-events: none; touch-action: none;">
             <!-- Movement D-Pad -->
-            <div id="mobileDPad" style="position: absolute; bottom: 20px; left: 20px; width: 200px; height: 200px; pointer-events: auto;">
+            <div id="mobileDPad" style="position: absolute; bottom: 10px; left: 10px; width: 120px; height: 120px; pointer-events: auto;">
                 <div style="position: relative; width: 100%; height: 100%;">
-                    <button id="mobileLeft" class="mobile-btn" style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 60px; height: 60px; border-radius: 15px; background: rgba(255,255,255,0.3); border: 3px solid rgba(255,255,255,0.6); font-size: 24px; color: white; touch-action: manipulation;">←</button>
-                    <button id="mobileRight" class="mobile-btn" style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 60px; height: 60px; border-radius: 15px; background: rgba(255,255,255,0.3); border: 3px solid rgba(255,255,255,0.6); font-size: 24px; color: white; touch-action: manipulation;">→</button>
-                    <button id="mobileUp" class="mobile-btn" style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 60px; height: 60px; border-radius: 15px; background: rgba(255,255,255,0.3); border: 3px solid rgba(255,255,255,0.6); font-size: 24px; color: white; touch-action: manipulation;">↑</button>
+                    <button id="mobileLeft" class="mobile-btn" style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.3); border: 2px solid rgba(255,255,255,0.6); font-size: 18px; color: white; touch-action: manipulation;">←</button>
+                    <button id="mobileRight" class="mobile-btn" style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.3); border: 2px solid rgba(255,255,255,0.6); font-size: 18px; color: white; touch-action: manipulation;">→</button>
+                    <button id="mobileUp" class="mobile-btn" style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.3); border: 2px solid rgba(255,255,255,0.6); font-size: 18px; color: white; touch-action: manipulation;">↑</button>
                 </div>
             </div>
             
             <!-- Jump Button -->
-            <button id="mobileJump" class="mobile-btn" style="position: absolute; bottom: 20px; right: 20px; width: 80px; height: 80px; border-radius: 50%; background: rgba(0,255,0,0.5); border: 3px solid rgba(0,255,0,0.8); font-size: 20px; color: white; font-weight: bold; pointer-events: auto; touch-action: manipulation;">JUMP</button>
+            <button id="mobileJump" class="mobile-btn" style="position: absolute; bottom: 10px; right: 10px; width: 60px; height: 60px; border-radius: 50%; background: rgba(0,255,0,0.5); border: 2px solid rgba(0,255,0,0.8); font-size: 14px; color: white; font-weight: bold; pointer-events: auto; touch-action: manipulation;">JUMP</button>
             
             <!-- Action Buttons (Laser/Fireball) -->
-            <div id="mobileActions" style="position: absolute; bottom: 120px; right: 20px; pointer-events: auto;">
-                <button id="mobileLaser" class="mobile-btn" style="display: none; width: 70px; height: 70px; border-radius: 50%; background: rgba(0,150,255,0.5); border: 3px solid rgba(0,150,255,0.8); font-size: 18px; color: white; font-weight: bold; margin-bottom: 10px; touch-action: manipulation;">LASER</button>
-                <button id="mobileFireball" class="mobile-btn" style="display: none; width: 70px; height: 70px; border-radius: 50%; background: rgba(255,100,0,0.5); border: 3px solid rgba(255,100,0,0.8); font-size: 16px; color: white; font-weight: bold; touch-action: manipulation;">FIRE</button>
+            <div id="mobileActions" style="position: absolute; bottom: 80px; right: 10px; pointer-events: auto;">
+                <button id="mobileLaser" class="mobile-btn" style="display: none; width: 50px; height: 50px; border-radius: 50%; background: rgba(0,150,255,0.5); border: 2px solid rgba(0,150,255,0.8); font-size: 12px; color: white; font-weight: bold; margin-bottom: 8px; touch-action: manipulation;">L</button>
+                <button id="mobileFireball" class="mobile-btn" style="display: none; width: 50px; height: 50px; border-radius: 50%; background: rgba(255,100,0,0.5); border: 2px solid rgba(255,100,0,0.8); font-size: 12px; color: white; font-weight: bold; touch-action: manipulation;">F</button>
             </div>
         </div>
         
@@ -6302,9 +6331,12 @@
             
             let newWidth, newHeight;
             if (isMobile) {
-                // Mobile: use viewport size with aspect ratio preservation
-                newWidth = window.innerWidth;
-                newHeight = window.innerHeight;
+                // Mobile: use much smaller size for better performance (max 600px width)
+                const maxMobileWidth = 600;
+                const maxMobileHeight = 338; // 16:9 ratio
+                newWidth = Math.min(window.innerWidth - 10, maxMobileWidth);
+                newHeight = Math.min(window.innerHeight - 120, maxMobileHeight); // Leave room for controls
+                
                 // Maintain 16:9 aspect ratio
                 const aspectRatio = 16 / 9;
                 if (newWidth / newHeight > aspectRatio) {
@@ -6328,8 +6360,8 @@
             const scaleY = canvas.height / baseHeight;
             const scale = Math.min(scaleX, scaleY);
             
-            // Zoom in 10% - multiply scale by 1.1
-            const zoomedScale = scale * 1.1;
+            // Mobile: no zoom, desktop: zoom in 10%
+            const zoomedScale = isMobile ? scale : scale * 1.1;
             
             // Store scale for use in game logic
             game.scale = zoomedScale;
@@ -11281,8 +11313,11 @@
                 ctx.fillStyle = gradient;
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
-                // Stars for night levels
-                if (game.level >= 3) {
+                // Mobile optimization: skip stars and reduce clouds
+                const isMobile = game.isMobile || window.innerWidth < 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                
+                // Stars for night levels (skip on mobile for performance)
+                if (!isMobile && game.level >= 3) {
                     ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
                     for (let i = 0; i < 20; i++) {
                         const x = (i * 123 + game.level * 50) % canvas.width;
@@ -11293,17 +11328,19 @@
                     }
                 }
                 
-                // Clouds (lighter for day, darker for night)
-                const cloudAlpha = game.level >= 3 ? 0.3 : 0.8;
-                ctx.fillStyle = `rgba(255, 255, 255, ${cloudAlpha})`;
-                for (let i = 0; i < 4; i++) {
-                    const x = (i * 300 - game.camera.x * 0.3) % (canvas.width + 100);
-                    const y = 50 + i * 40;
-                    ctx.beginPath();
-                    ctx.arc(x, y, 15 + i * 3, 0, Math.PI * 2);
-                    ctx.arc(x + 20, y, 20 + i * 2, 0, Math.PI * 2);
-                    ctx.arc(x + 40, y, 15 + i * 3, 0, Math.PI * 2);
-                    ctx.fill();
+                // Clouds (lighter for day, darker for night) - fewer on mobile
+                if (!isMobile) {
+                    const cloudAlpha = game.level >= 3 ? 0.3 : 0.8;
+                    ctx.fillStyle = `rgba(255, 255, 255, ${cloudAlpha})`;
+                    for (let i = 0; i < 4; i++) {
+                        const x = (i * 300 - game.camera.x * 0.3) % (canvas.width + 100);
+                        const y = 50 + i * 40;
+                        ctx.beginPath();
+                        ctx.arc(x, y, 15 + i * 3, 0, Math.PI * 2);
+                        ctx.arc(x + 20, y, 20 + i * 2, 0, Math.PI * 2);
+                        ctx.arc(x + 40, y, 15 + i * 3, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
                 }
             }
         }
@@ -11340,33 +11377,38 @@
                 ctx.fillStyle = lavaOverlay;
                 ctx.fillRect(0, lavaTop, canvas.width, lavaBottom - lavaTop);
                 
-                // Add lava surface effect (optimized: cache time, reduce particles)
-                const time = (game.frameCount || 0) * 0.033; // Use frame count instead of Date.now() for better performance
-                ctx.strokeStyle = 'rgba(255, 255, 0, 0.6)';
-                ctx.lineWidth = 3;
-                ctx.beginPath();
+                // Mobile optimization: skip lava effects for performance
+                const isMobile = game.isMobile || window.innerWidth < 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
                 
-                // Animated lava surface waves (reduced resolution for performance)
-                for (let x = 0; x < canvas.width; x += 20) { // Increased from 15 to 20
-                    const waveY = lavaTop + Math.sin(time + x * 0.02) * 5;
-                    if (x === 0) {
-                        ctx.moveTo(x, waveY);
-                    } else {
-                        ctx.lineTo(x, waveY);
-                    }
-                }
-                ctx.stroke();
-                
-                // Add lava particles/bubbles (reduced count for performance)
-                ctx.fillStyle = 'rgb(255, 100, 0)';
-                for (let i = 0; i < 8; i++) { // Reduced from 12 to 8
-                    const particleX = (i * 150 + Math.sin(time + i) * 40) % canvas.width;
-                    const particleY = lavaBottom - 15 - Math.sin(time * 3 + i) * 8;
-                    const particleSize = 3 + Math.sin(time + i * 0.7) * 2;
-                    
+                if (!isMobile) {
+                    // Add lava surface effect (optimized: cache time, reduce particles)
+                    const time = (game.frameCount || 0) * 0.033; // Use frame count instead of Date.now() for better performance
+                    ctx.strokeStyle = 'rgba(255, 255, 0, 0.6)';
+                    ctx.lineWidth = 3;
                     ctx.beginPath();
-                    ctx.arc(particleX, particleY, particleSize, 0, Math.PI * 2);
-                    ctx.fill();
+                    
+                    // Animated lava surface waves (reduced resolution for performance)
+                    for (let x = 0; x < canvas.width; x += 20) { // Increased from 15 to 20
+                        const waveY = lavaTop + Math.sin(time + x * 0.02) * 5;
+                        if (x === 0) {
+                            ctx.moveTo(x, waveY);
+                        } else {
+                            ctx.lineTo(x, waveY);
+                        }
+                    }
+                    ctx.stroke();
+                    
+                    // Add lava particles/bubbles (reduced count for performance)
+                    ctx.fillStyle = 'rgb(255, 100, 0)';
+                    for (let i = 0; i < 8; i++) { // Reduced from 12 to 8
+                        const particleX = (i * 150 + Math.sin(time + i) * 40) % canvas.width;
+                        const particleY = lavaBottom - 15 - Math.sin(time * 3 + i) * 8;
+                        const particleSize = 3 + Math.sin(time + i * 0.7) * 2;
+                        
+                        ctx.beginPath();
+                        ctx.arc(particleX, particleY, particleSize, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
                 }
                 
                 ctx.restore();
@@ -11392,33 +11434,38 @@
                 ctx.fillStyle = waterOverlay;
                 ctx.fillRect(0, waterTop, canvas.width, waterBottom - waterTop);
                 
-                // Add water surface effect (optimized: use frame count instead of Date.now())
-                const time = (game.frameCount || 0) * 0.016; // Use frame count for better performance
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
+                // Mobile optimization: skip water effects for performance
+                const isMobile = game.isMobile || window.innerWidth < 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
                 
-                // Animated water surface waves (reduced resolution for performance)
-                for (let x = 0; x < canvas.width; x += 25) { // Increased from 20 to 25
-                    const waveY = waterTop + Math.sin(time + x * 0.01) * 3;
-                    if (x === 0) {
-                        ctx.moveTo(x, waveY);
-                    } else {
-                        ctx.lineTo(x, waveY);
-                    }
-                }
-                ctx.stroke();
-                
-                // Add water bubbles (reduced count for performance)
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-                for (let i = 0; i < 6; i++) { // Reduced from 8 to 6
-                    const bubbleX = (i * 180 + Math.sin(time + i) * 50) % canvas.width;
-                    const bubbleY = waterBottom - 20 - Math.sin(time * 2 + i) * 10;
-                    const bubbleSize = 2 + Math.sin(time + i * 0.5) * 1;
-                    
+                if (!isMobile) {
+                    // Add water surface effect (optimized: use frame count instead of Date.now())
+                    const time = (game.frameCount || 0) * 0.016; // Use frame count for better performance
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                    ctx.lineWidth = 2;
                     ctx.beginPath();
-                    ctx.arc(bubbleX, bubbleY, bubbleSize, 0, Math.PI * 2);
-                    ctx.fill();
+                    
+                    // Animated water surface waves (reduced resolution for performance)
+                    for (let x = 0; x < canvas.width; x += 25) { // Increased from 20 to 25
+                        const waveY = waterTop + Math.sin(time + x * 0.01) * 3;
+                        if (x === 0) {
+                            ctx.moveTo(x, waveY);
+                        } else {
+                            ctx.lineTo(x, waveY);
+                        }
+                    }
+                    ctx.stroke();
+                    
+                    // Add water bubbles (reduced count for performance)
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                    for (let i = 0; i < 6; i++) { // Reduced from 8 to 6
+                        const bubbleX = (i * 180 + Math.sin(time + i) * 50) % canvas.width;
+                        const bubbleY = waterBottom - 20 - Math.sin(time * 2 + i) * 10;
+                        const bubbleSize = 2 + Math.sin(time + i * 0.5) * 1;
+                        
+                        ctx.beginPath();
+                        ctx.arc(bubbleX, bubbleY, bubbleSize, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
                 }
                 
                 ctx.restore();
@@ -16496,11 +16543,15 @@
                 return;
             }
             
+            const isMobile = game.isMobile || window.innerWidth < 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
             // Clear and draw background
             drawBackground();
             
-            // Draw top boundary warning
-            drawTopBoundary();
+            // Draw top boundary warning (skip on mobile for performance)
+            if (!isMobile) {
+                drawTopBoundary();
+            }
             
             // Water will be drawn as overlay at the end
             
@@ -18137,7 +18188,23 @@
         }
         
         // Game loop
-        function gameLoop() {
+        // Mobile frame rate limiting
+        let lastFrameTime = 0;
+        const mobileFrameInterval = 1000 / 30; // 30 FPS on mobile for better performance
+        
+        function gameLoop(timestamp) {
+            const isMobile = game.isMobile || window.innerWidth < 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            // Frame rate limiting for mobile
+            if (isMobile) {
+                const elapsed = timestamp - lastFrameTime;
+                if (elapsed < mobileFrameInterval) {
+                    requestAnimationFrame(gameLoop);
+                    return;
+                }
+                lastFrameTime = timestamp - (elapsed % mobileFrameInterval);
+            }
+            
             game.frameCount = (game.frameCount || 0) + 1;
             
             // Only run game logic when actually playing
@@ -18146,13 +18213,17 @@
                 updateTimeStats();
                 
                 // Check secret chest conditions and update abilities display periodically
-                if (game.frameCount % 60 === 0) {
+                // Less frequent on mobile
+                const checkInterval = isMobile ? 90 : 60;
+                if (game.frameCount % checkInterval === 0) {
                     checkSecretChestConditions(); // Check for secret chest conditions
                     updateAbilitiesDisplay(); // Update abilities display
                 }
                 
                 // Show random owl messages periodically (every 600 frames = ~10 seconds at 60fps)
-                if (game.frameCount % 600 === 0 && Math.random() < 0.3) { // 30% chance every 10 seconds
+                // Less frequent on mobile
+                const messageInterval = isMobile ? 900 : 600;
+                if (game.frameCount % messageInterval === 0 && Math.random() < 0.3) { // 30% chance every 10 seconds
                     showRandomOwlMessage();
                 }
                 
