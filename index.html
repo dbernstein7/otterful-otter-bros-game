@@ -544,45 +544,55 @@
             right: 8vw;
         }
         
-        /* Collectibles Counter Styles */
+        /* Collectibles Counter Styles - Match level display size */
         #collectiblesCounter {
             display: flex;
-            flex-direction: column;
-            gap: 4px;
-            min-width: 120px;
+            flex-direction: row;
+            gap: 15px;
+            color: #FFD700;
+            font-size: clamp(12px, 1.5vw, 18px);
+            font-family: 'SuperMario', 'Orbitron', 'Arial Black', sans-serif;
+            font-weight: 900;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.9), 0 0 15px rgba(255,215,0,0.8);
+            background: linear-gradient(135deg, rgba(0,0,0,0.9), rgba(26,26,46,0.95));
+            padding: clamp(8px, 1.2vw, 16px) clamp(12px, 2vw, 20px);
+            border-radius: 15px;
+            border: 2px solid #FFD700;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.7), inset 0 0 20px rgba(255,215,0,0.2), 0 0 25px rgba(255,215,0,0.6), 0 0 40px rgba(255,215,0,0.4);
+            backdrop-filter: blur(15px);
         }
         
         .counter-item {
             display: flex;
             align-items: center;
             gap: 6px;
-            padding: 4px 8px;
-            background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,165,0,0.1));
-            border-radius: 8px;
-            border-left: 3px solid #FFD700;
+            padding: 0;
+            background: transparent;
+            border-radius: 0;
+            border: none;
             /* Removed transition and animation for performance */
         }
         
         .counter-icon {
-            font-size: 18px;
+            font-size: clamp(12px, 1.5vw, 18px);
             filter: drop-shadow(0 0 8px rgba(255,215,0,0.7));
             /* Removed animation for performance */
         }
         
         .counter-label {
-            font-size: 11px;
+            font-size: clamp(12px, 1.5vw, 18px);
             color: #FFD700;
-            font-weight: bold;
-            min-width: 45px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            font-weight: 900;
+            min-width: auto;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.9), 0 0 15px rgba(255,215,0,0.8);
         }
         
         .counter-value {
-            font-size: 13px;
+            font-size: clamp(12px, 1.5vw, 18px);
             color: #00FFFF;
-            font-weight: bold;
-            text-shadow: 0 0 8px rgba(0,255,255,0.7), 1px 1px 2px rgba(0,0,0,0.8);
-            min-width: 30px;
+            font-weight: 900;
+            text-shadow: 0 0 8px rgba(0,255,255,0.7), 2px 2px 4px rgba(0,0,0,0.9);
+            min-width: auto;
             text-align: right;
             /* Removed animation for performance */
         }
@@ -1086,7 +1096,7 @@
         /* Health Bar Styles - Enhanced */
         .health-bar-container {
             position: fixed;
-            bottom: 24px;
+            bottom: 10px;
             right: 2vw;
             z-index: 10;
             display: flex;
@@ -1230,7 +1240,7 @@
             text-align: center;
         }
         
-        /* Abilities Display Styles */
+        /* Abilities Display Styles - Smaller */
         .abilities-display {
             position: fixed;
             top: 18px;
@@ -1239,7 +1249,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            gap: 6px;
             animation: abilitiesContainerFloat 4s ease-in-out infinite;
             transform-origin: top right;
         }
@@ -1251,13 +1261,13 @@
         
         .abilities-title {
             color: #FF6B35;
-            font-size: clamp(12px, 1.6vw, 18px);
+            font-size: clamp(10px, 1.2vw, 14px);
             font-family: 'SuperMario', 'Orbitron', 'Arial Black', sans-serif;
             font-weight: 900;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.9), 0 0 15px rgba(255,107,53,0.8);
             background: linear-gradient(135deg, rgba(0,0,0,0.85), rgba(26,26,46,0.95));
-            padding: clamp(6px, 1vw, 10px) clamp(10px, 1.6vw, 16px);
-            border-radius: 8px;
+            padding: clamp(4px, 0.8vw, 8px) clamp(8px, 1.2vw, 12px);
+            border-radius: 6px;
             border: 2px solid #FF6B35;
             box-shadow: 0 4px 12px rgba(0,0,0,0.6), inset 0 0 12px rgba(255,107,53,0.15), 0 0 16px rgba(255,107,53,0.5);
             backdrop-filter: blur(10px);
@@ -1265,7 +1275,7 @@
         
         .abilities-grid {
             display: flex;
-            gap: 12px;
+            gap: 8px;
             align-items: center;
         }
         
@@ -1274,12 +1284,12 @@
             flex-direction: column;
             align-items: center;
             gap: 2px;
-            padding: 8px 10px;
+            padding: 4px 6px;
             background: linear-gradient(135deg, rgba(255,107,53,0.15), rgba(255,107,53,0.05));
-            border-radius: 8px;
+            border-radius: 6px;
             border: 2px solid rgba(255,107,53,0.3);
             transition: all 0.3s ease;
-            min-width: 52px;
+            min-width: 40px;
         }
         
         .ability-item.active {
@@ -1300,12 +1310,12 @@
         }
         
         .ability-icon {
-            font-size: 26px;
+            font-size: 20px;
             filter: drop-shadow(0 0 5px rgba(255,107,53,0.7));
         }
         
         .ability-label {
-            font-size: 10px;
+            font-size: 8px;
             color: #FF6B35;
             font-weight: bold;
             text-align: center;
