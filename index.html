@@ -6222,8 +6222,11 @@
             const scaleY = canvas.height / baseHeight;
             const scale = Math.min(scaleX, scaleY);
             
+            // Zoom in 10% - multiply scale by 1.1
+            const zoomedScale = scale * 1.1;
+            
             // Store scale for use in game logic
-            game.scale = scale;
+            game.scale = zoomedScale;
             game.canvasWidth = canvas.width;
             game.canvasHeight = canvas.height;
         }
