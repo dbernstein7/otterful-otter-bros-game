@@ -23807,8 +23807,8 @@
             game.secretChestConditions.treasuresCollected = treasuresCollected;
             game.secretChestConditions.keysCollected = keysCollected;
             
-            // Get total coins in current level from currentLevel object
-            const totalCoinsInLevel = (typeof currentLevel !== 'undefined' && currentLevel.coins) ? currentLevel.coins.length : 50; // Default to 50 if not available
+            // Get total coins in current level - coins is a global array set in loadLevel
+            const totalCoinsInLevel = (typeof coins !== 'undefined' && coins.length > 0) ? coins.length : 50; // Default to 50 if not available
             
             // Check if all coins on current level are collected (50 coins) and other conditions are met
             // Only spawn if chests haven't been spawned yet
