@@ -15322,45 +15322,111 @@
                     }
                     
                 } else if (enemy.type === 'charger') {
-                    // Simplified Charger AI
-                    const canSeePlayer = distanceToPlayer < 300 && Math.abs(enemy.y - player.y) < 100;
+                    // Charger AI - strictly on platforms, only charges when player is close on same platform
                     
-                    if (canSeePlayer && !enemy.isCharging && currentTime - (enemy.lastChargeTime || 0) > enemy.chargeCooldown) {
-                        enemy.isCharging = true;
-                        enemy.chargeStartTime = currentTime;
-                        enemy.chargeDirection = player.x > enemy.x ? 1 : -1;
+                    // First, find which platform the charger is on (if any)
+                    let currentPlatform = null;
+                    for (const platform of platforms) {
+                        if (platform.isVisible === false) continue;
+                        if (enemy.x >= platform.x && enemy.x <= platform.x + platform.width &&
+                            enemy.y >= platform.y - enemy.height - 5 && enemy.y <= platform.y + 5) {
+                            currentPlatform = platform;
+                            // Keep charger on platform
+                            enemy.y = platform.y - enemy.height;
+                            break;
+                        }
                     }
                     
-                    if (enemy.isCharging) {
-                        const chargeProgress = (currentTime - enemy.chargeStartTime) / enemy.chargeWindup;
-                        if (chargeProgress < 1) {
-                            enemy.x += enemy.velX * 0.3 * enemy.chargeDirection;
-                        } else {
-                            enemy.x += enemy.chargeSpeed * enemy.chargeDirection;
-                            if (enemy.x < game.camera.x - 100 || enemy.x > game.camera.x + game.canvasWidth + 100) {
-                                enemy.isCharging = false;
-                                enemy.lastChargeTime = currentTime;
+                    // If charger is not on a platform, try to find the closest one and move towards it
+                    if (!currentPlatform) {
+                        let closestPlatform = null;
+                        let closestDistance = Infinity;
+                        for (const platform of platforms) {
+                            if (platform.isVisible === false) continue;
+                            const distance = Math.abs(enemy.x - (platform.x + platform.width / 2));
+                            if (distance < closestDistance) {
+                                closestDistance = distance;
+                                closestPlatform = platform;
                             }
                         }
-                    } else {
-                        enemy.x += enemy.velX * enemy.direction;
+                        if (closestPlatform && closestDistance < 200) {
+                            // Move towards closest platform
+                            if (enemy.x < closestPlatform.x + closestPlatform.width / 2) {
+                                enemy.direction = 1;
+                            } else {
+                                enemy.direction = -1;
+                            }
+                            enemy.x += enemy.velX * enemy.direction;
+                            // Snap to platform if close enough
+                            if (enemy.x >= closestPlatform.x && enemy.x <= closestPlatform.x + closestPlatform.width) {
+                                enemy.y = closestPlatform.y - enemy.height;
+                                currentPlatform = closestPlatform;
+                            }
+                        }
+                    }
+                    
+                    // Only proceed if charger is on a platform
+                    if (currentPlatform) {
+                        // Check if player is on the same platform and close enough to charge
+                        const playerOnSamePlatform = player.x >= currentPlatform.x && 
+                                                    player.x <= currentPlatform.x + currentPlatform.width &&
+                                                    Math.abs(player.y - currentPlatform.y) < 150;
+                        const canSeePlayer = distanceToPlayer < 300 && 
+                                           Math.abs(enemy.y - player.y) < 100 && 
+                                           playerOnSamePlatform;
                         
-                        // Simplified platform check - only check if near camera
-                        if (distanceToCamera < 300) {
-                            for (const platform of platforms) {
-                                if (platform.isVisible === false) continue;
-                                if (enemy.x >= platform.x && enemy.x <= platform.x + platform.width &&
-                                    enemy.y >= platform.y - enemy.height - 5 && enemy.y <= platform.y + 5) {
-                                    if (enemy.y > platform.y - enemy.height) {
-                                        enemy.y = platform.y - enemy.height;
+                        if (canSeePlayer && !enemy.isCharging && currentTime - (enemy.lastChargeTime || 0) > enemy.chargeCooldown) {
+                            enemy.isCharging = true;
+                            enemy.chargeStartTime = currentTime;
+                            enemy.chargeDirection = player.x > enemy.x ? 1 : -1;
+                        }
+                        
+                        if (enemy.isCharging) {
+                            const chargeProgress = (currentTime - enemy.chargeStartTime) / enemy.chargeWindup;
+                            
+                            // Check if charger would fall off platform during charge
+                            const nextX = enemy.x + (chargeProgress < 1 ? 
+                                enemy.velX * 0.3 * enemy.chargeDirection : 
+                                enemy.chargeSpeed * enemy.chargeDirection);
+                            const wouldFallOff = nextX < currentPlatform.x || nextX > currentPlatform.x + currentPlatform.width;
+                            
+                            if (wouldFallOff) {
+                                // Stop charging if about to fall off
+                                enemy.isCharging = false;
+                                enemy.lastChargeTime = currentTime;
+                                enemy.direction *= -1; // Turn around
+                            } else {
+                                if (chargeProgress < 1) {
+                                    // Windup phase
+                                    enemy.x += enemy.velX * 0.3 * enemy.chargeDirection;
+                                } else {
+                                    // Charge phase
+                                    enemy.x += enemy.chargeSpeed * enemy.chargeDirection;
+                                    
+                                    // Stop charging if reached edge or player is too far
+                                    if (enemy.x <= currentPlatform.x || enemy.x >= currentPlatform.x + currentPlatform.width ||
+                                        distanceToPlayer > 400 || !playerOnSamePlatform) {
+                                        enemy.isCharging = false;
+                                        enemy.lastChargeTime = currentTime;
                                     }
-                                    if ((enemy.direction === 1 && enemy.x >= platform.x + platform.width - 48) ||
-                                        (enemy.direction === -1 && enemy.x <= platform.x + 48)) {
-                                        enemy.direction *= -1;
-                                    }
-                                    break;
                                 }
                             }
+                            
+                            // Keep charger on platform during charge
+                            enemy.y = currentPlatform.y - enemy.height;
+                        } else {
+                            // Normal patrol movement
+                            enemy.x += enemy.velX * enemy.direction;
+                            
+                            // Turn around at platform edges
+                            if (enemy.x <= currentPlatform.x || enemy.x >= currentPlatform.x + currentPlatform.width) {
+                                enemy.direction *= -1;
+                                // Clamp to platform bounds
+                                enemy.x = Math.max(currentPlatform.x, Math.min(currentPlatform.x + currentPlatform.width, enemy.x));
+                            }
+                            
+                            // Keep charger on platform
+                            enemy.y = currentPlatform.y - enemy.height;
                         }
                     }
                     
