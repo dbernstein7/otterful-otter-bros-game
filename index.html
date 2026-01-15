@@ -16719,12 +16719,18 @@
                     xpForNextLevel = 1000;
                 }
                 
-                const xpPercentage = (currentLevelXP / xpForNextLevel) * 100;
+                const xpPercentage = Math.max(0, Math.min(100, (currentLevelXP / xpForNextLevel) * 100));
                 
-                xpBarFill.style.width = xpPercentage + '%';
-                xpText.innerHTML = `Level ${player.level} <span id="xpProgress">(${currentLevelXP}/${xpForNextLevel} XP)</span>`;
+                // Update main XP bar (top right corner) - ensure it updates
+                if (xpBarFill) {
+                    xpBarFill.style.width = xpPercentage + '%';
+                    xpBarFill.style.display = 'block';
+                }
+                if (xpText) {
+                    xpText.innerHTML = `Level ${player.level} <span id="xpProgress">(${currentLevelXP}/${xpForNextLevel} XP)</span>`;
+                }
                 
-                // Also update mobile XP bar
+                // Also update mobile XP bar (in settings menu)
                 const mobileXpBarFill = document.getElementById('mobileXpBarFill');
                 const mobileXpText = document.getElementById('mobileXpText');
                 if (mobileXpBarFill && mobileXpText) {
