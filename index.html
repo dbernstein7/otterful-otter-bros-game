@@ -24000,6 +24000,16 @@
                 const profileBtn = document.getElementById('profileBtn');
                 const marketplaceBtn = document.getElementById('marketplaceBtn');
                 const skipBtn = document.getElementById('skipCutsceneBtn');
+                const continueBtn = document.getElementById('continueGameBtn');
+                
+                if (continueBtn) {
+                    continueBtn.addEventListener('click', (event) => {
+                        addButtonClickEffect(event.target);
+                        console.log('🎮 Continue Game clicked!');
+                        continueGame();
+                    });
+                    console.log('✅ Continue Game button listener attached');
+                }
                 
                 if (startBtn) {
                     startBtn.addEventListener('click', (event) => {
