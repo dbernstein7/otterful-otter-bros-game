@@ -15159,61 +15159,24 @@
             
             // Screen boundaries - check if player has fallen off the bottom of the world
             // All platforms are now solid, so use all platforms for world bottom calculation
+            // Safety check: ensure platforms array exists and has items
+            if (!platforms || platforms.length === 0) {
+                return; // Skip boundary check if no platforms
+            }
+            
             const worldBottom = Math.max(...platforms.map(p => p.y)) + 500; // 500 pixels below the lowest platform - reasonable death boundary
             const worldTop = Math.min(...platforms.map(p => p.y)) - 1000; // 1000 pixels above the highest platform - reasonable death boundary
+            
+            // Prevent player from going above top boundary - push them down instead of killing to prevent freeze
             if (player.y < worldTop) {
-                console.log('Player went above world! Player Y:', player.y, 'World top:', worldTop);
-                console.log('Player lives before death:', game.lives);
-                game.lives--;
-                if (game.lives <= 0) {
-                    game.gameOver = true;
-                } else {
-                    // Reset player position to last platform they were on
-                    player.velX = 0;
-                    player.velY = 0;
-                    player.canDoubleJump = true;
-                    player.onGround = true; // Ensure they start on ground
-                    
-                    if (game.activeCheckpoint) {
-                        // Respawn at the last activated checkpoint
-                        player.x = game.activeCheckpoint.platform.x + (game.activeCheckpoint.platform.width / 2) - (player.collisionWidth / 2);
-                        player.y = game.activeCheckpoint.platform.y - player.collisionHeight - player.collisionOffsetY;
-                        console.log('Respawning at checkpoint');
-                    } else {
-                        // Simple respawn - just use the first platform
-                        console.log('Simple respawn to first platform');
-                        
-                        // Reset checkpoints when player dies
-                        game.activeCheckpoint = null;
-                        if (game.checkpointProgress[game.level]) {
-                            delete game.checkpointProgress[game.level];
-                        }
-                        console.log('Checkpoints reset due to death');
-                        
-                        if (platforms.length > 0) {
-                            const firstPlatform = platforms[0];
-                            player.x = firstPlatform.x + 50; // Simple positioning
-                            player.y = firstPlatform.y - player.collisionHeight - 10;
-                            console.log('Respawning at first platform:', firstPlatform.x, firstPlatform.y);
-                        } else {
-                            // Emergency fallback
-                            player.x = 240;
-                            player.y = 1170;
-                            console.log('Emergency fallback respawn');
-                        }
-                    }
-                    
-                    // Simple safety check
-                    if (platforms.length > 0) {
-                        const firstPlatform = platforms[0];
-                        // Ensure player is above the platform
-                        if (player.y + player.collisionHeight > firstPlatform.y) {
-                            player.y = firstPlatform.y - player.collisionHeight - 10;
-                        }
-                        console.log('Simple safety check completed');
-                    }
-                }
+                console.log('Player hit top boundary! Player Y:', player.y, 'World top:', worldTop);
+                // Push player down instead of killing to prevent freeze
+                player.y = worldTop + 10;
+                player.velY = Math.max(player.velY, 0); // Stop upward velocity
+                player.velX *= 0.8; // Slow down horizontal movement
+                return; // Exit early to prevent death/respawn loop
             }
+            
             
             if (player.y > worldBottom) {
                 console.log('Player fell off world! Player Y:', player.y, 'World bottom:', worldBottom);
@@ -17966,22 +17929,40 @@
         }
         
         function drawTopBoundary(isMobile = false) {
+            // Safety check: ensure platforms array exists and has items
+            if (!platforms || platforms.length === 0) {
+                return;
+            }
+            
             // Calculate world top boundary (1000 pixels above the highest platform)
             const worldTop = Math.min(...platforms.map(p => p.y)) - 1000;
             
-            // Only draw if the boundary is visible on screen
+            // Only draw if the boundary is visible on screen or player is near it
             const boundaryScreenY = worldTop - game.camera.y;
-            if (boundaryScreenY > -100 && boundaryScreenY < game.canvasHeight + 100) {
+            const playerScreenY = player.y - game.camera.y;
+            const playerBottomScreenY = playerScreenY + player.collisionHeight;
+            const distanceToBoundary = Math.abs(playerBottomScreenY - boundaryScreenY);
+            
+            // Show boundary if it's on screen OR if player is within 300 pixels of it (more visible)
+            const shouldShow = (boundaryScreenY > -50 && boundaryScreenY < game.canvasHeight + 50) || distanceToBoundary < 300;
+            
+            if (shouldShow) {
+                // Make boundary more visible when player is close
+                const proximityFactor = Math.max(0, 1 - (distanceToBoundary / 300));
+                const minOpacity = 0.5;
+                const maxOpacity = 1.0;
+                const baseOpacity = minOpacity + (maxOpacity - minOpacity) * proximityFactor;
                 ctx.save();
                 
                 if (isMobile) {
                     // Simplified version for mobile - just a simple red line and text
                     const time = Date.now() * 0.003;
                     const pulseIntensity = Math.sin(time) * 0.3 + 0.7;
+                    const finalOpacity = pulseIntensity * baseOpacity;
                     
-                    // Draw simple warning boundary line
-                    ctx.strokeStyle = `rgba(255, 0, 0, ${pulseIntensity * 0.9})`;
-                    ctx.lineWidth = 3;
+                    // Draw simple warning boundary line (thicker and more visible)
+                    ctx.strokeStyle = `rgba(255, 0, 0, ${finalOpacity})`;
+                    ctx.lineWidth = 4; // Thicker line
                     ctx.setLineDash([15, 10]);
                     ctx.lineDashOffset = time * 15;
                     ctx.beginPath();
@@ -17989,19 +17970,20 @@
                     ctx.lineTo(game.canvasWidth, boundaryScreenY);
                     ctx.stroke();
                     
-                    // Draw simple warning text (smaller font on mobile)
-                    ctx.fillStyle = `rgba(255, 0, 0, ${pulseIntensity})`;
-                    ctx.font = 'bold 14px Arial';
+                    // Draw simple warning text (more visible on mobile)
+                    ctx.fillStyle = `rgba(255, 0, 0, ${finalOpacity})`;
+                    ctx.font = 'bold 16px Arial'; // Slightly larger
                     ctx.textAlign = 'center';
-                    ctx.fillText('TOP BOUNDARY', game.canvasWidth / 2, boundaryScreenY - 20);
+                    ctx.fillText('⚠ TOP BOUNDARY ⚠', game.canvasWidth / 2, boundaryScreenY - 25);
                 } else {
                     // Full version for desktop
                     const time = Date.now() * 0.005;
                     const pulseIntensity = Math.sin(time) * 0.3 + 0.7;
+                    const finalOpacity = pulseIntensity * baseOpacity;
                     
                     // Draw warning boundary line
-                    ctx.strokeStyle = `rgba(255, 0, 0, ${pulseIntensity * 0.8})`;
-                    ctx.lineWidth = 4;
+                    ctx.strokeStyle = `rgba(255, 0, 0, ${finalOpacity * 0.9})`;
+                    ctx.lineWidth = 5; // Thicker
                     ctx.setLineDash([10, 5]);
                     ctx.lineDashOffset = time * 20; // Animated dash movement
                     ctx.beginPath();
@@ -18010,7 +17992,7 @@
                     ctx.stroke();
                     
                     // Draw warning triangles
-                    ctx.fillStyle = `rgba(255, 0, 0, ${pulseIntensity * 0.6})`;
+                    ctx.fillStyle = `rgba(255, 0, 0, ${finalOpacity * 0.7})`;
                     for (let i = 0; i < game.canvasWidth; i += 40) {
                         ctx.beginPath();
                         ctx.moveTo(i, boundaryScreenY - 15);
@@ -18021,10 +18003,10 @@
                     }
                     
                     // Draw warning text
-                    ctx.fillStyle = `rgba(255, 0, 0, ${pulseIntensity * 0.9})`;
-                    ctx.font = 'bold 16px Arial';
+                    ctx.fillStyle = `rgba(255, 0, 0, ${finalOpacity})`;
+                    ctx.font = 'bold 18px Arial'; // Larger
                     ctx.textAlign = 'center';
-                    ctx.fillText('WARNING: TOP BOUNDARY', game.canvasWidth / 2, boundaryScreenY - 25);
+                    ctx.fillText('⚠ WARNING: TOP BOUNDARY ⚠', game.canvasWidth / 2, boundaryScreenY - 30);
                 }
                 
                 ctx.restore();
