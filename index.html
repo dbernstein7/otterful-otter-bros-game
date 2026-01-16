@@ -7202,7 +7202,6 @@
             jumpPower: 28, // Increased jump power for better feel (20 * 1.4 = 28)
             onGround: true, // Start on ground to prevent immediate falling
             canDoubleJump: true,
-            isRespawning: false, // Flag to prevent death/respawn loop
             direction: 1,
             // Collision box that matches the visual sprite exactly
             collisionWidth: 64, // Same as sprite width
@@ -15163,70 +15162,57 @@
             const worldBottom = Math.max(...platforms.map(p => p.y)) + 500; // 500 pixels below the lowest platform - reasonable death boundary
             const worldTop = Math.min(...platforms.map(p => p.y)) - 1000; // 1000 pixels above the highest platform - reasonable death boundary
             if (player.y < worldTop) {
-                // Prevent freeze loop: only process death once per frame, and ensure safe respawn
-                if (!player.isRespawning) {
-                    player.isRespawning = true; // Flag to prevent multiple deaths in one frame
-                    console.log('Player went above world! Player Y:', player.y, 'World top:', worldTop);
-                    console.log('Player lives before death:', game.lives);
-                    game.lives--;
-                    if (game.lives <= 0) {
-                        game.gameOver = true;
+                console.log('Player went above world! Player Y:', player.y, 'World top:', worldTop);
+                console.log('Player lives before death:', game.lives);
+                game.lives--;
+                if (game.lives <= 0) {
+                    game.gameOver = true;
+                } else {
+                    // Reset player position to last platform they were on
+                    player.velX = 0;
+                    player.velY = 0;
+                    player.canDoubleJump = true;
+                    player.onGround = true; // Ensure they start on ground
+                    
+                    if (game.activeCheckpoint) {
+                        // Respawn at the last activated checkpoint
+                        player.x = game.activeCheckpoint.platform.x + (game.activeCheckpoint.platform.width / 2) - (player.collisionWidth / 2);
+                        player.y = game.activeCheckpoint.platform.y - player.collisionHeight - player.collisionOffsetY;
+                        console.log('Respawning at checkpoint');
                     } else {
-                        // Reset player position to last platform they were on
-                        player.velX = 0;
-                        player.velY = 0;
-                        player.canDoubleJump = true;
-                        player.onGround = true; // Ensure they start on ground
+                        // Simple respawn - just use the first platform
+                        console.log('Simple respawn to first platform');
                         
-                        if (game.activeCheckpoint) {
-                            // Respawn at the last activated checkpoint
-                            player.x = game.activeCheckpoint.platform.x + (game.activeCheckpoint.platform.width / 2) - (player.collisionWidth / 2);
-                            player.y = game.activeCheckpoint.platform.y - player.collisionHeight - player.collisionOffsetY - 50; // Extra space above platform
-                            console.log('Respawning at checkpoint');
+                        // Reset checkpoints when player dies
+                        game.activeCheckpoint = null;
+                        if (game.checkpointProgress[game.level]) {
+                            delete game.checkpointProgress[game.level];
+                        }
+                        console.log('Checkpoints reset due to death');
+                        
+                        if (platforms.length > 0) {
+                            const firstPlatform = platforms[0];
+                            player.x = firstPlatform.x + 50; // Simple positioning
+                            player.y = firstPlatform.y - player.collisionHeight - 10;
+                            console.log('Respawning at first platform:', firstPlatform.x, firstPlatform.y);
                         } else {
-                            // Simple respawn - just use the first platform
-                            console.log('Simple respawn to first platform');
-                            
-                            // Reset checkpoints when player dies
-                            game.activeCheckpoint = null;
-                            if (game.checkpointProgress[game.level]) {
-                                delete game.checkpointProgress[game.level];
-                            }
-                            console.log('Checkpoints reset due to death');
-                            
-                            if (platforms.length > 0) {
-                                const firstPlatform = platforms[0];
-                                player.x = firstPlatform.x + 50; // Simple positioning
-                                player.y = firstPlatform.y - player.collisionHeight - 50; // Extra space above platform to prevent immediate re-trigger
-                                console.log('Respawning at first platform:', firstPlatform.x, firstPlatform.y);
-                            } else {
-                                // Emergency fallback
-                                player.x = 240;
-                                player.y = 1170;
-                                console.log('Emergency fallback respawn');
-                            }
+                            // Emergency fallback
+                            player.x = 240;
+                            player.y = 1170;
+                            console.log('Emergency fallback respawn');
                         }
-                        
-                        // Safety check: ensure player is well below worldTop after respawn
-                        if (player.y < worldTop) {
-                            // Force player to safe position
-                            if (platforms.length > 0) {
-                                const firstPlatform = platforms[0];
-                                player.y = firstPlatform.y - player.collisionHeight - 100; // Even more space
-                            } else {
-                                player.y = worldTop + 200; // Force below boundary
-                            }
+                    }
+                    
+                    // Simple safety check
+                    if (platforms.length > 0) {
+                        const firstPlatform = platforms[0];
+                        // Ensure player is above the platform
+                        if (player.y + player.collisionHeight > firstPlatform.y) {
+                            player.y = firstPlatform.y - player.collisionHeight - 10;
                         }
-                        
-                        // Reset respawn flag after a short delay
-                        setTimeout(() => {
-                            player.isRespawning = false;
-                        }, 100);
+                        console.log('Simple safety check completed');
                     }
                 }
-            } else {
-                // Player is safe, reset respawn flag
-                player.isRespawning = false;
             }
             
             if (player.y > worldBottom) {
@@ -16889,8 +16875,12 @@
             // Clear and draw background
             drawBackground();
             
-            // Draw top boundary warning (show on both desktop and mobile)
-            drawTopBoundary();
+            // Draw top boundary warning
+            if (isMobile) {
+                drawTopBoundaryMobile();
+            } else {
+                drawTopBoundary();
+            }
             
             // Water will be drawn as overlay at the end
             
@@ -17980,24 +17970,12 @@
         }
         
         function drawTopBoundary() {
-            // Safety check: ensure platforms array exists and has items
-            if (!platforms || platforms.length === 0) {
-                return;
-            }
-            
             // Calculate world top boundary (1000 pixels above the highest platform)
             const worldTop = Math.min(...platforms.map(p => p.y)) - 1000;
             
-            // Calculate boundary position on screen
+            // Only draw if the boundary is visible on screen
             const boundaryScreenY = worldTop - game.camera.y;
-            
-            // Calculate player distance to boundary
-            const playerDistanceToBoundary = player.y - worldTop;
-            
-            // ALWAYS show boundary if player is within 600 pixels of it (above or below)
-            const shouldShow = playerDistanceToBoundary < 600 && playerDistanceToBoundary > -200;
-            
-            if (shouldShow) {
+            if (boundaryScreenY > -100 && boundaryScreenY < game.canvasHeight + 100) {
                 ctx.save();
                 
                 // Create warning boundary effect
@@ -18030,6 +18008,34 @@
                 ctx.font = 'bold 16px Arial';
                 ctx.textAlign = 'center';
                 ctx.fillText('WARNING: TOP BOUNDARY', game.canvasWidth / 2, boundaryScreenY - 25);
+                
+                ctx.restore();
+            }
+        }
+        
+        function drawTopBoundaryMobile() {
+            // Simplified version for mobile - just a simple red line
+            // Calculate world top boundary (1000 pixels above the highest platform)
+            const worldTop = Math.min(...platforms.map(p => p.y)) - 1000;
+            
+            // Only draw if the boundary is visible on screen
+            const boundaryScreenY = worldTop - game.camera.y;
+            if (boundaryScreenY > -50 && boundaryScreenY < game.canvasHeight + 50) {
+                ctx.save();
+                
+                // Simple pulsing red line for mobile (lightweight)
+                const time = Date.now() * 0.003;
+                const pulseIntensity = Math.sin(time) * 0.2 + 0.6;
+                
+                // Draw simple boundary line
+                ctx.strokeStyle = `rgba(255, 0, 0, ${pulseIntensity})`;
+                ctx.lineWidth = 3;
+                ctx.setLineDash([8, 4]);
+                ctx.lineDashOffset = time * 15;
+                ctx.beginPath();
+                ctx.moveTo(0, boundaryScreenY);
+                ctx.lineTo(game.canvasWidth, boundaryScreenY);
+                ctx.stroke();
                 
                 ctx.restore();
             }
