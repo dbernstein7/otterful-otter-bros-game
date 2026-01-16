@@ -9680,14 +9680,16 @@
             
             // 🔽 DOWN JUMP - Drop through platforms
             if (e.code === 'ArrowDown' || e.code === 'KeyS') {
-                if ((player.onGround || player.lastPlatform) && !game.keys['downJumpPressed']) {
+                // Always set the flag when down key is pressed, even if not exactly on ground
+                // This allows the collision detection to skip platforms while key is held
+                if (!game.keys['downJumpPressed']) {
                     game.keys['downJumpPressed'] = true;
+                }
+                // If player is on ground, immediately start falling
+                if (player.onGround) {
                     player.onGround = false;
-                    // Push player slightly down to ensure they start falling through the platform
-                    if (player.lastPlatform) {
-                        player.y = player.lastPlatform.y - player.collisionHeight - player.collisionOffsetY + 2;
-                    }
-                    player.velY = Math.max(player.velY, 5); // Strong downward push to ensure falling starts
+                    player.velY = 5; // Stronger downward push to start falling
+                    console.log('🔽 Down jump activated - dropping through platform', player.isGiant ? '(Giant Mode)' : '');
                 }
             }
             
@@ -13769,22 +13771,30 @@
             // ========================================
             // 🔽 DOWN JUMP - Drop through platforms (Mobile & Desktop)
             // ========================================
-            // Check if down key is pressed (from keyboard or mobile joystick)
-            // Allow dropping through when on ground or when standing on a platform
-            if ((game.keys['ArrowDown'] || game.keys['KeyS']) && (player.onGround || player.lastPlatform) && !game.keys['downJumpPressed']) {
-                game.keys['downJumpPressed'] = true;
-                player.onGround = false;
-                // Push player slightly down to ensure they start falling through the platform
-                if (player.lastPlatform) {
-                    player.y = player.lastPlatform.y - player.collisionHeight - player.collisionOffsetY + 2; // Move slightly into platform
+            // Set flag immediately when key is held, regardless of onGround state
+            if (game.keys['ArrowDown'] || game.keys['KeyS']) {
+                if (!game.keys['downJumpPressed']) {
+                    game.keys['downJumpPressed'] = true;
                 }
-                player.velY = Math.max(player.velY, 5); // Strong downward push to ensure falling starts
+                // If player is on ground, immediately start falling
+                if (player.onGround) {
+                    player.onGround = false;
+                    player.velY = 8; // Strong downward push to ensure falling starts quickly
+                }
+            }
+            
+            // Keep applying downward velocity while down key is held
+            if ((game.keys['ArrowDown'] || game.keys['KeyS']) && game.keys['downJumpPressed']) {
+                // Add extra downward velocity to ensure player falls through platforms
+                if (player.velY < 10) {
+                    player.velY = Math.max(player.velY, 6);
+                }
             }
             
             // Reset down jump flag when key is released (for mobile joystick)
             // Also reset if player is clearly below the original platform (allowing landing on lower platforms)
             if ((!game.keys['ArrowDown'] && !game.keys['KeyS']) || 
-                (player.lastPlatform && player.y > player.lastPlatform.y + 100)) {
+                (player.lastPlatform && player.y > player.lastPlatform.y + 150)) {
                 if (game.keys['downJumpPressed']) {
                     game.keys['downJumpPressed'] = false;
                 }
@@ -14920,20 +14930,27 @@
                     const isFalling = player.velY > 0;
                     
                     // 🔽 DOWN JUMP CHECK - Allow dropping through platforms when pressing down
-                    // Check if player is horizontally overlapping with platform and pressing down
-                    const isHorizontallyOverlapping = playerRight > platformLeft && playerLeft < platformRight;
+                    // Check if player is horizontally overlapping with platform (more forgiving for drop-through)
+                    const horizontalOverlapForDrop = playerRight > platformLeft && playerLeft < platformRight;
                     
-                    // Allow dropping through if:
-                    // 1. Player is pressing down key (ArrowDown or S)
-                    // 2. Player is horizontally overlapping with platform
-                    // 3. Player is above or just slightly below the platform (within reasonable range)
-                    // 4. OR player is on this platform (lastPlatform matches) and pressing down
-                    const isOnThisPlatform = player.lastPlatform === platform;
-                    const isWithinDropRange = player.y + player.collisionOffsetY + player.collisionHeight <= platform.y + 100;
-                    
+                    // Allow falling through if down key is held and player is horizontally overlapping with platform
+                    // Also check if downJumpPressed flag is set (for when player was on ground and pressed down)
+                    // Check if player is near or on the platform (within reasonable vertical range)
                     const isActivelyDropping = (game.keys['ArrowDown'] || game.keys['KeyS'] || game.keys['downJumpPressed']) && 
-                                              isHorizontallyOverlapping &&
-                                              (isOnThisPlatform || isWithinDropRange);
+                                              horizontalOverlapForDrop &&
+                                              playerBottom >= platform.y - 30 && // Player bottom is at or just above platform (more forgiving)
+                                              playerBottom < platform.y + 250; // Allow falling through even if slightly below (very forgiving range)
+                    
+                    // Debug: Log when trying to land but down key is held
+                    if (horizontalOverlap && verticalCollision && isAbovePlatform && isFalling && isActivelyDropping) {
+                        console.log('🔽 Skipping platform collision - down key held', {
+                            keyDown: game.keys['ArrowDown'],
+                            keyS: game.keys['KeyS'],
+                            downJumpPressed: game.keys['downJumpPressed'],
+                            playerBottom: playerBottom.toFixed(1),
+                            platformY: platform.y.toFixed(1)
+                        });
+                    }
                     
                     // 🌊 SWIMMING CHECK - Skip collision if player is swimming up in water
                     // BUT allow landing on platforms above water level even when in water
