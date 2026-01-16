@@ -16875,10 +16875,8 @@
             // Clear and draw background
             drawBackground();
             
-            // Draw top boundary warning (skip on mobile for performance)
-            if (!isMobile) {
-                drawTopBoundary();
-            }
+            // Draw top boundary warning (simplified version on mobile for performance)
+            drawTopBoundary(isMobile);
             
             // Water will be drawn as overlay at the end
             
@@ -17967,7 +17965,7 @@
             }
         }
         
-        function drawTopBoundary() {
+        function drawTopBoundary(isMobile = false) {
             // Calculate world top boundary (1000 pixels above the highest platform)
             const worldTop = Math.min(...platforms.map(p => p.y)) - 1000;
             
@@ -17976,36 +17974,58 @@
             if (boundaryScreenY > -100 && boundaryScreenY < game.canvasHeight + 100) {
                 ctx.save();
                 
-                // Create warning boundary effect
-                const time = Date.now() * 0.005;
-                const pulseIntensity = Math.sin(time) * 0.3 + 0.7;
-                
-                // Draw warning boundary line
-                ctx.strokeStyle = `rgba(255, 0, 0, ${pulseIntensity * 0.8})`;
-                ctx.lineWidth = 4;
-                ctx.setLineDash([10, 5]);
-                ctx.lineDashOffset = time * 20; // Animated dash movement
-                ctx.beginPath();
-                ctx.moveTo(0, boundaryScreenY);
-                ctx.lineTo(game.canvasWidth, boundaryScreenY);
-                ctx.stroke();
-                
-                // Draw warning triangles
-                ctx.fillStyle = `rgba(255, 0, 0, ${pulseIntensity * 0.6})`;
-                for (let i = 0; i < game.canvasWidth; i += 40) {
+                if (isMobile) {
+                    // Simplified version for mobile - just a simple red line and text
+                    const time = Date.now() * 0.003;
+                    const pulseIntensity = Math.sin(time) * 0.3 + 0.7;
+                    
+                    // Draw simple warning boundary line
+                    ctx.strokeStyle = `rgba(255, 0, 0, ${pulseIntensity * 0.9})`;
+                    ctx.lineWidth = 3;
+                    ctx.setLineDash([15, 10]);
+                    ctx.lineDashOffset = time * 15;
                     ctx.beginPath();
-                    ctx.moveTo(i, boundaryScreenY - 15);
-                    ctx.lineTo(i + 10, boundaryScreenY);
-                    ctx.lineTo(i - 10, boundaryScreenY);
-                    ctx.closePath();
-                    ctx.fill();
+                    ctx.moveTo(0, boundaryScreenY);
+                    ctx.lineTo(game.canvasWidth, boundaryScreenY);
+                    ctx.stroke();
+                    
+                    // Draw simple warning text (smaller font on mobile)
+                    ctx.fillStyle = `rgba(255, 0, 0, ${pulseIntensity})`;
+                    ctx.font = 'bold 14px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('TOP BOUNDARY', game.canvasWidth / 2, boundaryScreenY - 20);
+                } else {
+                    // Full version for desktop
+                    const time = Date.now() * 0.005;
+                    const pulseIntensity = Math.sin(time) * 0.3 + 0.7;
+                    
+                    // Draw warning boundary line
+                    ctx.strokeStyle = `rgba(255, 0, 0, ${pulseIntensity * 0.8})`;
+                    ctx.lineWidth = 4;
+                    ctx.setLineDash([10, 5]);
+                    ctx.lineDashOffset = time * 20; // Animated dash movement
+                    ctx.beginPath();
+                    ctx.moveTo(0, boundaryScreenY);
+                    ctx.lineTo(game.canvasWidth, boundaryScreenY);
+                    ctx.stroke();
+                    
+                    // Draw warning triangles
+                    ctx.fillStyle = `rgba(255, 0, 0, ${pulseIntensity * 0.6})`;
+                    for (let i = 0; i < game.canvasWidth; i += 40) {
+                        ctx.beginPath();
+                        ctx.moveTo(i, boundaryScreenY - 15);
+                        ctx.lineTo(i + 10, boundaryScreenY);
+                        ctx.lineTo(i - 10, boundaryScreenY);
+                        ctx.closePath();
+                        ctx.fill();
+                    }
+                    
+                    // Draw warning text
+                    ctx.fillStyle = `rgba(255, 0, 0, ${pulseIntensity * 0.9})`;
+                    ctx.font = 'bold 16px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('WARNING: TOP BOUNDARY', game.canvasWidth / 2, boundaryScreenY - 25);
                 }
-                
-                // Draw warning text
-                ctx.fillStyle = `rgba(255, 0, 0, ${pulseIntensity * 0.9})`;
-                ctx.font = 'bold 16px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('WARNING: TOP BOUNDARY', game.canvasWidth / 2, boundaryScreenY - 25);
                 
                 ctx.restore();
             }
