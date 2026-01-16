@@ -15162,16 +15162,9 @@
             const worldBottom = Math.max(...platforms.map(p => p.y)) + 500; // 500 pixels below the lowest platform - reasonable death boundary
             const worldTop = Math.min(...platforms.map(p => p.y)) - 1000; // 1000 pixels above the highest platform - reasonable death boundary
             if (player.y < worldTop) {
-                // Prevent freeze loop: push player down instead of killing if they're just slightly above
-                const distanceAbove = worldTop - player.y;
-                if (distanceAbove < 200) {
-                    // Just push them down - don't kill them
-                    player.y = worldTop + 10;
-                    player.velY = Math.max(player.velY, 2); // Force downward velocity
-                    player.velX *= 0.8; // Slow horizontal movement
-                    console.log('Player pushed down from top boundary');
-                } else {
-                    // Only kill if they're way above (prevents freeze loops)
+                // Prevent freeze loop: only process death once per frame, and ensure safe respawn
+                if (!player.isRespawning) {
+                    player.isRespawning = true; // Flag to prevent multiple deaths in one frame
                     console.log('Player went above world! Player Y:', player.y, 'World top:', worldTop);
                     console.log('Player lives before death:', game.lives);
                     game.lives--;
@@ -15187,7 +15180,7 @@
                         if (game.activeCheckpoint) {
                             // Respawn at the last activated checkpoint
                             player.x = game.activeCheckpoint.platform.x + (game.activeCheckpoint.platform.width / 2) - (player.collisionWidth / 2);
-                            player.y = game.activeCheckpoint.platform.y - player.collisionHeight - player.collisionOffsetY;
+                            player.y = game.activeCheckpoint.platform.y - player.collisionHeight - player.collisionOffsetY - 50; // Extra space above platform
                             console.log('Respawning at checkpoint');
                         } else {
                             // Simple respawn - just use the first platform
@@ -15203,7 +15196,7 @@
                             if (platforms.length > 0) {
                                 const firstPlatform = platforms[0];
                                 player.x = firstPlatform.x + 50; // Simple positioning
-                                player.y = firstPlatform.y - player.collisionHeight - 10;
+                                player.y = firstPlatform.y - player.collisionHeight - 50; // Extra space above platform to prevent immediate re-trigger
                                 console.log('Respawning at first platform:', firstPlatform.x, firstPlatform.y);
                             } else {
                                 // Emergency fallback
@@ -15213,17 +15206,26 @@
                             }
                         }
                         
-                        // Simple safety check
-                        if (platforms.length > 0) {
-                            const firstPlatform = platforms[0];
-                            // Ensure player is above the platform
-                            if (player.y + player.collisionHeight > firstPlatform.y) {
-                                player.y = firstPlatform.y - player.collisionHeight - 10;
+                        // Safety check: ensure player is well below worldTop after respawn
+                        if (player.y < worldTop) {
+                            // Force player to safe position
+                            if (platforms.length > 0) {
+                                const firstPlatform = platforms[0];
+                                player.y = firstPlatform.y - player.collisionHeight - 100; // Even more space
+                            } else {
+                                player.y = worldTop + 200; // Force below boundary
                             }
-                            console.log('Simple safety check completed');
                         }
+                        
+                        // Reset respawn flag after a short delay
+                        setTimeout(() => {
+                            player.isRespawning = false;
+                        }, 100);
                     }
                 }
+            } else {
+                // Player is safe, reset respawn flag
+                player.isRespawning = false;
             }
             
             if (player.y > worldBottom) {
@@ -17988,13 +17990,11 @@
             // Calculate boundary position on screen
             const boundaryScreenY = worldTop - game.camera.y;
             
-            // Calculate player position on screen
-            const playerScreenY = player.y - game.camera.y;
-            const distanceToBoundary = Math.abs(playerScreenY - boundaryScreenY);
+            // Calculate player distance to boundary
+            const playerDistanceToBoundary = player.y - worldTop;
             
-            // Show boundary if it's on screen OR if player is within 500 pixels of it (more visible)
-            const shouldShow = (boundaryScreenY > -100 && boundaryScreenY < game.canvasHeight + 100) || 
-                              (distanceToBoundary < 500 && player.y < worldTop + 500);
+            // ALWAYS show boundary if player is within 600 pixels of it (above or below)
+            const shouldShow = playerDistanceToBoundary < 600 && playerDistanceToBoundary > -200;
             
             if (shouldShow) {
                 ctx.save();
