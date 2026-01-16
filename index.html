@@ -7309,6 +7309,7 @@
             swimming: false,
             swimSpeed: 7.5, // Increased swimming speed for better responsiveness (5.16 * 1.45 = 7.5)
             waterResistance: 0.3,
+            waterJumpActive: false, // Flag to prevent water physics from canceling jump velocity
             // Lava system
             inLava: false,
                           lavaSinkTime: 0,
@@ -13814,9 +13815,10 @@
                     game.sessionStats.jumpsMade++;
                 } else if (player.inWater) {
                     // 🌊 WATER JUMP - Swim up when in water (always works, regardless of position)
-                    player.velY = -player.swimSpeed * 0.25; // Reduced water jump power for better control
+                    player.velY = -player.swimSpeed * 1.5; // Stronger water jump for better responsiveness
                     player.swimming = true;
                     player.onGround = false; // Ensure we're off ground when water jumping
+                    player.waterJumpActive = true; // Flag to prevent water physics from canceling the jump
                     game.sessionStats.jumpsMade++;
                 }
                 
@@ -13897,17 +13899,32 @@
                         // Much faster upward movement
                         player.velY = Math.max(player.velY - player.swimSpeed * 1.2, -player.swimSpeed * 2.0);
                         player.swimming = true;
+                        player.waterJumpActive = false; // Clear flag when using arrow keys
                     } else if (game.keys['ArrowDown'] || game.keys['KeyS']) {
                         player.velY = Math.min(player.velY + player.swimSpeed * 0.8, player.swimSpeed * 1.6);
                         player.swimming = true;
+                        player.waterJumpActive = false; // Clear flag when using arrow keys
                     } else {
                         // Gradually return to neutral when no keys pressed
-                        if (player.velY < 0) {
-                            player.velY = Math.min(player.velY + 0.2, 0);
-                        } else if (player.velY > 0) {
-                            player.velY = Math.max(player.velY - 0.2, 0);
+                        // BUT: Don't cancel upward velocity if player just jumped (waterJumpActive flag)
+                        if (player.waterJumpActive && player.velY < 0) {
+                            // Player just jumped - allow upward movement to continue
+                            player.swimming = true;
+                            // Only reduce velocity slightly, don't cancel it completely
+                            if (player.velY > -1) {
+                                // Jump is almost done, clear the flag
+                                player.waterJumpActive = false;
+                            }
+                        } else {
+                            // Normal gradual return to neutral
+                            if (player.velY < 0) {
+                                player.velY = Math.min(player.velY + 0.2, 0);
+                            } else if (player.velY > 0) {
+                                player.velY = Math.max(player.velY - 0.2, 0);
+                            }
+                            player.swimming = false;
+                            player.waterJumpActive = false; // Clear flag
                         }
-                        player.swimming = false;
                     }
                     
                     // Horizontal swimming
@@ -13921,6 +13938,7 @@
                 } else {
                     // At water surface - normal movement controls
                     player.swimming = false;
+                    player.waterJumpActive = false; // Clear flag at surface
                 }
                 
             } else {
@@ -13928,6 +13946,7 @@
                 if (player.inWater) {
                     player.inWater = false;
                     player.swimming = false;
+                    player.waterJumpActive = false; // Clear flag when exiting water
                 }
             }
             
@@ -16875,10 +16894,8 @@
             // Clear and draw background
             drawBackground();
             
-            // Draw top boundary warning
-            if (isMobile) {
-                drawTopBoundaryMobile();
-            } else {
+            // Draw top boundary warning (skip on mobile for performance)
+            if (!isMobile) {
                 drawTopBoundary();
             }
             
@@ -18008,34 +18025,6 @@
                 ctx.font = 'bold 16px Arial';
                 ctx.textAlign = 'center';
                 ctx.fillText('WARNING: TOP BOUNDARY', game.canvasWidth / 2, boundaryScreenY - 25);
-                
-                ctx.restore();
-            }
-        }
-        
-        function drawTopBoundaryMobile() {
-            // Simplified version for mobile - just a simple red line
-            // Calculate world top boundary (1000 pixels above the highest platform)
-            const worldTop = Math.min(...platforms.map(p => p.y)) - 1000;
-            
-            // Only draw if the boundary is visible on screen
-            const boundaryScreenY = worldTop - game.camera.y;
-            if (boundaryScreenY > -50 && boundaryScreenY < game.canvasHeight + 50) {
-                ctx.save();
-                
-                // Simple pulsing red line for mobile (lightweight)
-                const time = Date.now() * 0.003;
-                const pulseIntensity = Math.sin(time) * 0.2 + 0.6;
-                
-                // Draw simple boundary line
-                ctx.strokeStyle = `rgba(255, 0, 0, ${pulseIntensity})`;
-                ctx.lineWidth = 3;
-                ctx.setLineDash([8, 4]);
-                ctx.lineDashOffset = time * 15;
-                ctx.beginPath();
-                ctx.moveTo(0, boundaryScreenY);
-                ctx.lineTo(game.canvasWidth, boundaryScreenY);
-                ctx.stroke();
                 
                 ctx.restore();
             }
