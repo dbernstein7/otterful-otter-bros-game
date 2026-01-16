@@ -6301,6 +6301,7 @@
             keyCount: 0,
             maxLives: 99, // Increased max lives to 99
             lastLifeScore: 0,
+            lastLifeCoins: 0, // Track coins for life bonuses (every 1000 coins = 1 life)
             jumpPressed: false,
             selectedOtter: 'otter1', // Default selected otter
             secretChestsSpawned: false, // Track if secret chests have been spawned
@@ -8648,27 +8649,12 @@
         function generateRandomHealth(platforms, levelNum) {
             const health = [];
             
-            // Score-based health system: 1 health for every 30,000 points
-            const currentScore = game.score || 0;
-            const healthThreshold = 30000;
-            const healthCount = Math.floor(currentScore / healthThreshold);
-            
-            // Only spawn health if player has earned it through score AND it's an even-numbered level
-            if (healthCount > 0 && levelNum % 2 === 0) {
-                // Place health in difficult locations based on score
-                let targetPlatforms;
-                if (currentScore < 60000) {
-                    // First health: medium difficulty
-                    targetPlatforms = platforms.filter(p => p.y < 1080 && p.y > 840);
-                } else if (currentScore < 120000) {
-                    // Second health: high difficulty
-                    targetPlatforms = platforms.filter(p => p.y < 840 && p.y > 600);
-                } else {
-                    // Third+ health: very high difficulty
-                    targetPlatforms = platforms.filter(p => p.y < 600 && p.y > 360);
-                }
-            
-            if (targetPlatforms.length > 0) {
+            // Always spawn exactly 1 health box per level
+            if (platforms.length > 0) {
+                // Choose a random platform from the middle section for better gameplay
+                const midPlatforms = platforms.filter(p => p.y > 400 && p.y < 1200);
+                const targetPlatforms = midPlatforms.length > 0 ? midPlatforms : platforms;
+                
                 const platform = targetPlatforms[Math.floor(Math.random() * targetPlatforms.length)];
                 const healthX = platform.x + Math.random() * platform.width;
                 const healthY = platform.y - 48; // Scaled from 20 (20*2.4=48)
@@ -8679,12 +8665,7 @@
                     collected: false,
                     type: 'health'
                 });
-                    console.log(`❤️ Health pickup earned at ${currentScore} score on level ${levelNum}, placed at:`, healthX, healthY);
-                }
-            } else if (healthCount === 0) {
-                console.log(`❤️ No health pickup - need ${healthThreshold - (currentScore % healthThreshold)} more points for next health`);
-            } else if (levelNum % 2 !== 0) {
-                console.log(`❤️ No health pickup - health only spawns on even-numbered levels (level ${levelNum} is odd)`);
+                console.log(`❤️ Health pickup spawned on level ${levelNum}, placed at:`, healthX, healthY);
             }
             
             return health;
@@ -15275,6 +15256,21 @@
                     game.sessionStats.totalCoins += coinMultiplier + bonusCoins;
                     game.sessionStats.currentSessionCoins += coinMultiplier + bonusCoins;
                     
+                    // 🎁 BONUS LIFE: Every 1000 coins = 1 extra life
+                    const coinLifeThreshold = 1000;
+                    const currentLifeCoins = Math.floor(game.coins / coinLifeThreshold);
+                    if (currentLifeCoins > game.lastLifeCoins) {
+                        const livesToAdd = currentLifeCoins - game.lastLifeCoins;
+                        game.lives = Math.min(game.lives + livesToAdd, game.maxLives);
+                        game.lastLifeCoins = currentLifeCoins;
+                        console.log(`🎁 Bonus life! ${game.coins} coins = ${currentLifeCoins} lives. Total lives: ${game.lives}`);
+                        // Update lives display
+                        const livesElement = document.getElementById('lives');
+                        if (livesElement) {
+                            livesElement.textContent = game.lives;
+                        }
+                    }
+                    
                     // Add score with XP and multiplier
                     addScoreWithXP(25 * coinMultiplier, 'Coin');
                     
@@ -17675,6 +17671,7 @@
                     game.lives = 3;
                     game.level = 1;
                     game.lastLifeScore = 0;
+                    game.lastLifeCoins = 0;
                     game.gameOver = false;
                     game.keyCount = 0; // Reset key count on game restart
                     
