@@ -9316,6 +9316,16 @@
             
             currentLevel = generateLevel(levelNum);
             platforms = [...currentLevel.platforms];
+            
+            // OPTIMIZED: Cache world boundaries once per level load (not every frame)
+            if (platforms.length > 0) {
+                game.worldBottom = Math.max(...platforms.map(p => p.y)) + 500;
+                game.worldTop = Math.min(...platforms.map(p => p.y)) - 1000;
+            } else {
+                game.worldBottom = 2000;
+                game.worldTop = -1000;
+            }
+            
             fish = currentLevel.fish.map(f => ({ ...f, collected: false }));
             enemies = [...currentLevel.enemies];
             coins = currentLevel.coins.map(c => ({ ...c, collected: false }));
@@ -14889,13 +14899,11 @@
                 }
                 
                 if (platform.isVisible !== false) { // Skip invisible disappearing platforms and clouds
-                    const collisionX = player.x + player.collisionOffsetX;
-                    const collisionY = player.y + player.collisionOffsetY;
-                    
-                    const playerLeft = collisionX;
-                    const playerRight = collisionX + player.collisionWidth;
-                    const playerTop = collisionY;
-                    const playerBottom = collisionY + player.collisionHeight;
+                    // OPTIMIZED: Reuse pre-calculated collision positions (no redundant calculations)
+                    const playerLeft = playerCollisionX;
+                    const playerRight = playerCollisionX + player.collisionWidth;
+                    const playerTop = playerCollisionY;
+                    const playerBottom = playerCollisionY + player.collisionHeight;
                     
                     const platformLeft = platform.x;
                     const platformRight = platform.x + platform.width;
@@ -14906,7 +14914,7 @@
                     const horizontalOverlap = playerRight > platformLeft + 2 && playerLeft < platformRight - 2;
                     const verticalCollision = playerBottom >= platformTop - tolerance && 
                                              playerBottom <= platformTop + tolerance * 2;
-                    const isAbovePlatform = collisionY < platformBottom - 5;
+                    const isAbovePlatform = playerCollisionY < platformBottom - 5;
                     // Only consider falling if velocity is positive (actually moving down)
                     // This prevents the player from being stuck on ground immediately after jumping
                     const isFalling = player.velY > 0;
@@ -14926,16 +14934,6 @@
                     const isActivelyDropping = (game.keys['ArrowDown'] || game.keys['KeyS'] || game.keys['downJumpPressed']) && 
                                               isHorizontallyOverlapping &&
                                               (isOnThisPlatform || isWithinDropRange);
-                    
-                    // Reset down jump flag once you've passed the platform or released the key
-                    if (game.keys['downJumpPressed']) {
-                        // Reset if: key released, or clearly past the platform, or on a different platform
-                        if ((!game.keys['ArrowDown'] && !game.keys['KeyS']) ||
-                            (player.lastPlatform && player.y > player.lastPlatform.y + 100) ||
-                            (player.lastPlatform !== platform && player.y > platform.y + 50)) {
-                            game.keys['downJumpPressed'] = false;
-                        }
-                    }
                     
                     // 🌊 SWIMMING CHECK - Skip collision if player is swimming up in water
                     // BUT allow landing on platforms above water level even when in water
@@ -14987,13 +14985,11 @@
                         continue;
                     }
                     
-                    const collisionX = player.x + player.collisionOffsetX;
-                    const collisionY = player.y + player.collisionOffsetY;
-                    
-                    const playerLeft = collisionX;
-                    const playerRight = collisionX + player.collisionWidth;
-                    const playerTop = collisionY;
-                    const playerBottom = collisionY + player.collisionHeight;
+                    // OPTIMIZED: Reuse pre-calculated collision positions
+                    const playerLeft = playerCollisionX;
+                    const playerRight = playerCollisionX + player.collisionWidth;
+                    const playerTop = playerCollisionY;
+                    const playerBottom = playerCollisionY + player.collisionHeight;
                     
                     const barrierLeft = platform.x;
                     const barrierRight = platform.x + platform.width;
@@ -15008,6 +15004,15 @@
                         player.x = barrierRight - player.collisionOffsetX;
                         player.velX = Math.max(0, player.velX); // Stop leftward movement
                     }
+                }
+            }
+            
+            // 🔽 DOWN JUMP RESET - Moved outside platform loop for performance (runs once per frame)
+            if (game.keys['downJumpPressed']) {
+                // Reset if: key released, or clearly past the platform
+                if ((!game.keys['ArrowDown'] && !game.keys['KeyS']) ||
+                    (player.lastPlatform && player.y > player.lastPlatform.y + 100)) {
+                    game.keys['downJumpPressed'] = false;
                 }
             }
             
@@ -15029,105 +15034,55 @@
             
             // Move collectibles and enemies with their platforms
             // IMPORTANT: This must run BEFORE enemy AI to keep enemies fixed to moving platforms
+            // OPTIMIZED: Only process moving platforms, and use simplified checks for mobile
+            const isMobile = game.isMobile || window.innerWidth < 768;
+            const collectibleCheckRadius = isMobile ? 150 : 200; // Smaller radius on mobile
+            
             platforms.forEach(platform => {
                 if (platform.type === 'linear' && platform.deltaX !== undefined && platform.deltaY !== undefined) {
-                    // Move enemies on this platform - use wider tolerance to catch all enemies
+                    const platformCenterX = platform.x + platform.width / 2;
+                    const platformCenterY = platform.y;
+                    
+                    // Move enemies on this platform - only check enemies near the platform
                     enemies.forEach(enemy => {
-                        // Check if enemy is on this platform (wider Y tolerance for moving platforms)
+                        const distX = Math.abs(enemy.x - platformCenterX);
+                        if (distX > collectibleCheckRadius) return; // Skip far enemies
+                        
                         const isOnPlatform = enemy.x >= platform.x - 10 && enemy.x <= platform.x + platform.width + 10 &&
                             enemy.y >= platform.y - enemy.height - 20 && enemy.y <= platform.y + 20;
                         
                         if (isOnPlatform) {
-                            // Move enemy with platform
                             enemy.x += platform.deltaX;
                             enemy.y += platform.deltaY;
-                            // Store reference to platform for enemy AI
                             enemy.currentPlatform = platform;
-                            // Keep enemy properly positioned on platform
                             enemy.y = platform.y - enemy.height;
                         } else if (enemy.currentPlatform === platform) {
-                            // Enemy was on this platform but fell off - clear reference
                             enemy.currentPlatform = null;
                         }
                     });
                     
-                    // Move collectibles on this platform
-                    fish.forEach(fish => {
-                        if (!fish.collected && fish.x >= platform.x && fish.x <= platform.x + platform.width &&
-                            fish.y >= platform.y - 80 && fish.y <= platform.y + 20) {
-                            fish.x += platform.deltaX;
-                            fish.y += platform.deltaY;
+                    // Helper function to move collectibles (reduces code duplication)
+                    const moveCollectible = (item, collectedProp = 'collected') => {
+                        if (item[collectedProp]) return;
+                        const distX = Math.abs(item.x - platformCenterX);
+                        if (distX > collectibleCheckRadius) return;
+                        if (item.x >= platform.x && item.x <= platform.x + platform.width &&
+                            item.y >= platform.y - 80 && item.y <= platform.y + 20) {
+                            item.x += platform.deltaX;
+                            item.y += platform.deltaY;
                         }
-                    });
+                    };
                     
-                    coins.forEach(coin => {
-                        if (!coin.collected && coin.x >= platform.x && coin.x <= platform.x + platform.width &&
-                            coin.y >= platform.y - 80 && coin.y <= platform.y + 20) {
-                            coin.x += platform.deltaX;
-                            coin.y += platform.deltaY;
-                        }
-                    });
-                    
-                    health.forEach(h => {
-                        if (!h.collected && h.x >= platform.x && h.x <= platform.x + platform.width &&
-                            h.y >= platform.y - 80 && h.y <= platform.y + 20) {
-                            h.x += platform.deltaX;
-                            h.y += platform.deltaY;
-                        }
-                    });
-                    
-                    treasures.forEach(treasure => {
-                        if (!treasure.collected && treasure.x >= platform.x && treasure.x <= platform.x + platform.width &&
-                            treasure.y >= platform.y - 80 && treasure.y <= platform.y + 20) {
-                            treasure.x += platform.deltaX;
-                            treasure.y += platform.deltaY;
-                        }
-                    });
-                    
-                    jetpacks.forEach(jetpack => {
-                        if (!jetpack.collected && jetpack.x >= platform.x && jetpack.x <= platform.x + platform.width &&
-                            jetpack.y >= platform.y - 80 && jetpack.y <= platform.y + 20) {
-                            jetpack.x += platform.deltaX;
-                            jetpack.y += platform.deltaY;
-                        }
-                    });
-                    
-                    mushrooms.forEach(mushroom => {
-                        if (!mushroom.collected && mushroom.x >= platform.x && mushroom.x <= platform.x + platform.width &&
-                            mushroom.y >= platform.y - 80 && mushroom.y <= platform.y + 20) {
-                            mushroom.x += platform.deltaX;
-                            mushroom.y += platform.deltaY;
-                        }
-                    });
-                    
-                    // Move laser powerups on this platform
-                    if (laserPowerups) {
-                        laserPowerups.forEach(laser => {
-                            if (!laser.collected && laser.x >= platform.x && laser.x <= platform.x + platform.width &&
-                                laser.y >= platform.y - 80 && laser.y <= platform.y + 20) {
-                                laser.x += platform.deltaX;
-                                laser.y += platform.deltaY;
-                            }
-                        });
-                    }
-                    
-                    // Move keys on this platform
-                    keys.forEach(key => {
-                        if (!key.collected && key.x >= platform.x && key.x <= platform.x + platform.width &&
-                            key.y >= platform.y - 80 && key.y <= platform.y + 20) {
-                            key.x += platform.deltaX;
-                            key.y += platform.deltaY;
-                        }
-                    });
-                    
-                    // Move breakable tiles (crates) on this platform
-                    breakables.forEach(breakable => {
-                        if (!breakable.broken && breakable.x >= platform.x && breakable.x <= platform.x + platform.width &&
-                            breakable.y >= platform.y - 80 && breakable.y <= platform.y + 20) {
-                            breakable.x += platform.deltaX;
-                            breakable.y += platform.deltaY;
-                        }
-                    });
+                    // Move all collectibles using helper (much faster on mobile)
+                    fish.forEach(f => moveCollectible(f));
+                    coins.forEach(c => moveCollectible(c));
+                    health.forEach(h => moveCollectible(h));
+                    treasures.forEach(t => moveCollectible(t));
+                    jetpacks.forEach(j => moveCollectible(j));
+                    mushrooms.forEach(m => moveCollectible(m));
+                    if (laserPowerups) laserPowerups.forEach(l => moveCollectible(l));
+                    keys.forEach(k => moveCollectible(k));
+                    breakables.forEach(b => moveCollectible(b, 'broken'));
                 }
             });
             
@@ -15138,9 +15093,9 @@
             }
             
             // Screen boundaries - check if player has fallen off the bottom of the world
-            // All platforms are now solid, so use all platforms for world bottom calculation
-            const worldBottom = Math.max(...platforms.map(p => p.y)) + 500; // 500 pixels below the lowest platform - reasonable death boundary
-            const worldTop = Math.min(...platforms.map(p => p.y)) - 1000; // 1000 pixels above the highest platform - reasonable death boundary
+            // OPTIMIZED: Use cached world boundaries (calculated once per level load, not every frame)
+            const worldBottom = game.worldBottom || (Math.max(...platforms.map(p => p.y)) + 500);
+            const worldTop = game.worldTop || (Math.min(...platforms.map(p => p.y)) - 1000);
             if (player.y < worldTop) {
                 console.log('Player went above world! Player Y:', player.y, 'World top:', worldTop);
                 console.log('Player lives before death:', game.lives);
