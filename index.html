@@ -10181,34 +10181,19 @@
                         game.keys['KeyD'] = false;
                     }
                     
-                    // Up/Down movement (up for jetpack, down for downward movement)
-                    // Allow independent control - don't block jump or down movement
-                    // Only set up/down keys if joystick is significantly tilted
-                    if (normalizedY < -0.3) {
-                        // Pointing up - for jetpack (but don't block jump button)
-                        game.keys['ArrowUp'] = true;
-                        game.keys['KeyW'] = true;
-                        // Don't set ArrowDown to false - allow jump button to work
-                    } else if (normalizedY > 0.2) {
+                    // Up/Down movement (down for downward movement only - up removed, use jump button instead)
+                    // Only set down keys if joystick is significantly tilted down
+                    if (normalizedY > 0.2) {
                         // Pointing down - for downward movement (lowered threshold for better responsiveness)
                         game.keys['ArrowDown'] = true;
                         game.keys['KeyS'] = true;
-                        game.keys['ArrowUp'] = false;
-                        game.keys['KeyW'] = false;
                     } else {
-                        // Neutral position - only clear if not actively using other controls
-                        // Don't interfere with jump button
-                        if (Math.abs(normalizedX) < 0.3) {
-                            // Only clear up/down if joystick is in center (not moving horizontally)
-                            game.keys['ArrowUp'] = false;
-                            game.keys['KeyW'] = false;
-                            game.keys['ArrowDown'] = false;
-                            game.keys['KeyS'] = false;
-                        } else {
-                            // Moving horizontally - keep up/down keys as they were
-                            // This allows jump button to work while moving horizontally
-                        }
+                        // Neutral or pointing up - clear down keys
+                        // Up direction removed - use jump button instead of D-pad up
+                        game.keys['ArrowDown'] = false;
+                        game.keys['KeyS'] = false;
                     }
+                    // Note: ArrowUp/KeyW are no longer set by D-pad - only jump button can trigger jumps
                 };
                 
                 mobileJoystick.addEventListener('touchstart', (e) => {
@@ -10229,13 +10214,11 @@
                     joystickActive = false;
                     // Reset handle to center
                     joystickHandle.style.transform = 'translate(-50%, -50%)';
-                    // Reset all movement keys
+                    // Reset all movement keys (ArrowUp/KeyW not reset since D-pad no longer controls them)
                     game.keys['ArrowLeft'] = false;
                     game.keys['KeyA'] = false;
                     game.keys['ArrowRight'] = false;
                     game.keys['KeyD'] = false;
-                    game.keys['ArrowUp'] = false;
-                    game.keys['KeyW'] = false;
                     game.keys['ArrowDown'] = false;
                     game.keys['KeyS'] = false;
                 });
@@ -10451,17 +10434,29 @@
         otterImages.otter4.src = 'public/otter-skins/Yellow Plumber.png';   // Yellow
         otterImages.otter5.src = 'public/otter-skins/Purple Plumber.png';  // Purple
         
-        // Preload fish skeleton image
+        // Preload coin image (using fishy-log.png.png)
+        gameAssets.coin = new Image();
+        gameAssets.coin.onload = function() {
+            console.log('Coin image (fishy-log.png.png) loaded successfully');
+            gameAssets.useCustomAssets = true;
+        };
+        gameAssets.coin.onerror = function() {
+            console.log('Failed to load coin image, using default coin');
+            gameAssets.coin = null;
+        };
+        gameAssets.coin.src = 'public/fishy-log.png.png';
+        
+        // Preload fish/XP image (using clam.png)
         gameAssets.fish = new Image();
         gameAssets.fish.onload = function() {
-            console.log('Fish skeleton image loaded successfully');
+            console.log('Fish/XP image (clam.png) loaded successfully');
             gameAssets.useCustomAssets = true;
         };
         gameAssets.fish.onerror = function() {
-            console.log('Failed to load fish skeleton image, using default fish');
+            console.log('Failed to load fish/XP image, using default fish');
             gameAssets.fish = null;
         };
-        gameAssets.fish.src = 'public/fishy-log.png.png';
+        gameAssets.fish.src = 'public/clam.png';
         
         // Preload crab image
         gameAssets.enemy = new Image();
@@ -12041,10 +12036,19 @@
         }
         
         function drawCoin(x, y) {
-            if (gameAssets.useCustomAssets && gameAssets.coin) {
-                // Draw custom coin sprite
-                ctx.drawImage(gameAssets.coin, x - 19, y - 19, 38, 38); // Scaled from 8, 16 (8*2.4=19.2, 16*2.4=38.4)
-            } else {
+            // Always use fishy-log.png for coins if it's loaded
+            if (gameAssets.coin && (gameAssets.coin.complete || gameAssets.coin.width > 0)) {
+                // Draw custom coin sprite (fishy-log.png)
+                try {
+                    ctx.drawImage(gameAssets.coin, x - 19, y - 19, 38, 38); // Scaled from 8, 16 (8*2.4=19.2, 16*2.4=38.4)
+                    return; // Successfully drew, exit early
+                } catch (e) {
+                    console.log('Error drawing coin image:', e);
+                    // Fall through to default drawing
+                }
+            }
+            // Default coin drawing (fallback)
+            {
                 // Draw default coin
                 // Coin body
                 ctx.fillStyle = '#FFD700';
@@ -13846,8 +13850,16 @@
             const waterTop = game.waterLevel;
             const waterBottom = game.waterLevel + game.waterDepth;
             
-            // Player is in water if any part of them is below water surface
-            if (playerTop < waterBottom && playerBottom > waterTop) {
+            // Check if player is standing on a platform above water - if so, don't apply water physics
+            let isOnPlatformAboveWater = false;
+            if (player.lastPlatform && player.onGround && 
+                player.lastPlatform.y < game.waterLevel && 
+                player.lastPlatform.type !== 'underwater') {
+                isOnPlatformAboveWater = true;
+            }
+            
+            // Player is in water if any part of them is below water surface AND not on a platform above water
+            if (!isOnPlatformAboveWater && playerTop < waterBottom && playerBottom > waterTop) {
                 // Player is in water
                 if (!player.inWater) {
                     player.inWater = true;
@@ -13859,13 +13871,14 @@
                 const isAtWaterSurface = playerBottom <= waterTop + 20;
                 
                 // Always allow jumping when in water (both surface and underwater)
-                if (isAtWaterSurface) {
-                    // At water surface - treat like normal ground for jumping
+                // BUT don't set onGround if player might be landing on a platform above water
+                if (isAtWaterSurface && !isOnPlatformAboveWater) {
+                    // At water surface - treat like normal ground for jumping (only if not on platform above water)
                     player.onGround = true;
                     player.canDoubleJump = true;
                 } else {
                     // Underwater - still allow jumping but apply water physics
-                    if (player.onGround) {
+                    if (player.onGround && !isOnPlatformAboveWater) {
                         player.onGround = false;
                     }
                 }
@@ -13914,8 +13927,13 @@
                 }
                 
             } else {
-                // Player is not in water
-                if (player.inWater) {
+                // Player is not in water (or is on platform above water)
+                if (player.inWater && !isOnPlatformAboveWater) {
+                    player.inWater = false;
+                    player.swimming = false;
+                }
+                // If on platform above water, clear water state
+                if (isOnPlatformAboveWater) {
                     player.inWater = false;
                     player.swimming = false;
                 }
@@ -14750,7 +14768,7 @@
                         
                         // Check if player is over this platform
                         // Allow landing on underwater platforms even when in water if platform is above water level
-                        const platformAboveWater = platform.y < game.waterLevel - 50;
+                        const platformAboveWater = platform.y < game.waterLevel; // Platform is above water (any amount)
                         const canLand = !player.inWater || platformAboveWater || platform.type === 'underwater';
                         
                         if (collisionX + player.collisionWidth > platform.x && 
@@ -14866,104 +14884,177 @@
             }
             
             // ========================================
-            // 🏗️ ENHANCED PLATFORM COLLISION & DOUBLE JUMP RESET
+            // 🏗️ PLATFORM COLLISION SYSTEM - COMPLETE REWRITE
             // ========================================
-            const tolerance = 5; // 🎯 Define collision tolerance
-            let wasOnGround = player.onGround; // 📝 Remember previous ground state
+            const tolerance = 10; // Collision tolerance
+            let wasOnGround = player.onGround;
             player.onGround = false;
 
-            // Optimize: Only check platforms near the player (spatial culling)
+            // Get player collision bounds
             const playerCollisionX = player.x + player.collisionOffsetX;
             const playerCollisionY = player.y + player.collisionOffsetY;
-            const checkRadius = 300; // Only check platforms within 300px
+            const playerLeft = playerCollisionX;
+            const playerRight = playerCollisionX + player.collisionWidth;
+            const playerCollisionTop = playerCollisionY;
+            const playerCollisionBottom = playerCollisionY + player.collisionHeight;
+            
+            // Check radius for optimization
+            const checkRadius = 400;
             
             for (const platform of platforms) {
-                // Quick distance check to skip far platforms
+                // Skip invisible platforms
+                if (platform.isVisible === false) continue;
+                
+                // Quick distance check
                 const platformCenterX = platform.x + platform.width / 2;
                 const platformCenterY = platform.y + platform.height / 2;
                 const distanceX = Math.abs(platformCenterX - playerCollisionX);
                 const distanceY = Math.abs(platformCenterY - playerCollisionY);
+                if (distanceX > checkRadius || distanceY > checkRadius) continue;
                 
-                // Skip platforms that are too far away
-                if (distanceX > checkRadius || distanceY > checkRadius) {
-                    continue;
+                // Platform bounds
+                const platformLeft = platform.x;
+                const platformRight = platform.x + platform.width;
+                const platformTop = platform.y; // Top surface where player lands
+                const platformBottom = platform.y + platform.height;
+                
+                // Check if platform is above water
+                // A platform is above water if:
+                // 1. Its top surface is above water level, AND
+                // 2. It's not marked as an underwater platform type
+                const platformAboveWater = platformTop < game.waterLevel && platform.type !== 'underwater';
+                
+                // 1. HORIZONTAL OVERLAP - Player must be horizontally aligned with platform
+                const horizontalOverlap = playerRight > platformLeft + 2 && playerLeft < platformRight - 2;
+                if (!horizontalOverlap) continue;
+                
+                // 2. VERTICAL COLLISION - Player's feet must be near the top surface of platform
+                // More lenient for platforms above water, but prevent penetration
+                const verticalTolerance = platformAboveWater ? 25 : tolerance;
+                // Player feet should be at or ABOVE platform top (not below) to prevent getting stuck
+                const playerFeetNearPlatformTop = playerCollisionBottom >= platformTop - verticalTolerance && 
+                                                 playerCollisionBottom <= platformTop + 2; // Only allow 2px below, not full tolerance
+                
+                // 3. PLAYER ABOVE PLATFORM - Player must be above or at the platform top
+                // For platforms above water, be more lenient (allow landing from slightly below)
+                const isAbovePlatform = platformAboveWater ? 
+                    (playerCollisionTop < platformTop + 50) : // Very lenient for platforms above water
+                    (playerCollisionTop < platformBottom - 5); // Normal check for other platforms
+                
+                // 4. CHECK IF PLAYER WANTS TO DROP THROUGH - MUST BE FIRST CHECK
+                // If down key is pressed and player is on or near this platform, skip collision entirely
+                const wantsToDrop = (game.keys['ArrowDown'] || game.keys['KeyS'] || game.keys['downJumpPressed']);
+                const playerOnOrNearPlatform = playerCollisionBottom >= platformTop - 20 && 
+                                              playerCollisionBottom < platformTop + 100 &&
+                                              horizontalOverlap;
+                if (wantsToDrop && playerOnOrNearPlatform) {
+                    // Player wants to drop through - completely skip collision for this platform
+                    continue; // Skip collision for this platform
                 }
                 
-                if (platform.isVisible !== false) { // Skip invisible disappearing platforms and clouds
-                    // OPTIMIZED: Reuse pre-calculated collision positions (no redundant calculations)
-                    const playerLeft = playerCollisionX;
-                    const playerRight = playerCollisionX + player.collisionWidth;
-                    const playerTop = playerCollisionY;
-                    const playerBottom = playerCollisionY + player.collisionHeight;
+                // 5. CHECK IF PLAYER IS INSIDE PLATFORM - Skip collision if player is stuck inside
+                const playerInsidePlatform = playerCollisionTop < platformBottom && 
+                                           playerCollisionBottom > platformTop &&
+                                           playerLeft < platformRight && 
+                                           playerRight > platformLeft;
+                if (playerInsidePlatform && playerCollisionTop < platformTop - 5) {
+                    // Player is stuck inside platform - push them up immediately
+                    // Add 5px offset to land well above platform (prevents getting stuck)
+                    const targetY = platformTop - player.collisionHeight - player.collisionOffsetY - 5;
+                    player.y = targetY; // Always snap to correct position when stuck
+                    player.velY = 0;
+                    player.onGround = true;
+                    player.lastPlatform = platform;
+                    continue; // Skip collision check for this platform
+                }
+                
+                // 6. FALLING CHECK - Player must be falling or close to platform
+                // Skip if player is already on this platform and properly positioned (prevents shaking)
+                // BUT only if not trying to drop through (wantsToDrop already checked above)
+                // Add 5px offset to land well above platform (prevents getting stuck)
+                const targetYForCheck = platformTop - player.collisionHeight - player.collisionOffsetY - 5;
+                // Check if player is already positioned correctly (feet should be 5px above platform top)
+                const isAlreadyOnPlatform = player.lastPlatform === platform && player.onGround && 
+                                           playerCollisionBottom <= platformTop - 3 && // Feet should be at least 3px above platform
+                                           playerCollisionBottom >= platformTop - 8 && // But not more than 8px above
+                                           Math.abs(player.y - targetYForCheck) < 2;
+                if (isAlreadyOnPlatform && Math.abs(player.velY) < 0.5 && !wantsToDrop) {
+                    // Already on platform and stable - maintain position without snapping (prevents shake)
+                    // Only if not trying to drop through
+                    player.velY = 0;
+                    player.onGround = true;
+                    // Only make tiny adjustments if needed (smooth, no shake)
+                    if (Math.abs(player.y - targetYForCheck) > 0.5) {
+                        player.y = targetYForCheck;
+                    }
+                    continue; // Skip to next platform
+                }
+                
+                // For platforms above water: allow landing even with slight upward velocity if close
+                const playerNearPlatformTop = Math.abs(playerCollisionBottom - platformTop) < 60;
+                const isFalling = player.velY > 0 || // Actually falling
+                                 (platformAboveWater && playerNearPlatformTop && player.velY > -6); // Close to platform above water
+                
+                // 7. DOWN JUMP CHECK - Skip if player is actively trying to drop through (redundant check for safety)
+                const isActivelyDropping = (game.keys['ArrowDown'] || game.keys['KeyS'] || game.keys['downJumpPressed']) && 
+                                          playerCollisionBottom >= platformTop - 20 && 
+                                          playerCollisionBottom < platformTop + 100;
+                
+                // 8. SWIMMING CHECK - Only block if swimming up very fast on underwater platforms
+                const isSwimmingUpFast = player.inWater && player.swimming && player.velY < -6;
+                const canLandOnPlatform = platformAboveWater ? true : !isSwimmingUpFast;
+                
+                // FINAL LANDING CHECK - All conditions must be met
+                // Also check that player is not already positioned correctly (prevents repeated snapping)
+                // Add 5px offset to land well above platform (prevents getting stuck)
+                const targetY = platformTop - player.collisionHeight - player.collisionOffsetY - 5;
+                const isAlreadyPositioned = Math.abs(player.y - targetY) < 0.5 && 
+                                          player.lastPlatform === platform && 
+                                          player.onGround;
+                
+                // Final check - make sure we're not trying to drop through
+                if (horizontalOverlap && 
+                    playerFeetNearPlatformTop && 
+                    isAbovePlatform && 
+                    isFalling && 
+                    !isActivelyDropping && 
+                    !wantsToDrop && // Don't land if trying to drop
+                    canLandOnPlatform &&
+                    !isAlreadyPositioned) { // Only snap if not already in correct position
                     
-                    const platformLeft = platform.x;
-                    const platformRight = platform.x + platform.width;
-                    const platformTop = platform.y;
-                    const platformBottom = platform.y + platform.height;
+                    // Player landed on platform - snap to position 5px above platform top
+                    // This prevents player from getting stuck inside the platform
+                    player.y = targetY; // Always snap to correct position when landing
+                    player.velY = 0;
+                    player.onGround = true;
                     
-                    // ✅ ENHANCED collision detection - more forgiving for moving players
-                    const horizontalOverlap = playerRight > platformLeft + 2 && playerLeft < platformRight - 2;
-                    const verticalCollision = playerBottom >= platformTop - tolerance && 
-                                             playerBottom <= platformTop + tolerance * 2;
-                    const isAbovePlatform = playerCollisionY < platformBottom - 5;
-                    // Only consider falling if velocity is positive (actually moving down)
-                    // This prevents the player from being stuck on ground immediately after jumping
-                    const isFalling = player.velY > 0;
-                    
-                    // 🔽 DOWN JUMP CHECK - Allow dropping through platforms when pressing down
-                    // Check if player is horizontally overlapping with platform (more forgiving for drop-through)
-                    const horizontalOverlapForDrop = playerRight > platformLeft && playerLeft < platformRight;
-                    
-                    // Allow falling through if down key is held and player is horizontally overlapping with platform
-                    // Also check if downJumpPressed flag is set (for when player was on ground and pressed down)
-                    // Check if player is near or on the platform (within reasonable vertical range)
-                    const isActivelyDropping = (game.keys['ArrowDown'] || game.keys['KeyS'] || game.keys['downJumpPressed']) && 
-                                              horizontalOverlapForDrop &&
-                                              playerBottom >= platform.y - 30 && // Player bottom is at or just above platform (more forgiving)
-                                              playerBottom < platform.y + 250; // Allow falling through even if slightly below (very forgiving range)
-                    
-                    // Debug: Log when trying to land but down key is held
-                    if (horizontalOverlap && verticalCollision && isAbovePlatform && isFalling && isActivelyDropping) {
-                        console.log('🔽 Skipping platform collision - down key held', {
-                            keyDown: game.keys['ArrowDown'],
-                            keyS: game.keys['KeyS'],
-                            downJumpPressed: game.keys['downJumpPressed'],
-                            playerBottom: playerBottom.toFixed(1),
-                            platformY: platform.y.toFixed(1)
-                        });
+                    // Clear water state when landing on platform above water
+                    if (platformAboveWater) {
+                        player.inWater = false;
+                        player.swimming = false;
                     }
                     
-                    // 🌊 SWIMMING CHECK - Skip collision if player is swimming up in water
-                    // BUT allow landing on platforms above water level even when in water
-                    const isSwimmingUp = player.inWater && player.swimming && player.velY < 0;
-                    const platformAboveWater = platform.y < game.waterLevel - 50; // Platform is clearly above water
-                    const canLandOnPlatform = !isSwimmingUp || platformAboveWater; // Allow landing if platform is above water
+                    // Track last platform
+                    player.lastPlatform = platform;
                     
-                    if (horizontalOverlap && verticalCollision && isAbovePlatform && isFalling && !isActivelyDropping && canLandOnPlatform) {
-                        // 🎯 Player landed on platform - snap to exact position
-                        player.y = platform.y - player.collisionHeight - player.collisionOffsetY;
-                        player.velY = 0;
-                        player.onGround = true;
-                        
-                        // 📍 Track last platform
-                        player.lastPlatform = platform;
-                        
-                        // 🚀 Set moving platform state if this is a moving platform
-                        if (platform.type === 'linear') {
-                            player.onMovingPlatform = true;
-                            player.platformStartTime = Date.now();
-                        } else {
-                            player.onMovingPlatform = false;
-                        }
-                        
-                        // ☁️ Start cloud disappearing timer when player steps on cloud
-                        if (platform.type === 'cloud' && !platform.isDisappearing) {
-                            platform.isDisappearing = true;
-                            platform.cloudStartTime = Date.now();
-                        }
-                        
-                        break; // Exit loop once we find a platform we're standing on
+                    // Handle moving platforms
+                    if (platform.type === 'linear') {
+                        player.onMovingPlatform = true;
+                        player.platformStartTime = Date.now();
+                    } else {
+                        player.onMovingPlatform = false;
                     }
+                    
+                    // Handle cloud platforms
+                    if (platform.type === 'cloud' && !platform.isDisappearing) {
+                        platform.isDisappearing = true;
+                        platform.cloudStartTime = Date.now();
+                    }
+                    
+                    // Reset double jump
+                    player.canDoubleJump = true;
+                    
+                    break; // Only land on one platform per frame
                 }
             }
 
@@ -15812,6 +15903,8 @@
                 if (typeof playerFireballs !== 'undefined') playerFireballs.length = 0;
                 if (typeof lasers !== 'undefined') lasers.length = 0;
                 if (typeof bossLasers !== 'undefined') bossLasers.length = 0;
+                // Clear enemies from completed level (they'll be regenerated for next level)
+                if (typeof enemies !== 'undefined') enemies.length = 0;
                 
                 document.getElementById('levelCompleteName').textContent = `${currentLevel.name} Complete!`;
                 document.getElementById('levelComplete').style.display = 'block';
@@ -16360,23 +16453,9 @@
                 }
             });
             
-            // PERFORMANCE: Remove enemies that are too far off-screen to prevent memory buildup
-            // This prevents the enemies array from growing indefinitely and causing resets
-            const cleanupRadius = 1500; // Remove enemies more than 1500px from camera
-            for (let i = enemies.length - 1; i >= 0; i--) {
-                const enemy = enemies[i];
-                const enemyScreenX = enemy.x - game.camera.x;
-                const enemyScreenY = enemy.y - game.camera.y;
-                const distanceToCamera = Math.sqrt(
-                    Math.pow(enemyScreenX, 2) + Math.pow(enemyScreenY, 2)
-                );
-                const distanceToPlayer = Math.abs(enemy.x - player.x);
-                
-                // Remove enemy if it's far from both camera and player
-                if (distanceToCamera > cleanupRadius && distanceToPlayer > cleanupRadius) {
-                    enemies.splice(i, 1);
-                }
-            }
+            // PERFORMANCE: Enemies far away stop animating (handled by update skip above)
+            // This prevents performance issues while keeping enemies available if player goes back
+            // Enemies are only cleaned up on level completion or checkpoint respawn (see those sections)
             
             // Checkpoint collision and activation
             checkpoints.forEach((checkpoint, index) => {
