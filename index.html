@@ -2523,7 +2523,9 @@
                     <div style="display: flex; align-items: center; gap: 8px; background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05)); padding: 12px 20px; border-radius: 25px; border: 2px solid rgba(255,215,0,0.3); backdrop-filter: blur(10px);">
                         <span style="font-size: 20px;">🪙</span>
                         <span id="marketplaceCoins" style="font-size: 18px; font-weight: bold; color: #FFD700; text-shadow: 0 0 10px rgba(255,215,0,0.5);">0</span>
+                        <span id="pendingCoins" style="color: #999; font-size: 12px; font-style: italic; display: none;"></span>
                         <span style="color: #FFD700; font-size: 14px; font-weight: 600;">Coins</span>
+                        <span style="color: #AAA; font-size: 11px; font-style: italic;" title="Only coins from completed levels can be spent. Coins from your current level will be available after completion.">(from completed levels only)</span>
         </div>
         </div>
                 <button onclick="toggleMarketplace()" style="background: linear-gradient(135deg, #FF4444, #CC0000); color: white; border: none; padding: 12px 20px; border-radius: 50%; cursor: pointer; font-size: 20px; font-weight: bold; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(255,68,68,0.3); width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">×</button>
@@ -10555,27 +10557,42 @@
         };
         gameAssets.coin.src = 'public/fishy-log.png.png';
         
-        // Preload fish/XP image (using clam.png)
-        // Try relative path first (works with both file:// and http:// protocols)
+        // Preload clam image (used for fish/XP collectible - it's actually a clam!)
+        // Try multiple paths to work with both local file:// and web server http:// protocols
+        // For GitHub Pages, detect base path from current location
+        const basePath = window.location.pathname.split('/').slice(0, -1).join('/') || '';
+        
         gameAssets.fish = new Image();
         gameAssets.fish.onload = function() {
-            console.log('Fish/XP image (clam.png) loaded successfully');
+            console.log('✅ Clam image (clam.png) loaded successfully as XP collectible');
             gameAssets.useCustomAssets = true;
         };
         gameAssets.fish.onerror = function() {
-            console.log('Failed to load fish/XP image from public/clam.png, trying absolute path...');
-            // Try absolute path as fallback (for web servers)
+            console.log('⚠️ Failed to load clam.png from public/clam.png, trying base path...');
+            // Try with base path (for GitHub Pages subdirectory repos)
             gameAssets.fish = new Image();
             gameAssets.fish.onload = function() {
-                console.log('Fish/XP image (clam.png) loaded successfully from absolute path');
+                console.log('✅ Clam image loaded from base path');
                 gameAssets.useCustomAssets = true;
             };
             gameAssets.fish.onerror = function() {
-                console.log('Failed to load fish/XP image from both paths, using default fish');
-                gameAssets.fish = null;
+                console.log('⚠️ Failed from base path, trying absolute path...');
+                // Try absolute path (for GitHub Pages at root)
+                gameAssets.fish = new Image();
+                gameAssets.fish.onload = function() {
+                    console.log('✅ Clam image loaded from /public/clam.png');
+                    gameAssets.useCustomAssets = true;
+                };
+                gameAssets.fish.onerror = function() {
+                    console.log('❌ Failed to load clam.png from all paths, using default fish drawing');
+                    gameAssets.fish = null;
+                };
+                gameAssets.fish.src = '/public/clam.png';
             };
-            gameAssets.fish.src = '/public/clam.png';
+            const basePathSrc = basePath ? basePath + '/public/clam.png' : '/public/clam.png';
+            gameAssets.fish.src = basePathSrc;
         };
+        // Try relative path first (works with file:// protocol and most web servers)
         gameAssets.fish.src = 'public/clam.png';
         
         // Preload crab image
@@ -12214,10 +12231,10 @@
         
         function drawFish(x, y) {
             if (gameAssets.useCustomAssets && gameAssets.fish) {
-                // Draw custom fish skeleton sprite - made larger
+                // Draw custom clam sprite (loaded as clam.png) - made larger
                 ctx.drawImage(gameAssets.fish, x - 25, y - 25, 50, 50); // Increased from 38x38 to 50x50
             } else {
-                // Draw default fish - made larger
+                // Draw default fish (fallback if clam.png doesn't load) - made larger
             ctx.fillStyle = '#FFD700';
             ctx.beginPath();
                 ctx.arc(x, y, 18, 0, Math.PI * 2); // Increased from 14 to 18
@@ -18938,13 +18955,29 @@
         
         function updateMarketplace() {
             console.log('🛒 Updating marketplace...');
-            console.log('Marketplace coins:', game.marketplace.coins);
+            console.log('Marketplace coins (permanent/spendable):', game.marketplace.coins);
+            console.log('Session coins (pending, not spendable):', player.sessionCoins);
             
-            // Update coins display
+            // Update coins display - ONLY show permanent coins (spendable)
+            // Session coins are NOT available until level completion
             const coinsElement = document.getElementById('marketplaceCoins');
             console.log('Coins element found:', coinsElement);
             if (coinsElement) {
+                // Only show permanent coins (spendable)
                 coinsElement.textContent = game.marketplace.coins;
+                
+                // Show pending session coins separately if any exist
+                const pendingCoinsElement = document.getElementById('pendingCoins');
+                if (pendingCoinsElement) {
+                    if (player.sessionCoins > 0) {
+                        pendingCoinsElement.textContent = `(+${player.sessionCoins} pending)`;
+                        pendingCoinsElement.style.display = 'inline';
+                        pendingCoinsElement.style.color = '#999';
+                        pendingCoinsElement.style.fontSize = '12px';
+                    } else {
+                        pendingCoinsElement.style.display = 'none';
+                    }
+                }
             }
             
             // Update hats grid
@@ -19310,6 +19343,8 @@
         
         function buyHat(hatId) {
             const hat = marketplaceItems.hats.find(h => h.id === hatId);
+            // Only allow purchase with permanent coins (from completed levels)
+            // Session coins are NOT spendable until level completion
             if (hat && game.marketplace.coins >= hat.price) {
                 game.marketplace.coins -= hat.price;
                 hat.owned = true;
@@ -19329,6 +19364,8 @@
         
         function buySkin(skinId) {
             const skin = marketplaceItems.skins.find(s => s.id === skinId);
+            // Only allow purchase with permanent coins (from completed levels)
+            // Session coins are NOT spendable until level completion
             if (skin && game.marketplace.coins >= skin.price) {
                 game.marketplace.coins -= skin.price;
                 skin.owned = true;
@@ -19379,6 +19416,8 @@
         
         function buyAbility(abilityId) {
             const ability = marketplaceItems.abilities.find(a => a.id === abilityId);
+            // Only allow purchase with permanent coins (from completed levels)
+            // Session coins are NOT spendable until level completion
             if (ability && game.marketplace.coins >= ability.price) {
                 game.marketplace.coins -= ability.price;
                 ability.owned = true;
