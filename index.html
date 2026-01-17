@@ -16360,6 +16360,24 @@
                 }
             });
             
+            // PERFORMANCE: Remove enemies that are too far off-screen to prevent memory buildup
+            // This prevents the enemies array from growing indefinitely and causing resets
+            const cleanupRadius = 1500; // Remove enemies more than 1500px from camera
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                const enemy = enemies[i];
+                const enemyScreenX = enemy.x - game.camera.x;
+                const enemyScreenY = enemy.y - game.camera.y;
+                const distanceToCamera = Math.sqrt(
+                    Math.pow(enemyScreenX, 2) + Math.pow(enemyScreenY, 2)
+                );
+                const distanceToPlayer = Math.abs(enemy.x - player.x);
+                
+                // Remove enemy if it's far from both camera and player
+                if (distanceToCamera > cleanupRadius && distanceToPlayer > cleanupRadius) {
+                    enemies.splice(i, 1);
+                }
+            }
+            
             // Checkpoint collision and activation
             checkpoints.forEach((checkpoint, index) => {
                 if (!checkpoint.activated && checkCollision(player, checkpoint)) {
