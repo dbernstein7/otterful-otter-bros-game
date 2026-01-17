@@ -85,7 +85,7 @@
         }
         
         /* Mobile responsive container */
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
             body {
                 background: #87CEEB; /* Match game sky color on mobile */
             }
@@ -204,7 +204,7 @@
         }
         
         /* Mobile responsive adjustments */
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
             /* Show UI elements on mobile but make them smaller */
             /* Hide entire #ui container (Score, Coins, XP boxes) on mobile */
             #ui {
@@ -318,7 +318,7 @@
             }
             
             /* Adjust for landscape/horizontal mode */
-            @media (orientation: landscape) and (max-width: 768px) {
+            @media (orientation: landscape) and (max-width: 1024px) {
                 #levelDisplay {
                     top: 5px !important;
                     left: 5px !important;
@@ -507,7 +507,7 @@
             }
         }
         
-        @media (min-width: 769px) {
+        @media (min-width: 1025px) {
             #mobileControls {
                 display: none !important;
             }
@@ -1633,7 +1633,7 @@
         }
         
         /* Responsive Design */
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
             .home-button {
                 padding: 15px 25px !important;
                 font-size: clamp(16px, 4vw, 20px) !important;
@@ -6498,7 +6498,9 @@
             const containerRect = container.getBoundingClientRect();
             
             // For mobile, use full viewport; for desktop, use fixed 1920x1080
-            const isMobile = window.innerWidth < 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            // Check for touch devices (includes iPads) or small screens
+            const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+            const isMobile = window.innerWidth <= 1024 || hasTouch || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             
             let newWidth, newHeight;
             if (isMobile) {
@@ -9522,7 +9524,8 @@
             // Safety check for canvas height
             if (canvas && canvas.height) {
                 // On mobile, position camera to show more area (farther away)
-                const isMobile = game.isMobile || window.innerWidth < 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+                const isMobile = game.isMobile || window.innerWidth <= 1024 || hasTouch || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
                 if (isMobile) {
                     // Use larger offset on mobile to show more of the game world
                     game.camera.y = player.y - canvas.height / 1.5; // Show more area above and below
@@ -9620,7 +9623,8 @@
         
         function createParticle(x, y, type) {
             // Mobile optimization: disable particles completely on mobile for performance
-            const isMobile = game.isMobile || window.innerWidth < 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+            const isMobile = game.isMobile || window.innerWidth <= 1024 || hasTouch || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             if (isMobile) {
                 return []; // Disable particles on mobile
             }
@@ -10207,7 +10211,9 @@
         
         // Mobile Touch Controls Setup
         function setupMobileControls() {
-            const isMobile = window.innerWidth < 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            // Check for touch devices (includes iPads) or small screens
+            const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+            const isMobile = window.innerWidth <= 1024 || hasTouch || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             
             if (!isMobile) return;
             
@@ -11756,7 +11762,8 @@
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
                 // Mobile optimization: skip stars and reduce clouds
-                const isMobile = game.isMobile || window.innerWidth < 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+                const isMobile = game.isMobile || window.innerWidth <= 1024 || hasTouch || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
                 
                 // Stars for night levels (skip on mobile for performance)
                 if (!isMobile && game.level >= 3) {
@@ -11820,7 +11827,8 @@
                 ctx.fillRect(0, lavaTop, canvas.width, lavaBottom - lavaTop);
                 
                 // Mobile optimization: skip lava effects for performance
-                const isMobile = game.isMobile || window.innerWidth < 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+                const isMobile = game.isMobile || window.innerWidth <= 1024 || hasTouch || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
                 
                 if (!isMobile) {
                     // Add lava surface effect (optimized: cache time, reduce particles)
@@ -11877,7 +11885,8 @@
                 ctx.fillRect(0, waterTop, canvas.width, waterBottom - waterTop);
                 
                 // Mobile optimization: skip water effects for performance
-                const isMobile = game.isMobile || window.innerWidth < 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+                const isMobile = game.isMobile || window.innerWidth <= 1024 || hasTouch || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
                 
                 if (!isMobile) {
                     // Add water surface effect (optimized: use frame count instead of Date.now())
@@ -15299,7 +15308,8 @@
             // Move collectibles and enemies with their platforms
             // IMPORTANT: This must run BEFORE enemy AI to keep enemies fixed to moving platforms
             // OPTIMIZED: Only process moving platforms, and use simplified checks for mobile
-            const isMobile = game.isMobile || window.innerWidth < 768;
+            const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+            const isMobile = game.isMobile || window.innerWidth <= 1024 || hasTouch;
             const collectibleCheckRadius = isMobile ? 150 : 200; // Smaller radius on mobile
             
             platforms.forEach(platform => {
@@ -17129,7 +17139,8 @@
                 return;
             }
             
-            const isMobile = game.isMobile || window.innerWidth < 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+            const isMobile = game.isMobile || window.innerWidth <= 1024 || hasTouch || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             
             // Clear and draw background
             drawBackground();
@@ -18793,7 +18804,8 @@
         const mobileFrameInterval = 1000 / 30; // 30 FPS on mobile for better performance
         
         function gameLoop(timestamp) {
-            const isMobile = game.isMobile || window.innerWidth < 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+            const isMobile = game.isMobile || window.innerWidth <= 1024 || hasTouch || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             
             // Frame rate limiting for mobile
             if (isMobile) {
@@ -22451,8 +22463,8 @@
                 unlockAchievement('first_game');
             }
             
-            // Coin achievements (use all-time stats)
-            const totalCoins = game.sessionStats.allTimeCoins || 0;
+            // Coin achievements (use all-time stats + current session stats for accurate totals)
+            const totalCoins = (game.sessionStats.allTimeCoins || 0) + (game.sessionStats.totalCoins || 0);
             if (totalCoins >= 1 && !achievements.find(a => a.id === 'first_coin').unlocked) {
                 unlockAchievement('first_coin');
             }
@@ -22469,8 +22481,8 @@
                 unlockAchievement('two_hundred_coins');
             }
             
-            // Level achievements (use all-time stats)
-            const levelsCompleted = game.sessionStats.allTimeLevels || 0;
+            // Level achievements (use all-time stats + current session)
+            const levelsCompleted = (game.sessionStats.allTimeLevels || 0) + (game.sessionStats.levelsCompleted || 0);
             if (levelsCompleted >= 1 && !achievements.find(a => a.id === 'first_level').unlocked) {
                 unlockAchievement('first_level');
             }
@@ -22490,8 +22502,8 @@
                 unlockAchievement('hundred_levels');
             }
             
-            // Score achievements (use all-time stats)
-            const currentScore = game.sessionStats.allTimeScore || 0;
+            // Score achievements (use all-time stats + current session)
+            const currentScore = (game.sessionStats.allTimeScore || 0) + (game.sessionStats.totalScore || 0);
             if (currentScore >= 100 && !achievements.find(a => a.id === 'hundred_score').unlocked) {
                 unlockAchievement('hundred_score');
             }
@@ -22508,8 +22520,10 @@
                 unlockAchievement('million_score');
             }
             
-            // Enemy achievements (use all-time stats)
-            const enemiesDefeated = game.sessionStats.allTimeEnemies || 0;
+            // Enemy achievements (use all-time stats + current session)
+            const enemiesDefeated = (game.sessionStats.allTimeEnemies || 0) + 
+                ((game.sessionStats.crabsDefeated || 0) + (game.sessionStats.eaglesDefeated || 0) + 
+                 (game.sessionStats.gatorsDefeated || 0) + (game.sessionStats.sharksDefeated || 0));
             if (enemiesDefeated >= 1 && !achievements.find(a => a.id === 'first_enemy').unlocked) {
                 unlockAchievement('first_enemy');
             }
@@ -22526,8 +22540,8 @@
                 unlockAchievement('thousand_enemies');
             }
             
-            // Boss achievements (use all-time stats)
-            const bossesDefeated = game.sessionStats.allTimeBosses || 0;
+            // Boss achievements (use all-time stats + current session)
+            const bossesDefeated = (game.sessionStats.allTimeBosses || 0) + (game.sessionStats.bossesDefeated || 0);
             if (bossesDefeated >= 1 && !achievements.find(a => a.id === 'boss_defeater').unlocked) {
                 unlockAchievement('boss_defeater');
             }
@@ -22544,8 +22558,12 @@
                 unlockAchievement('fifty_bosses');
             }
             
-            // Collection achievements (use all-time stats)
-            const totalItems = (game.sessionStats.allTimeFish || 0) + (game.sessionStats.allTimeHealth || 0) + (game.sessionStats.allTimeTreasures || 0) + (game.sessionStats.allTimeMushrooms || 0);
+            // Collection achievements (use all-time stats + current session)
+            const totalItems = 
+                ((game.sessionStats.allTimeFish || 0) + (game.sessionStats.fishCollected || 0)) +
+                ((game.sessionStats.allTimeHealth || 0) + (game.sessionStats.healthCollected || 0)) +
+                ((game.sessionStats.allTimeTreasures || 0) + (game.sessionStats.treasuresCollected || 0)) +
+                ((game.sessionStats.allTimeMushrooms || 0) + (game.sessionStats.mushroomsCollected || 0));
             if (totalItems >= 100 && !achievements.find(a => a.id === 'collector').unlocked) {
                 unlockAchievement('collector');
             }
@@ -22584,66 +22602,81 @@
         }
         
         function checkNewGameplayAchievements() {
-            // Fireball achievements (use all-time stats)
-            if ((game.sessionStats.allTimeFireballs || 0) >= 10 && !achievements.find(a => a.id === 'fireball_master').unlocked) {
+            // Fireball achievements (use all-time + current session)
+            const totalFireballs = (game.sessionStats.allTimeFireballs || 0) + (game.sessionStats.fireballsShot || 0);
+            if (totalFireballs >= 10 && !achievements.find(a => a.id === 'fireball_master').unlocked) {
                 unlockAchievement('fireball_master');
             }
             
-            // All-time stats achievements
-            if (game.sessionStats.allTimeUnderwater >= 600000 && !achievements.find(a => a.id === 'underwater_explorer_master').unlocked) { // 10 minutes
+            // All-time stats achievements (use all-time + current session)
+            const totalUnderwater = (game.sessionStats.allTimeUnderwater || 0) + (game.sessionStats.underwaterTime || 0);
+            if (totalUnderwater >= 600000 && !achievements.find(a => a.id === 'underwater_explorer_master').unlocked) { // 10 minutes
                 unlockAchievement('underwater_explorer_master');
             }
             
-            if (game.sessionStats.allTimeJetpackTime >= 300000 && !achievements.find(a => a.id === 'jetpack_explorer').unlocked) { // 5 minutes
+            const totalJetpackTime = (game.sessionStats.allTimeJetpackTime || 0) + (game.sessionStats.jetpackTime || 0);
+            if (totalJetpackTime >= 300000 && !achievements.find(a => a.id === 'jetpack_explorer').unlocked) { // 5 minutes
                 unlockAchievement('jetpack_explorer');
             }
             
-            if (game.sessionStats.allTimeLasers >= 25 && !achievements.find(a => a.id === 'laser_expert').unlocked) {
+            const totalLasers = (game.sessionStats.allTimeLasers || 0) + (game.sessionStats.lasersUsed || 0);
+            if (totalLasers >= 25 && !achievements.find(a => a.id === 'laser_expert').unlocked) {
                 unlockAchievement('laser_expert');
             }
             
-            if (game.sessionStats.allTimeTreasures >= 50 && !achievements.find(a => a.id === 'treasure_hunter').unlocked) {
+            const totalTreasures = (game.sessionStats.allTimeTreasures || 0) + (game.sessionStats.treasuresCollected || 0);
+            if (totalTreasures >= 50 && !achievements.find(a => a.id === 'treasure_hunter').unlocked) {
                 unlockAchievement('treasure_hunter');
             }
             
-            if (game.sessionStats.allTimeHealth >= 100 && !achievements.find(a => a.id === 'health_master').unlocked) {
+            const totalHealth = (game.sessionStats.allTimeHealth || 0) + (game.sessionStats.healthCollected || 0);
+            if (totalHealth >= 100 && !achievements.find(a => a.id === 'health_master').unlocked) {
                 unlockAchievement('health_master');
             }
             
-            if (game.sessionStats.allTimeMushrooms >= 50 && !achievements.find(a => a.id === 'mushroom_master').unlocked) {
+            const totalMushrooms = (game.sessionStats.allTimeMushrooms || 0) + (game.sessionStats.mushroomsCollected || 0);
+            if (totalMushrooms >= 50 && !achievements.find(a => a.id === 'mushroom_master').unlocked) {
                 unlockAchievement('mushroom_master');
             }
             
-            if (game.sessionStats.allTimeKeys >= 25 && !achievements.find(a => a.id === 'key_collector').unlocked) {
+            const totalKeys = (game.sessionStats.allTimeKeys || 0) + (game.sessionStats.keysCollected || 0);
+            if (totalKeys >= 25 && !achievements.find(a => a.id === 'key_collector').unlocked) {
                 unlockAchievement('key_collector');
             }
             
-            if (game.sessionStats.allTimeFish >= 100 && !achievements.find(a => a.id === 'fish_collector').unlocked) {
+            const totalFish = (game.sessionStats.allTimeFish || 0) + (game.sessionStats.fishCollected || 0);
+            if (totalFish >= 100 && !achievements.find(a => a.id === 'fish_collector').unlocked) {
                 unlockAchievement('fish_collector');
             }
             
-            if (game.sessionStats.allTimeJumps >= 500 && !achievements.find(a => a.id === 'jump_master').unlocked) {
+            const totalJumps = (game.sessionStats.allTimeJumps || 0) + (game.sessionStats.jumpsMade || 0);
+            if (totalJumps >= 500 && !achievements.find(a => a.id === 'jump_master').unlocked) {
                 unlockAchievement('jump_master');
             }
             
-            // Total enemies defeated (for skin unlock)
-            const totalEnemiesDefeated = game.sessionStats.allTimeEnemies;
+            // Total enemies defeated (for skin unlock) - use all-time + current session
+            const totalEnemiesDefeated = (game.sessionStats.allTimeEnemies || 0) + 
+                ((game.sessionStats.crabsDefeated || 0) + (game.sessionStats.eaglesDefeated || 0) + 
+                 (game.sessionStats.gatorsDefeated || 0) + (game.sessionStats.sharksDefeated || 0));
             if (totalEnemiesDefeated >= 50 && !achievements.find(a => a.id === 'defeat_50_enemies').unlocked) {
                 unlockAchievement('defeat_50_enemies');
             }
             
-            // Total coins collected (for skin unlock)
-            if (game.sessionStats.allTimeCoins >= 100 && !achievements.find(a => a.id === 'collect_100_coins').unlocked) {
+            // Total coins collected (for skin unlock) - use all-time + current session
+            const totalCoinsCollected = (game.sessionStats.allTimeCoins || 0) + (game.sessionStats.totalCoins || 0);
+            if (totalCoinsCollected >= 100 && !achievements.find(a => a.id === 'collect_100_coins').unlocked) {
                 unlockAchievement('collect_100_coins');
             }
             
-            // Total levels completed (for skin unlock)
-            if (game.sessionStats.allTimeLevels >= 10 && !achievements.find(a => a.id === 'complete_10_levels').unlocked) {
+            // Total levels completed (for skin unlock) - use all-time + current session
+            const totalLevelsCompleted = (game.sessionStats.allTimeLevels || 0) + (game.sessionStats.levelsCompleted || 0);
+            if (totalLevelsCompleted >= 10 && !achievements.find(a => a.id === 'complete_10_levels').unlocked) {
                 unlockAchievement('complete_10_levels');
             }
             
-            // Total bosses defeated (for skin unlock)
-            if (game.sessionStats.allTimeBosses >= 5 && !achievements.find(a => a.id === 'defeat_5_bosses').unlocked) {
+            // Total bosses defeated (for skin unlock) - use all-time + current session
+            const totalBossesDefeated = (game.sessionStats.allTimeBosses || 0) + (game.sessionStats.bossesDefeated || 0);
+            if (totalBossesDefeated >= 5 && !achievements.find(a => a.id === 'defeat_5_bosses').unlocked) {
                 unlockAchievement('defeat_5_bosses');
             }
             
@@ -22659,20 +22692,27 @@
                 unlockAchievement('lucky_777');
             }
             
-            // Unlucky 13
-            const totalItems = (game.sessionStats.allTimeFish || 0) + (game.sessionStats.allTimeHealth || 0) + (game.sessionStats.allTimeTreasures || 0) + (game.sessionStats.allTimeMushrooms || 0);
+            // Unlucky 13 - use all-time + current session
+            const totalItems = 
+                ((game.sessionStats.allTimeFish || 0) + (game.sessionStats.fishCollected || 0)) +
+                ((game.sessionStats.allTimeHealth || 0) + (game.sessionStats.healthCollected || 0)) +
+                ((game.sessionStats.allTimeTreasures || 0) + (game.sessionStats.treasuresCollected || 0)) +
+                ((game.sessionStats.allTimeMushrooms || 0) + (game.sessionStats.mushroomsCollected || 0));
             if (totalItems === 13 && !achievements.find(a => a.id === 'collector_13').unlocked) {
                 unlockAchievement('collector_13');
             }
             
-            // Devil Hunter 666
-            const enemiesDefeated = game.sessionStats.allTimeEnemies || 0;
+            // Devil Hunter 666 - use all-time + current session
+            const enemiesDefeated = (game.sessionStats.allTimeEnemies || 0) + 
+                ((game.sessionStats.crabsDefeated || 0) + (game.sessionStats.eaglesDefeated || 0) + 
+                 (game.sessionStats.gatorsDefeated || 0) + (game.sessionStats.sharksDefeated || 0));
             if (enemiesDefeated === 666 && !achievements.find(a => a.id === 'enemy_666').unlocked) {
                 unlockAchievement('enemy_666');
             }
             
-            // Answer to Everything 42
-            if (game.sessionStats.allTimeCoins === 42 && !achievements.find(a => a.id === 'coin_42').unlocked) {
+            // Answer to Everything 42 - use all-time + current session
+            const totalCoins = (game.sessionStats.allTimeCoins || 0) + (game.sessionStats.totalCoins || 0);
+            if (totalCoins === 42 && !achievements.find(a => a.id === 'coin_42').unlocked) {
                 unlockAchievement('coin_42');
             }
             
@@ -22888,7 +22928,8 @@
             if (!particleContainer) return;
             
             // Mobile optimization: reduce or disable particles
-            const isMobile = game.isMobile || window.innerWidth < 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+            const isMobile = game.isMobile || window.innerWidth <= 1024 || hasTouch || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             if (isMobile) {
                 return; // Disable particles completely on mobile for performance
             }
