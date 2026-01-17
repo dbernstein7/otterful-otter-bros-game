@@ -344,6 +344,11 @@
                 font-size: 10px !important;
             }
             
+            img.counter-icon {
+                width: 16px !important;
+                height: 16px !important;
+            }
+            
             .counter-label, .counter-value {
                 font-size: 8px !important;
             }
@@ -667,6 +672,16 @@
             font-size: clamp(12px, 1.5vw, 18px);
             filter: drop-shadow(0 0 8px rgba(255,215,0,0.7));
             /* Removed animation for performance */
+        }
+        
+        .counter-icon img,
+        img.counter-icon {
+            width: clamp(20px, 2vw, 28px);
+            height: clamp(20px, 2vw, 28px);
+            object-fit: contain;
+            filter: drop-shadow(0 0 8px rgba(255,215,0,0.7));
+            display: inline-block;
+            vertical-align: middle;
         }
         
         .counter-label {
@@ -1939,7 +1954,7 @@
     <!-- Real-time Collectibles Counter - Horizontal -->
             <div id="collectiblesCounter" class="corner-display top-left" style="top: 2vh; left: 11vw; display: flex; flex-direction: row; gap: 15px;">
         <div class="counter-item">
-            <span class="counter-icon">🪙</span>
+            <img src="public/fishy-log.png.png" alt="Coins" class="counter-icon">
             <span class="counter-label">Coins:</span>
             <span id="coinsCounter" class="counter-value">0</span>
         </div>
@@ -6432,6 +6447,50 @@
                 console.error('❌ Game initialization failed!');
                 return;
             }
+            
+            // ========================================
+            // 💾 AUTOMATIC SAVE ON PAGE UNLOAD (Like Mario Bros)
+            // ========================================
+            // Save game progress automatically when leaving the page
+            window.addEventListener('beforeunload', function() {
+                // Only save PERMANENT progress (not session progress)
+                // Session progress (XP, coins, score) is only saved on level completion
+                if (typeof game !== 'undefined' && game && game.gameState === 'playing') {
+                    try {
+                        saveGameState(); // Save current level, health, checkpoint (game state only)
+                        // DO NOT save player progress or marketplace - session progress is lost if level not completed
+                        console.log('💾 Auto-saved game state on page unload (session progress NOT saved - level not completed)');
+                    } catch (error) {
+                        console.error('❌ Error auto-saving on unload:', error);
+                    }
+                }
+            });
+            
+            // Also save when tab becomes hidden (more reliable than beforeunload)
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden && typeof game !== 'undefined' && game && game.gameState === 'playing') {
+                    try {
+                        saveGameState(); // Only save game state, not session progress
+                        console.log('💾 Auto-saved game state (tab hidden) - session progress NOT saved');
+                    } catch (error) {
+                        console.error('❌ Error auto-saving on visibility change:', error);
+                    }
+                }
+            });
+            
+            // Periodic auto-save every 30 seconds while playing
+            // NOTE: This only saves game state, NOT session progress (XP, coins, score)
+            setInterval(function() {
+                if (typeof game !== 'undefined' && game && game.gameState === 'playing') {
+                    try {
+                        saveGameState(); // Only save game state, not session progress
+                        // Session progress is only saved on level completion
+                    } catch (error) {
+                        console.error('❌ Error in periodic auto-save:', error);
+                    }
+                }
+            }, 30000); // Save every 30 seconds
+            
         function resizeCanvas() {
             const container = document.getElementById('gameContainer');
             const containerRect = container.getBoundingClientRect();
@@ -7274,6 +7333,11 @@
             level: 1,
             xpToNextLevel: 1000, // XP needed for next level (will be calculated dynamically)
             totalScore: 0,
+            
+            // Session-only progress (lost if level not completed)
+            sessionXP: 0, // XP gained this session (not saved until level complete)
+            sessionCoins: 0, // Coins gained this session (not saved until level complete)
+            sessionScore: 0, // Score gained this session (not saved until level complete)
 
             laserChargingLevel: 0, // Start at 0 - must be unlocked
             maxLaserChargingLevel: 6, // Maximum charging level
@@ -9188,13 +9252,38 @@
                 }
             ];
             
-            return themes[(levelNum - 1) % themes.length];
+            // Safety check - ensure levelNum is valid
+            if (!levelNum || levelNum < 1) {
+                console.warn('⚠️ Invalid levelNum:', levelNum, '- using level 1 theme');
+                return themes[0];
+            }
+            
+            const themeIndex = (levelNum - 1) % themes.length;
+            const theme = themes[themeIndex];
+            
+            // Double-check theme exists
+            if (!theme) {
+                console.error('❌ Theme not found at index:', themeIndex, '- using first theme');
+                return themes[0];
+            }
+            
+            return theme;
         }
         
         function generateLevel(levelNum) {
             console.log('🔫 generateLevel called for level:', levelNum);
             
-            const theme = getLevelTheme(levelNum);
+            let theme = getLevelTheme(levelNum);
+            if (!theme) {
+                console.error('❌ Theme is undefined for level:', levelNum, '- using fallback theme');
+                // Fallback to first theme directly
+                theme = {
+                    name: "Sunny Shores",
+                    skyColors: ['#87CEEB', '#98FB98'],
+                    groundColor: '#228B22',
+                    platformColor: '#654321'
+                };
+            }
             const platforms = generateRandomPlatforms(levelNum);
             const goalX = platforms[platforms.length - 1].x + 480; // Scaled from 200 (200*2.4=480)
             
@@ -9411,10 +9500,10 @@
             game.keyCount = 0;
             player.keys = 0;
             
-            // Force exact positioning on starting platform using collision box
+            // Force exact positioning on starting platform using collision box (15px above to prevent clipping)
             const startingPlatform = platforms.find(p => p.x === 0 && p.y === 1320);
             if (startingPlatform) {
-                player.y = startingPlatform.y - player.collisionHeight - player.collisionOffsetY;
+                player.y = startingPlatform.y - player.collisionHeight - player.collisionOffsetY - 15;
                 player.lastPlatform = startingPlatform; // Set initial last platform
                 player.onGround = true; // Ensure player starts on ground
                 player.canDoubleJump = true; // Ensure double jump is available
@@ -9448,6 +9537,9 @@
             
             // Reset level start time for timing
             game.sessionStats.levelStartTime = Date.now();
+            
+            // Reset session progress for new level (XP, coins, score not saved until level complete)
+            resetSessionProgress();
             
             // Reset collectibles counter for new level
             game.collectiblesCount.coinsCollected = 0;
@@ -10181,19 +10273,33 @@
                         game.keys['KeyD'] = false;
                     }
                     
-                    // Up/Down movement (down for downward movement only - up removed, use jump button instead)
+                    // Up/Down movement
                     // Only set down keys if joystick is significantly tilted down
                     if (normalizedY > 0.2) {
                         // Pointing down - for downward movement (lowered threshold for better responsiveness)
                         game.keys['ArrowDown'] = true;
                         game.keys['KeyS'] = true;
-                    } else {
-                        // Neutral or pointing up - clear down keys
-                        // Up direction removed - use jump button instead of D-pad up
+                        game.keys['ArrowUp'] = false;
+                        game.keys['KeyW'] = false;
+                    } else if (normalizedY < -0.2) {
+                        // Pointing up - set up keys (for swimming up in water)
+                        // Only set ArrowUp/KeyW if player is in water (for swimming), otherwise jump button handles it
+                        if (player.inWater) {
+                            game.keys['ArrowUp'] = true;
+                            game.keys['KeyW'] = true;
+                        } else {
+                            game.keys['ArrowUp'] = false;
+                            game.keys['KeyW'] = false;
+                        }
                         game.keys['ArrowDown'] = false;
                         game.keys['KeyS'] = false;
+                    } else {
+                        // Neutral position - clear all up/down keys
+                        game.keys['ArrowDown'] = false;
+                        game.keys['KeyS'] = false;
+                        game.keys['ArrowUp'] = false;
+                        game.keys['KeyW'] = false;
                     }
-                    // Note: ArrowUp/KeyW are no longer set by D-pad - only jump button can trigger jumps
                 };
                 
                 mobileJoystick.addEventListener('touchstart', (e) => {
@@ -10214,13 +10320,16 @@
                     joystickActive = false;
                     // Reset handle to center
                     joystickHandle.style.transform = 'translate(-50%, -50%)';
-                    // Reset all movement keys (ArrowUp/KeyW not reset since D-pad no longer controls them)
+                    // Reset all movement keys
                     game.keys['ArrowLeft'] = false;
                     game.keys['KeyA'] = false;
                     game.keys['ArrowRight'] = false;
                     game.keys['KeyD'] = false;
                     game.keys['ArrowDown'] = false;
                     game.keys['KeyS'] = false;
+                    // Reset up keys (used for swimming in water)
+                    game.keys['ArrowUp'] = false;
+                    game.keys['KeyW'] = false;
                 });
             }
             
@@ -10447,14 +10556,25 @@
         gameAssets.coin.src = 'public/fishy-log.png.png';
         
         // Preload fish/XP image (using clam.png)
+        // Try relative path first (works with both file:// and http:// protocols)
         gameAssets.fish = new Image();
         gameAssets.fish.onload = function() {
             console.log('Fish/XP image (clam.png) loaded successfully');
             gameAssets.useCustomAssets = true;
         };
         gameAssets.fish.onerror = function() {
-            console.log('Failed to load fish/XP image, using default fish');
-            gameAssets.fish = null;
+            console.log('Failed to load fish/XP image from public/clam.png, trying absolute path...');
+            // Try absolute path as fallback (for web servers)
+            gameAssets.fish = new Image();
+            gameAssets.fish.onload = function() {
+                console.log('Fish/XP image (clam.png) loaded successfully from absolute path');
+                gameAssets.useCustomAssets = true;
+            };
+            gameAssets.fish.onerror = function() {
+                console.log('Failed to load fish/XP image from both paths, using default fish');
+                gameAssets.fish = null;
+            };
+            gameAssets.fish.src = '/public/clam.png';
         };
         gameAssets.fish.src = 'public/clam.png';
         
@@ -10936,12 +11056,15 @@
         function addXP(amount) {
             // NOTE: XP gaining logic is identical for mobile and desktop
             // No platform-specific conditions - same XP rate for all devices
-            player.xp += amount;
-            player.totalScore += amount;
             
-            // Calculate new level based on XP progression system
+            // Add to SESSION XP only (not permanent until level complete)
+            player.sessionXP += amount;
+            player.sessionScore += amount;
+            
+            // Calculate what the new level WOULD be if we committed session XP
+            // This is for display purposes only - actual level won't change until level complete
+            const tempXP = player.xp + player.sessionXP;
             let newLevel = 1;
-            let totalXPNeeded = 0;
             
             // Calculate level using the new XP progression system
             // Level 1: 0-999 XP (1000 total)
@@ -10949,6 +11072,71 @@
             // Level 3: 2500-4499 XP (2000 total)
             // ... and so on until level 10
             // Level 10+: 1000 XP per level
+            
+            if (tempXP < 1000) {
+                newLevel = 1;
+                player.xpToNextLevel = 1000;
+            } else if (tempXP < 2500) {
+                newLevel = 2;
+                player.xpToNextLevel = 2500;
+            } else if (tempXP < 4500) {
+                newLevel = 3;
+                player.xpToNextLevel = 4500;
+            } else if (tempXP < 7000) {
+                newLevel = 4;
+                player.xpToNextLevel = 7000;
+            } else if (tempXP < 10000) {
+                newLevel = 5;
+                player.xpToNextLevel = 10000;
+            } else if (tempXP < 13500) {
+                newLevel = 6;
+                player.xpToNextLevel = 13500;
+            } else if (tempXP < 17500) {
+                newLevel = 7;
+                player.xpToNextLevel = 17500;
+            } else if (tempXP < 22000) {
+                newLevel = 8;
+                player.xpToNextLevel = 22000;
+            } else if (tempXP < 27000) {
+                newLevel = 9;
+                player.xpToNextLevel = 27000;
+            } else if (tempXP < 32500) {
+                newLevel = 10;
+                player.xpToNextLevel = 32500;
+            } else {
+                // Level 10+: 1000 XP per level
+                const level10Plus = Math.floor((tempXP - 32500) / 1000) + 10;
+                newLevel = level10Plus;
+                player.xpToNextLevel = 32500 + (level10Plus - 10) * 1000;
+            }
+            
+            // Check if level would increase (for display only)
+            const tempLevel = newLevel;
+            if (tempLevel > player.level) {
+                // Show preview of what level would be, but don't actually level up yet
+                // Level up will happen when session XP is committed on level completion
+            }
+            
+            // Don't save progress here - only save when level is completed
+            // savePlayerProgress();
+            
+            // Update profile XP bar if profile is open
+            updateProfileXPBar();
+            
+            console.log(`🎯 Gained ${amount} XP (Session: ${player.sessionXP}, Total would be: ${tempXP})! Current Level: ${player.level}, Preview Level: ${tempLevel}`);
+        }
+        
+        // Commit session progress to permanent progress (called on level completion)
+        function commitSessionProgress() {
+            const oldXP = player.xp;
+            const oldLevel = player.level;
+            
+            // Commit session XP to permanent XP
+            player.xp += player.sessionXP;
+            player.totalScore += player.sessionScore;
+            
+            // Calculate new level based on committed XP
+            let newLevel = 1;
             
             if (player.xp < 1000) {
                 newLevel = 1;
@@ -10981,23 +11169,33 @@
                 newLevel = 10;
                 player.xpToNextLevel = 32500;
             } else {
-                // Level 10+: 1000 XP per level
                 const level10Plus = Math.floor((player.xp - 32500) / 1000) + 10;
                 newLevel = level10Plus;
                 player.xpToNextLevel = 32500 + (level10Plus - 10) * 1000;
             }
             
-                if (newLevel > player.level) {
+            // Level up if needed
+            if (newLevel > player.level) {
                 levelUp(newLevel);
             }
             
-            // Don't save progress here - only save when level is completed
-            // savePlayerProgress();
+            // Commit session coins to marketplace
+            game.marketplace.coins += player.sessionCoins;
             
-            // Update profile XP bar if profile is open
-            updateProfileXPBar();
+            console.log(`💾 Committed session progress: +${player.sessionXP} XP, +${player.sessionCoins} coins, +${player.sessionScore} score`);
             
-            console.log(`🎯 Gained ${amount} XP! Total: ${player.xp}, Level: ${player.level}, XP to next: ${player.xpToNextLevel - player.xp}`);
+            // Reset session progress
+            player.sessionXP = 0;
+            player.sessionCoins = 0;
+            player.sessionScore = 0;
+        }
+        
+        // Reset session progress (called on level start or game restart)
+        function resetSessionProgress() {
+            player.sessionXP = 0;
+            player.sessionCoins = 0;
+            player.sessionScore = 0;
+            console.log('🔄 Session progress reset');
         }
         
         function levelUp(newLevel) {
@@ -11280,11 +11478,13 @@
         }
         
         function savePlayerProgress() {
+            // Only save PERMANENT progress, NOT session progress
+            // Session progress (sessionXP, sessionCoins, sessionScore) is only saved on level completion
             const progress = {
-                xp: player.xp,
+                xp: player.xp, // Only permanent XP, not sessionXP
                 level: player.level,
                 xpToNextLevel: player.xpToNextLevel,
-                totalScore: player.totalScore,
+                totalScore: player.totalScore, // Only permanent totalScore, not sessionScore
 
                 laserChargingLevel: player.laserChargingLevel,
                 maxChargeLevel: player.maxChargeLevel,
@@ -11294,6 +11494,8 @@
                 // Armor system
                 hasArmorBoost: player.hasArmorBoost,
                 armorLevel: player.armorLevel
+                // NOTE: sessionXP, sessionCoins, sessionScore are NOT saved here
+                // They are only committed to permanent progress on level completion
             };
             localStorage.setItem('otterBrosProgress', JSON.stringify(progress));
         }
@@ -11451,11 +11653,14 @@
             game.sessionStats.totalScore += finalScore;
             game.sessionStats.currentSessionScore += finalScore;
             
-            // Add XP (1 XP per score point)
+            // Add to SESSION score only (not saved until level complete)
+            player.sessionScore += finalScore;
+            
+            // Add XP (1 XP per score point) - goes to session XP
             const xpGained = Math.floor(finalScore * player.rewards.xpPerScore);
             addXP(xpGained);
             
-            console.log(`🎯 ${source}: Score ${finalScore} (${baseScore} × ${scoreMultiplier}x), +${xpGained} XP`);
+            console.log(`🎯 ${source}: Score ${finalScore} (${baseScore} × ${scoreMultiplier}x), +${xpGained} XP (Session only - not saved until level complete)`);
             
             return finalScore;
         }
@@ -13796,9 +14001,9 @@
                     player.velY = -player.jumpPower;
                     player.onGround = false;
                     player.onMovingPlatform = false; // Reset moving platform state when jumping
-                    // Force player slightly above platform to prevent immediate collision
+                    // Force player slightly above platform to prevent immediate collision (15px above)
                     if (player.lastPlatform) {
-                        player.y = player.lastPlatform.y - player.collisionHeight - player.collisionOffsetY - 5;
+                        player.y = player.lastPlatform.y - player.collisionHeight - player.collisionOffsetY - 15;
                     }
                     game.sessionStats.jumpsMade++;
                 } else if (player.canDoubleJump) {
@@ -13827,7 +14032,18 @@
             // Keep gravity consistent even when jetpack is active
             // This prevents the "floaty" feeling when switching between walking and jetpack
             
-            player.velY += gravityStrength;
+            // CRITICAL: Store onGround state BEFORE collision detection resets it
+            // This prevents gravity from being applied when player is stable on platform
+            const wasOnGroundStable = player.onGround && player.velY <= 0;
+            
+            // CRITICAL: Don't apply gravity if player is on ground and stable (prevents shaking)
+            // Only apply gravity if player is not on ground, or if they're falling/jumping
+            if (!wasOnGroundStable || player.velY > 0) {
+                player.velY += gravityStrength;
+            } else {
+                // Player is on ground - ensure velocity is zero to prevent any movement
+                player.velY = 0;
+            }
 
             // 📉 Cap maximum fall velocity for better feel
             let maxFallVelocity = 10.0; // Increased fall velocity for snappier feel
@@ -13851,11 +14067,19 @@
             const waterBottom = game.waterLevel + game.waterDepth;
             
             // Check if player is standing on a platform above water - if so, don't apply water physics
+            // CRITICAL: Also check if player is actually positioned correctly on the platform
             let isOnPlatformAboveWater = false;
-            if (player.lastPlatform && player.onGround && 
-                player.lastPlatform.y < game.waterLevel && 
-                player.lastPlatform.type !== 'underwater') {
-                isOnPlatformAboveWater = true;
+            if (player.lastPlatform && player.onGround) {
+                const playerBottom = player.y + player.collisionHeight + player.collisionOffsetY;
+                const platformTop = player.lastPlatform.y;
+                // Player is on platform if their feet are within reasonable range of platform top
+                const isActuallyOnPlatform = playerBottom >= platformTop - 25 && playerBottom <= platformTop + 5;
+                
+                if (isActuallyOnPlatform && 
+                    player.lastPlatform.y < game.waterLevel && 
+                    player.lastPlatform.type !== 'underwater') {
+                    isOnPlatformAboveWater = true;
+                }
             }
             
             // Player is in water if any part of them is below water surface AND not on a platform above water
@@ -13870,15 +14094,24 @@
                 // Check if player is at water surface (within 20px of surface for more reliable detection)
                 const isAtWaterSurface = playerBottom <= waterTop + 20;
                 
+                // Check if player is actually standing on a platform (not just at water surface)
+                // This prevents water system from interfering with platform collision
+                const isActuallyOnPlatform = player.onGround && player.lastPlatform && 
+                                            player.lastPlatform.y < game.waterLevel &&
+                                            playerBottom <= player.lastPlatform.y + 5 &&
+                                            playerBottom >= player.lastPlatform.y - 25;
+                
                 // Always allow jumping when in water (both surface and underwater)
                 // BUT don't set onGround if player might be landing on a platform above water
-                if (isAtWaterSurface && !isOnPlatformAboveWater) {
+                // AND don't interfere if player is actually on a platform
+                if (isAtWaterSurface && !isOnPlatformAboveWater && !isActuallyOnPlatform) {
                     // At water surface - treat like normal ground for jumping (only if not on platform above water)
                     player.onGround = true;
                     player.canDoubleJump = true;
                 } else {
                     // Underwater - still allow jumping but apply water physics
-                    if (player.onGround && !isOnPlatformAboveWater) {
+                    // Don't clear onGround if player is actually on a platform
+                    if (player.onGround && !isOnPlatformAboveWater && !isActuallyOnPlatform) {
                         player.onGround = false;
                     }
                 }
@@ -13996,10 +14229,10 @@
                             addScreenShake(10);
                             console.log('🔥 Lava death! Sunk for too long. Took 100 damage. Health remaining:', player.health);
                             
-                            // Respawn at last platform
+                            // Respawn at last platform (15px above to prevent clipping)
                             if (player.lastPlatform) {
                                 player.x = player.lastPlatform.x + 100;
-                                player.y = player.lastPlatform.y - player.collisionHeight - player.collisionOffsetY;
+                                player.y = player.lastPlatform.y - player.collisionHeight - player.collisionOffsetY - 15;
                                 player.velX = 0;
                                 player.velY = 0;
                                 player.onGround = true;
@@ -14074,7 +14307,12 @@
 
             // 🎯 Update player position
             player.x += player.velX;
-            player.y += player.velY;
+            // CRITICAL: Only apply vertical velocity if player was not on ground (prevents shaking)
+            // Use the stored value from before collision detection resets onGround
+            // If on ground, position is controlled by collision system, not velocity
+            if (!wasOnGroundStable) {
+                player.y += player.velY;
+            }
 
             // 🧱 Left boundary check - 200px from spawn
             const leftBoundaryX = 240 - 200; // 40px left of spawn
@@ -14090,10 +14328,10 @@
                     game.gameOver = true;
                     saveSessionStats(); // Save stats when game ends
                 } else {
-                    // Respawn player at last checkpoint or starting position
+                    // Respawn player at last checkpoint or starting position (15px above to prevent clipping)
                     if (game.activeCheckpoint) {
                         player.x = game.activeCheckpoint.platform.x + (game.activeCheckpoint.platform.width / 2) - (player.collisionWidth / 2);
-                        player.y = game.activeCheckpoint.platform.y - player.collisionHeight - player.collisionOffsetY;
+                        player.y = game.activeCheckpoint.platform.y - player.collisionHeight - player.collisionOffsetY - 15;
                     } else {
                         // Respawn at starting position
                         player.x = 240;
@@ -14362,10 +14600,10 @@
                         
                             
                             if (treasure.type === 'rareTreasure') {
-                                game.coins += 25; // Extra bonus coins for rare treasures
+                                player.sessionCoins += 25; // Extra bonus coins for rare treasures (session only)
                                 game.lives = Math.min(game.lives + 1, game.maxLives); // Bonus life for rare treasure
                             } else {
-                                game.coins += 10; // Regular bonus coins for normal treasures
+                                player.sessionCoins += 10; // Regular bonus coins for normal treasures (session only)
                         }
                         
                         addScreenShake(3);
@@ -14750,8 +14988,8 @@
                     collisionY + player.collisionHeight >= player.lastPlatform.y - 16 &&
                     collisionY + player.collisionHeight <= player.lastPlatform.y + 16) {
                     
-                    // Snap player back to platform
-                    player.y = player.lastPlatform.y - player.collisionHeight - player.collisionOffsetY;
+                    // Snap player back to platform (15px above to prevent clipping)
+                    player.y = player.lastPlatform.y - player.collisionHeight - player.collisionOffsetY - 15;
                     player.velY = 0;
                     player.onGround = true;
                     player.canDoubleJump = true; // Reset double jump when landing
@@ -14777,8 +15015,8 @@
                             collisionY + player.collisionHeight <= platform.y + 10 &&
                             canLand) {
                             
-                            // Snap player to this platform
-                            player.y = platform.y - player.collisionHeight - player.collisionOffsetY;
+                            // Snap player to this platform (15px above to prevent clipping)
+                            player.y = platform.y - player.collisionHeight - player.collisionOffsetY - 15;
                             player.velY = 0;
                             player.onGround = true;
                             player.canDoubleJump = true;
@@ -14884,9 +15122,8 @@
             }
             
             // ========================================
-            // 🏗️ PLATFORM COLLISION SYSTEM - COMPLETE REWRITE
+            // 🏗️ PLATFORM COLLISION SYSTEM - SIMPLE
             // ========================================
-            const tolerance = 10; // Collision tolerance
             let wasOnGround = player.onGround;
             player.onGround = false;
 
@@ -14915,127 +15152,48 @@
                 // Platform bounds
                 const platformLeft = platform.x;
                 const platformRight = platform.x + platform.width;
-                const platformTop = platform.y; // Top surface where player lands
+                const platformTop = platform.y;
                 const platformBottom = platform.y + platform.height;
                 
-                // Check if platform is above water
-                // A platform is above water if:
-                // 1. Its top surface is above water level, AND
-                // 2. It's not marked as an underwater platform type
-                const platformAboveWater = platformTop < game.waterLevel && platform.type !== 'underwater';
-                
-                // 1. HORIZONTAL OVERLAP - Player must be horizontally aligned with platform
-                const horizontalOverlap = playerRight > platformLeft + 2 && playerLeft < platformRight - 2;
-                if (!horizontalOverlap) continue;
-                
-                // 2. VERTICAL COLLISION - Player's feet must be near the top surface of platform
-                // More lenient for platforms above water, but prevent penetration
-                const verticalTolerance = platformAboveWater ? 25 : tolerance;
-                // Player feet should be at or ABOVE platform top (not below) to prevent getting stuck
-                const playerFeetNearPlatformTop = playerCollisionBottom >= platformTop - verticalTolerance && 
-                                                 playerCollisionBottom <= platformTop + 2; // Only allow 2px below, not full tolerance
-                
-                // 3. PLAYER ABOVE PLATFORM - Player must be above or at the platform top
-                // For platforms above water, be more lenient (allow landing from slightly below)
-                const isAbovePlatform = platformAboveWater ? 
-                    (playerCollisionTop < platformTop + 50) : // Very lenient for platforms above water
-                    (playerCollisionTop < platformBottom - 5); // Normal check for other platforms
-                
-                // 4. CHECK IF PLAYER WANTS TO DROP THROUGH - MUST BE FIRST CHECK
-                // If down key is pressed and player is on or near this platform, skip collision entirely
-                const wantsToDrop = (game.keys['ArrowDown'] || game.keys['KeyS'] || game.keys['downJumpPressed']);
-                const playerOnOrNearPlatform = playerCollisionBottom >= platformTop - 20 && 
-                                              playerCollisionBottom < platformTop + 100 &&
-                                              horizontalOverlap;
-                if (wantsToDrop && playerOnOrNearPlatform) {
-                    // Player wants to drop through - completely skip collision for this platform
-                    continue; // Skip collision for this platform
+                // Check if player is already stable on this platform
+                if (player.lastPlatform === platform && player.onGround && Math.abs(player.velY) < 0.1) {
+                    const targetY = platformTop - player.collisionHeight - player.collisionOffsetY - 15;
+                    if (Math.abs(player.y - targetY) < 10) {
+                        // Already stable - don't touch anything
+                        player.velY = 0;
+                        player.onGround = true;
+                        break;
+                    }
                 }
                 
-                // 5. CHECK IF PLAYER IS INSIDE PLATFORM - Skip collision if player is stuck inside
-                const playerInsidePlatform = playerCollisionTop < platformBottom && 
-                                           playerCollisionBottom > platformTop &&
-                                           playerLeft < platformRight && 
-                                           playerRight > platformLeft;
-                if (playerInsidePlatform && playerCollisionTop < platformTop - 5) {
-                    // Player is stuck inside platform - push them up immediately
-                    // Add 5px offset to land well above platform (prevents getting stuck)
-                    const targetY = platformTop - player.collisionHeight - player.collisionOffsetY - 5;
-                    player.y = targetY; // Always snap to correct position when stuck
+                // Horizontal overlap
+                const horizontalOverlap = playerRight > platformLeft + 5 && playerLeft < platformRight - 5;
+                if (!horizontalOverlap) continue;
+                
+                // Check if trying to drop through
+                const wantsToDrop = (game.keys['ArrowDown'] || game.keys['KeyS'] || game.keys['downJumpPressed']);
+                if (wantsToDrop && playerCollisionBottom >= platformTop - 20 && playerCollisionBottom < platformTop + 100) {
+                    continue;
+                }
+                
+                // Check if landing
+                const targetY = platformTop - player.collisionHeight - player.collisionOffsetY - 15;
+                const isFalling = player.velY > 0;
+                const feetNearTop = playerCollisionBottom >= platformTop - 20 && playerCollisionBottom <= platformTop + 5;
+                const isAbove = playerCollisionTop < platformBottom;
+                
+                if (horizontalOverlap && feetNearTop && isAbove && isFalling && !wantsToDrop) {
+                    // Land on platform
+                    player.y = targetY;
                     player.velY = 0;
                     player.onGround = true;
                     player.lastPlatform = platform;
-                    continue; // Skip collision check for this platform
-                }
-                
-                // 6. FALLING CHECK - Player must be falling or close to platform
-                // Skip if player is already on this platform and properly positioned (prevents shaking)
-                // BUT only if not trying to drop through (wantsToDrop already checked above)
-                // Add 5px offset to land well above platform (prevents getting stuck)
-                const targetYForCheck = platformTop - player.collisionHeight - player.collisionOffsetY - 5;
-                // Check if player is already positioned correctly (feet should be 5px above platform top)
-                const isAlreadyOnPlatform = player.lastPlatform === platform && player.onGround && 
-                                           playerCollisionBottom <= platformTop - 3 && // Feet should be at least 3px above platform
-                                           playerCollisionBottom >= platformTop - 8 && // But not more than 8px above
-                                           Math.abs(player.y - targetYForCheck) < 2;
-                if (isAlreadyOnPlatform && Math.abs(player.velY) < 0.5 && !wantsToDrop) {
-                    // Already on platform and stable - maintain position without snapping (prevents shake)
-                    // Only if not trying to drop through
-                    player.velY = 0;
-                    player.onGround = true;
-                    // Only make tiny adjustments if needed (smooth, no shake)
-                    if (Math.abs(player.y - targetYForCheck) > 0.5) {
-                        player.y = targetYForCheck;
-                    }
-                    continue; // Skip to next platform
-                }
-                
-                // For platforms above water: allow landing even with slight upward velocity if close
-                const playerNearPlatformTop = Math.abs(playerCollisionBottom - platformTop) < 60;
-                const isFalling = player.velY > 0 || // Actually falling
-                                 (platformAboveWater && playerNearPlatformTop && player.velY > -6); // Close to platform above water
-                
-                // 7. DOWN JUMP CHECK - Skip if player is actively trying to drop through (redundant check for safety)
-                const isActivelyDropping = (game.keys['ArrowDown'] || game.keys['KeyS'] || game.keys['downJumpPressed']) && 
-                                          playerCollisionBottom >= platformTop - 20 && 
-                                          playerCollisionBottom < platformTop + 100;
-                
-                // 8. SWIMMING CHECK - Only block if swimming up very fast on underwater platforms
-                const isSwimmingUpFast = player.inWater && player.swimming && player.velY < -6;
-                const canLandOnPlatform = platformAboveWater ? true : !isSwimmingUpFast;
-                
-                // FINAL LANDING CHECK - All conditions must be met
-                // Also check that player is not already positioned correctly (prevents repeated snapping)
-                // Add 5px offset to land well above platform (prevents getting stuck)
-                const targetY = platformTop - player.collisionHeight - player.collisionOffsetY - 5;
-                const isAlreadyPositioned = Math.abs(player.y - targetY) < 0.5 && 
-                                          player.lastPlatform === platform && 
-                                          player.onGround;
-                
-                // Final check - make sure we're not trying to drop through
-                if (horizontalOverlap && 
-                    playerFeetNearPlatformTop && 
-                    isAbovePlatform && 
-                    isFalling && 
-                    !isActivelyDropping && 
-                    !wantsToDrop && // Don't land if trying to drop
-                    canLandOnPlatform &&
-                    !isAlreadyPositioned) { // Only snap if not already in correct position
                     
-                    // Player landed on platform - snap to position 5px above platform top
-                    // This prevents player from getting stuck inside the platform
-                    player.y = targetY; // Always snap to correct position when landing
-                    player.velY = 0;
-                    player.onGround = true;
-                    
-                    // Clear water state when landing on platform above water
-                    if (platformAboveWater) {
+                    // Clear water state
+                    if (platformTop < game.waterLevel && platform.type !== 'underwater') {
                         player.inWater = false;
                         player.swimming = false;
                     }
-                    
-                    // Track last platform
-                    player.lastPlatform = platform;
                     
                     // Handle moving platforms
                     if (platform.type === 'linear') {
@@ -15199,9 +15357,9 @@
                     player.onGround = true; // Ensure they start on ground
                     
                     if (game.activeCheckpoint) {
-                        // Respawn at the last activated checkpoint
+                        // Respawn at the last activated checkpoint (15px above to prevent clipping)
                         player.x = game.activeCheckpoint.platform.x + (game.activeCheckpoint.platform.width / 2) - (player.collisionWidth / 2);
-                        player.y = game.activeCheckpoint.platform.y - player.collisionHeight - player.collisionOffsetY;
+                        player.y = game.activeCheckpoint.platform.y - player.collisionHeight - player.collisionOffsetY - 15;
                         console.log('Respawning at checkpoint');
                     } else {
                         // Simple respawn - just use the first platform
@@ -15217,7 +15375,7 @@
                         if (platforms.length > 0) {
                             const firstPlatform = platforms[0];
                             player.x = firstPlatform.x + 50; // Simple positioning
-                            player.y = firstPlatform.y - player.collisionHeight - 10;
+                            player.y = firstPlatform.y - player.collisionHeight - 15;
                             console.log('Respawning at first platform:', firstPlatform.x, firstPlatform.y);
                         } else {
                             // Emergency fallback
@@ -15232,7 +15390,7 @@
                         const firstPlatform = platforms[0];
                         // Ensure player is above the platform
                         if (player.y + player.collisionHeight > firstPlatform.y) {
-                            player.y = firstPlatform.y - player.collisionHeight - 10;
+                            player.y = firstPlatform.y - player.collisionHeight - 15;
                         }
                         console.log('Simple safety check completed');
                     }
@@ -15253,9 +15411,9 @@
                     player.onGround = true; // Ensure they start on ground
                     
                     if (game.activeCheckpoint) {
-                        // Respawn at the last activated checkpoint
+                        // Respawn at the last activated checkpoint (15px above to prevent clipping)
                         player.x = game.activeCheckpoint.platform.x + (game.activeCheckpoint.platform.width / 2) - (player.collisionWidth / 2);
-                        player.y = game.activeCheckpoint.platform.y - player.collisionHeight - player.collisionOffsetY;
+                        player.y = game.activeCheckpoint.platform.y - player.collisionHeight - player.collisionOffsetY - 15;
                         console.log('Respawning at checkpoint');
                     } else {
                     // Simple respawn - just use the first platform
@@ -15271,7 +15429,7 @@
                     if (platforms.length > 0) {
                         const firstPlatform = platforms[0];
                         player.x = firstPlatform.x + 50; // Simple positioning
-                        player.y = firstPlatform.y - player.collisionHeight - 10;
+                        player.y = firstPlatform.y - player.collisionHeight - 15;
                         console.log('Respawning at first platform:', firstPlatform.x, firstPlatform.y);
                     } else {
                         // Emergency fallback
@@ -15286,7 +15444,7 @@
                         const firstPlatform = platforms[0];
                         // Ensure player is above the platform
                         if (player.y + player.collisionHeight > firstPlatform.y) {
-                            player.y = firstPlatform.y - player.collisionHeight - 10;
+                            player.y = firstPlatform.y - player.collisionHeight - 15;
                         }
                         console.log('Simple safety check completed');
                     }
@@ -15342,14 +15500,15 @@
                     let bonusCoins = 0;
                     // Wallet system disabled - no coin multipliers
                     
-                    game.coins += coinMultiplier + bonusCoins;
-                    // Don't add to marketplace coins yet - only on level completion
+                    // Add to SESSION coins only (not saved until level complete)
+                    player.sessionCoins += coinMultiplier + bonusCoins;
                     game.sessionStats.totalCoins += coinMultiplier + bonusCoins;
                     game.sessionStats.currentSessionCoins += coinMultiplier + bonusCoins;
                     
-                    // 🎁 BONUS LIFE: Every 1000 coins = 1 extra life
+                    // 🎁 BONUS LIFE: Every 1000 coins = 1 extra life (use total coins including session)
                     const coinLifeThreshold = 1000;
-                    const currentLifeCoins = Math.floor(game.coins / coinLifeThreshold);
+                    const totalCoinsForLife = game.marketplace.coins + player.sessionCoins;
+                    const currentLifeCoins = Math.floor(totalCoinsForLife / coinLifeThreshold);
                     if (currentLifeCoins > game.lastLifeCoins) {
                         const livesToAdd = currentLifeCoins - game.lastLifeCoins;
                         game.lives = Math.min(game.lives + livesToAdd, game.maxLives);
@@ -15535,7 +15694,7 @@
                                     
                                     
                                     // Golden chest rewards
-                                    game.coins += 50; // Extra bonus coins for golden chests
+                                    player.sessionCoins += 50; // Extra bonus coins for golden chests (session only)
                                     game.lives = Math.min(game.lives + 2, game.maxLives); // Bonus 2 lives for golden chest
                                     
                                     // Update collectibles counter
@@ -15567,10 +15726,10 @@
                     }
                     
                     if (t.type === 'rareTreasure') {
-                        game.coins += 25; // Extra bonus coins for rare treasures
+                        player.sessionCoins += 25; // Extra bonus coins for rare treasures (session only)
                         game.lives = Math.min(game.lives + 1, game.maxLives); // Bonus life for rare treasure
                     } else {
-                        game.coins += 10; // Regular bonus coins for normal treasures
+                        player.sessionCoins += 10; // Regular bonus coins for normal treasures (session only)
                             }
                     
                     // Update collectibles counter
@@ -15853,6 +16012,11 @@
                     addXP(levelCompletionXP);
                     
                     console.log(`🎉 Level ${game.level} completed! +${levelCompletionXP} bonus XP`);
+                    
+                    // CRITICAL: Commit all session progress to permanent progress
+                    // This is when XP, coins, and score are actually saved
+                    commitSessionProgress();
+                    
                 game.sessionStats.currentSessionLevels++;
                 
                 // Update highest levels if current session is higher
@@ -16812,52 +16976,85 @@
             
             // Update UI
             document.getElementById('score').textContent = game.score;
-            document.getElementById('coins').textContent = game.coins;
+            // Show total coins (permanent + session) for display, but they're separate internally
+            const totalCoinsDisplay = game.marketplace.coins + player.sessionCoins;
+            document.getElementById('coins').textContent = totalCoinsDisplay;
             document.getElementById('lives').textContent = game.lives;
-            document.getElementById('xp').textContent = player.xp;
+            // Show total XP (permanent + session) for display
+            const totalXPDisplay = player.xp + player.sessionXP;
+            document.getElementById('xp').textContent = totalXPDisplay;
             
-            // Update XP bar
+            // Update XP bar - use TOTAL XP (permanent + session) for real-time display
             const xpBarFill = document.getElementById('xpBarFill');
             const xpText = document.getElementById('xpText');
             if (xpBarFill && xpText) {
-                // Calculate current level XP and XP needed for next level based on new system
+                // Use total XP (permanent + session) for display calculations
+                const totalXP = player.xp + player.sessionXP;
+                
+                // Calculate what level the total XP would be (for display)
+                let displayLevel = 1;
+                if (totalXP < 1000) {
+                    displayLevel = 1;
+                } else if (totalXP < 2500) {
+                    displayLevel = 2;
+                } else if (totalXP < 4500) {
+                    displayLevel = 3;
+                } else if (totalXP < 7000) {
+                    displayLevel = 4;
+                } else if (totalXP < 10000) {
+                    displayLevel = 5;
+                } else if (totalXP < 13500) {
+                    displayLevel = 6;
+                } else if (totalXP < 17500) {
+                    displayLevel = 7;
+                } else if (totalXP < 22000) {
+                    displayLevel = 8;
+                } else if (totalXP < 27000) {
+                    displayLevel = 9;
+                } else if (totalXP < 32500) {
+                    displayLevel = 10;
+                } else {
+                    displayLevel = Math.floor((totalXP - 32500) / 1000) + 10;
+                }
+                
+                // Calculate current level XP and XP needed for next level based on total XP
                 let currentLevelXP, xpForNextLevel;
                 
-                if (player.level === 1) {
-                    currentLevelXP = player.xp;
+                if (displayLevel === 1) {
+                    currentLevelXP = totalXP;
                     xpForNextLevel = 1000;
-                } else if (player.level === 2) {
-                    currentLevelXP = player.xp - 1000;
+                } else if (displayLevel === 2) {
+                    currentLevelXP = totalXP - 1000;
                     xpForNextLevel = 1500;
-                } else if (player.level === 3) {
-                    currentLevelXP = player.xp - 2500;
+                } else if (displayLevel === 3) {
+                    currentLevelXP = totalXP - 2500;
                     xpForNextLevel = 2000;
-                } else if (player.level === 4) {
-                    currentLevelXP = player.xp - 4500;
+                } else if (displayLevel === 4) {
+                    currentLevelXP = totalXP - 4500;
                     xpForNextLevel = 2500;
-                } else if (player.level === 5) {
-                    currentLevelXP = player.xp - 7000;
+                } else if (displayLevel === 5) {
+                    currentLevelXP = totalXP - 7000;
                     xpForNextLevel = 3000;
-                } else if (player.level === 6) {
-                    currentLevelXP = player.xp - 10000;
+                } else if (displayLevel === 6) {
+                    currentLevelXP = totalXP - 10000;
                     xpForNextLevel = 3500;
-                } else if (player.level === 7) {
-                    currentLevelXP = player.xp - 13500;
+                } else if (displayLevel === 7) {
+                    currentLevelXP = totalXP - 13500;
                     xpForNextLevel = 4000;
-                } else if (player.level === 8) {
-                    currentLevelXP = player.xp - 17500;
+                } else if (displayLevel === 8) {
+                    currentLevelXP = totalXP - 17500;
                     xpForNextLevel = 4500;
-                } else if (player.level === 9) {
-                    currentLevelXP = player.xp - 22000;
+                } else if (displayLevel === 9) {
+                    currentLevelXP = totalXP - 22000;
                     xpForNextLevel = 5000;
-                } else if (player.level === 10) {
-                    currentLevelXP = player.xp - 27000;
+                } else if (displayLevel === 10) {
+                    currentLevelXP = totalXP - 27000;
                     xpForNextLevel = 5500;
                 } else {
                     // Level 10+: 1000 XP per level
-                    const level10Plus = player.level - 10;
+                    const level10Plus = displayLevel - 10;
                     const baseXP = 32500 + (level10Plus * 1000);
-                    currentLevelXP = player.xp - baseXP;
+                    currentLevelXP = totalXP - baseXP;
                     xpForNextLevel = 1000;
                 }
                 
@@ -16869,7 +17066,7 @@
                     xpBarFill.style.display = 'block';
                 }
                 if (xpText) {
-                    xpText.innerHTML = `Level ${player.level} <span id="xpProgress">(${currentLevelXP}/${xpForNextLevel} XP)</span>`;
+                    xpText.innerHTML = `Level ${displayLevel} <span id="xpProgress">(${Math.floor(currentLevelXP)}/${xpForNextLevel} XP)</span>`;
                 }
                 
                 // Also update mobile XP bar (in settings menu)
@@ -16877,7 +17074,7 @@
                 const mobileXpText = document.getElementById('mobileXpText');
                 if (mobileXpBarFill && mobileXpText) {
                     mobileXpBarFill.style.width = xpPercentage + '%';
-                    mobileXpText.innerHTML = `Level ${player.level} <span id="mobileXpProgress">(${currentLevelXP}/${xpForNextLevel} XP)</span>`;
+                    mobileXpText.innerHTML = `Level ${displayLevel} <span id="mobileXpProgress">(${Math.floor(currentLevelXP)}/${xpForNextLevel} XP)</span>`;
                 }
             }
             
@@ -18213,6 +18410,9 @@
             // Don't reset marketplace.coins - preserve coins from completed levels
             console.log('🆕 Starting fresh session, keeping marketplace coins:', game.marketplace.coins);
             
+            // Reset session progress (XP, coins, score not saved until level complete)
+            resetSessionProgress();
+            
             // Clear any existing saved game state when starting new game
             localStorage.removeItem('otterBrosGameState');
             console.log('🗑️ Cleared saved game state for new game');
@@ -18621,9 +18821,9 @@
 
         // Simple menu drawing function
         function drawMenu() {
-            // Safety check: ensure canvas context is available
-            if (!ctx) {
-                console.error('❌ Canvas context not available in drawMenu');
+            // Safety check: ensure canvas and context are available
+            if (!canvas || !ctx) {
+                // Silently return if canvas isn't ready yet (initialization phase)
                 return;
             }
             
@@ -19496,50 +19696,75 @@
         }
         
         function updateProfileXPBar() {
-            // Get current XP and level data
-            const currentXP = player.xp || 0;
-            const currentLevel = player.level || 1;
+            // Use TOTAL XP (permanent + session) for real-time display
+            const totalXP = (player.xp || 0) + (player.sessionXP || 0);
+            
+            // Calculate what level the total XP would be (for display)
+            let displayLevel = 1;
+            if (totalXP < 1000) {
+                displayLevel = 1;
+            } else if (totalXP < 2500) {
+                displayLevel = 2;
+            } else if (totalXP < 4500) {
+                displayLevel = 3;
+            } else if (totalXP < 7000) {
+                displayLevel = 4;
+            } else if (totalXP < 10000) {
+                displayLevel = 5;
+            } else if (totalXP < 13500) {
+                displayLevel = 6;
+            } else if (totalXP < 17500) {
+                displayLevel = 7;
+            } else if (totalXP < 22000) {
+                displayLevel = 8;
+            } else if (totalXP < 27000) {
+                displayLevel = 9;
+            } else if (totalXP < 32500) {
+                displayLevel = 10;
+            } else {
+                displayLevel = Math.floor((totalXP - 32500) / 1000) + 10;
+            }
             
             // Calculate XP requirements using the same logic as the main game
             let xpForNextLevel = 0;
             let currentLevelXP = 0;
             
-            if (currentLevel === 1) {
+            if (displayLevel === 1) {
                 xpForNextLevel = 1000;
-                currentLevelXP = currentXP;
-            } else if (currentLevel === 2) {
+                currentLevelXP = totalXP;
+            } else if (displayLevel === 2) {
                 xpForNextLevel = 1500; // 2500 - 1000
-                currentLevelXP = currentXP - 1000;
-            } else if (currentLevel === 3) {
+                currentLevelXP = totalXP - 1000;
+            } else if (displayLevel === 3) {
                 xpForNextLevel = 2000; // 4500 - 2500
-                currentLevelXP = currentXP - 2500;
-            } else if (currentLevel === 4) {
+                currentLevelXP = totalXP - 2500;
+            } else if (displayLevel === 4) {
                 xpForNextLevel = 2500; // 7000 - 4500
-                currentLevelXP = currentXP - 4500;
-            } else if (currentLevel === 5) {
+                currentLevelXP = totalXP - 4500;
+            } else if (displayLevel === 5) {
                 xpForNextLevel = 3000; // 10000 - 7000
-                currentLevelXP = currentXP - 7000;
-            } else if (currentLevel === 6) {
+                currentLevelXP = totalXP - 7000;
+            } else if (displayLevel === 6) {
                 xpForNextLevel = 3500; // 13500 - 10000
-                currentLevelXP = currentXP - 10000;
-            } else if (currentLevel === 7) {
+                currentLevelXP = totalXP - 10000;
+            } else if (displayLevel === 7) {
                 xpForNextLevel = 4000; // 17500 - 13500
-                currentLevelXP = currentXP - 13500;
-            } else if (currentLevel === 8) {
+                currentLevelXP = totalXP - 13500;
+            } else if (displayLevel === 8) {
                 xpForNextLevel = 4500; // 22000 - 17500
-                currentLevelXP = currentXP - 17500;
-            } else if (currentLevel === 9) {
+                currentLevelXP = totalXP - 17500;
+            } else if (displayLevel === 9) {
                 xpForNextLevel = 5000; // 27000 - 22000
-                currentLevelXP = currentXP - 22000;
-            } else if (currentLevel === 10) {
+                currentLevelXP = totalXP - 22000;
+            } else if (displayLevel === 10) {
                 xpForNextLevel = 5500; // 32500 - 27000
-                currentLevelXP = currentXP - 27000;
+                currentLevelXP = totalXP - 27000;
             } else {
                 // Level 10+: 1000 XP per level
-                const level10Plus = currentLevel - 10;
+                const level10Plus = displayLevel - 10;
                 const baseXP = 32500 + (level10Plus * 1000);
                 xpForNextLevel = 1000;
-                currentLevelXP = currentXP - baseXP;
+                currentLevelXP = totalXP - baseXP;
             }
             
             // Ensure currentLevelXP doesn't go negative
@@ -19556,14 +19781,14 @@
             const profileXpToNext = document.getElementById('profileXpToNext');
             const profileXpProgress = document.getElementById('profileXpProgress');
             
-            if (profilePlayerLevel) profilePlayerLevel.textContent = currentLevel;
+            if (profilePlayerLevel) profilePlayerLevel.textContent = displayLevel;
             if (profileXpBarFill) profileXpBarFill.style.width = `${progressPercentage}%`;
-            if (profileXpText) profileXpText.textContent = `${currentLevelXP.toLocaleString()} / ${xpForNextLevel.toLocaleString()} XP`;
-            if (profileTotalXP) profileTotalXP.textContent = currentXP.toLocaleString();
+            if (profileXpText) profileXpText.textContent = `${Math.floor(currentLevelXP).toLocaleString()} / ${xpForNextLevel.toLocaleString()} XP`;
+            if (profileTotalXP) profileTotalXP.textContent = Math.floor(totalXP).toLocaleString();
             if (profileXpToNext) profileXpToNext.textContent = Math.max(0, (xpForNextLevel - currentLevelXP)).toLocaleString();
             if (profileXpProgress) profileXpProgress.textContent = `${Math.round(progressPercentage)}%`;
             
-            console.log(`📊 Profile XP Updated: Level ${currentLevel}, XP: ${currentXP}, Current Level XP: ${currentLevelXP}, XP for Next: ${xpForNextLevel}, Progress: ${progressPercentage.toFixed(1)}%`);
+            console.log(`📊 Profile XP Updated: Level ${displayLevel}, Total XP: ${totalXP} (Permanent: ${player.xp} + Session: ${player.sessionXP}), Current Level XP: ${currentLevelXP}, XP for Next: ${xpForNextLevel}, Progress: ${progressPercentage.toFixed(1)}%`);
         }
         
         // Wallet functions removed for performance
@@ -21958,28 +22183,29 @@
             const customizationBtn = document.getElementById('customizationTabBtn');
             const walletBtn = document.getElementById('walletTabBtn');
             
+            // Safety checks - only access elements if they exist
             // Hide all tabs
-            statsTab.style.display = 'none';
-            achievementsTab.style.display = 'none';
-            customizationTab.style.display = 'none';
-            walletTab.style.display = 'none';
+            if (statsTab) statsTab.style.display = 'none';
+            if (achievementsTab) achievementsTab.style.display = 'none';
+            if (customizationTab) customizationTab.style.display = 'none';
+            if (walletTab) walletTab.style.display = 'none';
             
             // Remove active class from all buttons
-            statsBtn.classList.remove('active');
-            achievementsBtn.classList.remove('active');
-            customizationBtn.classList.remove('active');
-            walletBtn.classList.remove('active');
+            if (statsBtn) statsBtn.classList.remove('active');
+            if (achievementsBtn) achievementsBtn.classList.remove('active');
+            if (customizationBtn) customizationBtn.classList.remove('active');
+            if (walletBtn) walletBtn.classList.remove('active');
             
             // Show selected tab and activate button
             if (tab === 'stats') {
-                statsTab.style.display = 'block';
-                statsBtn.classList.add('active');
+                if (statsTab) statsTab.style.display = 'block';
+                if (statsBtn) statsBtn.classList.add('active');
             } else if (tab === 'achievements') {
-                achievementsTab.style.display = 'block';
-                achievementsBtn.classList.add('active');
+                if (achievementsTab) achievementsTab.style.display = 'block';
+                if (achievementsBtn) achievementsBtn.classList.add('active');
             } else if (tab === 'customization') {
-                customizationTab.style.display = 'block';
-                customizationBtn.classList.add('active');
+                if (customizationTab) customizationTab.style.display = 'block';
+                if (customizationBtn) customizationBtn.classList.add('active');
             } else if (tab === 'wallet') {
                 // Wallet tab disabled - show message instead
                 if (walletTab) walletTab.style.display = 'block';
@@ -22079,30 +22305,30 @@
             const notification = document.createElement('div');
             notification.style.cssText = `
                 position: fixed;
-                top: 50%;
+                top: 10vh;
                 left: 50%;
-                transform: translate(-50%, -50%);
+                transform: translateX(-50%);
                 background: linear-gradient(135deg, rgba(255,215,0,0.95), rgba(255,165,0,0.95));
                 color: #000;
-                padding: 25px 30px;
-                border-radius: 20px;
-                font-size: 16px;
+                padding: 12px 18px;
+                border-radius: 12px;
+                font-size: 12px;
                 font-weight: bold;
                 text-align: center;
                 z-index: 10001;
-                box-shadow: 0 10px 30px rgba(255,215,0,0.6);
+                box-shadow: 0 5px 15px rgba(255,215,0,0.6);
                 animation: achievementPopupSlideIn 0.6s ease-out;
-                max-width: 350px;
+                max-width: 250px;
                 font-family: 'SuperMario', 'Orbitron', 'Arial Black', sans-serif;
-                border: 3px solid #FFD700;
+                border: 2px solid #FFD700;
             `;
             
             notification.innerHTML = `
-                <div style="font-size: 48px; margin-bottom: 15px;">🏆</div>
-                <div style="font-size: 20px; margin-bottom: 10px; color: #8B0000; text-shadow: 0 0 10px rgba(139,0,0,0.3);">ACHIEVEMENT UNLOCKED!</div>
-                <div style="font-size: 18px; margin-bottom: 8px; color: #000080;">${achievement.icon} ${achievement.name}</div>
-                <div style="font-size: 14px; margin-bottom: 15px; color: #333; opacity: 0.9;">${achievement.description}</div>
-                <div style="font-size: 16px; color: #006400; font-weight: bold;">+${achievement.xpReward || 0} XP</div>
+                <div style="font-size: 28px; margin-bottom: 6px;">🏆</div>
+                <div style="font-size: 14px; margin-bottom: 6px; color: #8B0000; text-shadow: 0 0 8px rgba(139,0,0,0.3);">ACHIEVEMENT UNLOCKED!</div>
+                <div style="font-size: 13px; margin-bottom: 4px; color: #000080;">${achievement.icon} ${achievement.name}</div>
+                <div style="font-size: 11px; margin-bottom: 6px; color: #333; opacity: 0.9;">${achievement.description}</div>
+                <div style="font-size: 12px; color: #006400; font-weight: bold;">+${achievement.xpReward || 0} XP</div>
             `;
             
             document.body.appendChild(notification);
@@ -22802,8 +23028,9 @@
                 game.sessionStats.allTimeNoPowerups += game.sessionStats.noPowerupLevels;
                 game.sessionStats.allTimeKeys += game.sessionStats.keysCollected;
                 
-                // Add session coins to marketplace coins only on level completion
-                game.marketplace.coins += game.sessionStats.currentSessionCoins;
+                // Session coins are already committed in commitSessionProgress() which is called before this
+                // So we don't need to add them again here
+                // game.marketplace.coins += game.sessionStats.currentSessionCoins;
                 
                 localStorage.setItem('otterBrosStats', JSON.stringify(game.sessionStats));
                 saveMarketplaceData(); // Save marketplace data with new coins
@@ -24690,12 +24917,12 @@
                 to { transform: translateX(-50%) translateY(50px); opacity: 0; }
             }
             @keyframes achievementPopupSlideIn {
-                from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-                to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+                from { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+                to { transform: translateX(-50%) translateY(0); opacity: 1; }
             }
             @keyframes achievementPopupSlideOut {
-                from { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-                to { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+                from { transform: translateX(-50%) translateY(0); opacity: 1; }
+                to { transform: translateX(-50%) translateY(-100%); opacity: 0; }
             }
         `;
         document.head.appendChild(style);
