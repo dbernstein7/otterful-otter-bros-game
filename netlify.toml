@@ -8,4 +8,4 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     # Keep Web3-friendly CSP, but allow embedding from Vercel-hosted Otterful pages.
     # Add your custom domain(s) here too if/when you have them.
-    Content-Security-Policy = "frame-ancestors 'self' https://*.vercel.app;"
+    Content-Security-Policy = "frame-ancestors 'self' https://*.vercel.app https://otterfulotters.xyz https://www.otterfulotters.xyz;"
