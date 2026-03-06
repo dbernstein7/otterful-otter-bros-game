@@ -1,9 +1,11 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Frame-Options = "DENY"
+    # Allow the Otter Bros site to be embedded on Otterful pages.
+    # (X-Frame-Options: DENY blocks all iframes.)
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    # Remove any CSP headers that might be blocking Web3
-    Content-Security-Policy = ""
+    # Keep Web3-friendly CSP, but allow embedding from Vercel-hosted Otterful pages.
+    # Add your custom domain(s) here too if/when you have them.
+    Content-Security-Policy = "frame-ancestors 'self' https://*.vercel.app;"
