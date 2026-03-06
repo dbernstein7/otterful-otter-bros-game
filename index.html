@@ -25,10 +25,16 @@
                 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
             }
             
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+
         body {
             margin: 0;
             padding: 0;
-            background: #87CEEB; /* Match game sky color to fill white space */
+            /* Let the game render its own background; keep the page transparent for embedding */
+            background: transparent;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -38,19 +44,8 @@
             overflow: hidden;
         }
         
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.3) 0%, transparent 50%);
-            animation: backgroundShift 10s ease-in-out infinite;
-        }
+        /* Remove decorative page overlay so only the game is visible */
+        body::before { content: none; }
         
         @keyframes backgroundShift {
             0%, 100% { transform: translateX(0) translateY(0); }
@@ -70,18 +65,18 @@
         
         #gameContainer {
             position: relative;
-            width: 1920px;
-            height: 1080px;
+            width: 100vw;
+            height: 100vh;
             max-width: 100vw;
             max-height: 100vh;
-            border: 6px solid #FFD700;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.4), 0 0 30px rgba(255,215,0,0.3);
-            background: #87CEEB; /* Match game sky color */
-            padding: 10px;
-            animation: glow 3s ease-in-out infinite alternate;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+            background: transparent;
+            padding: 0;
+            animation: none;
             overflow: hidden;
-            margin: 0 auto;
+            margin: 0;
         }
         
         /* Mobile responsive container */
@@ -171,7 +166,7 @@
             width: 100% !important;
             height: 100% !important;
             object-fit: fill; /* Fill entire container instead of contain */
-            background: #87CEEB; /* Match game sky color */
+            background: transparent;
         }
         
         @keyframes glow {
